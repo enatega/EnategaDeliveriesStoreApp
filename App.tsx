@@ -6,6 +6,7 @@ import RootNavigator from './src/navigation/RootNavigator';
 import { ThemeProvider, useAppTheme } from './src/theme/ThemeProvider';
 import QueryProvider from './src/providers/QueryProvider';
 import { LocalizationProvider } from './src/localization/LocalizationProvider';
+import { AuthProvider } from './src/auth/AuthProvider';
 import './src/localization/i18n';
 
 function ThemedApp() {
@@ -25,7 +26,9 @@ export default function App() {
       <SafeAreaProvider>
         <QueryProvider>
           <LocalizationProvider>
-            <ThemedApp />
+            <AuthProvider>
+              <ThemedApp />
+            </AuthProvider>
           </LocalizationProvider>
         </QueryProvider>
       </SafeAreaProvider>

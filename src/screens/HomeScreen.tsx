@@ -2,11 +2,13 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useLocalization, useTranslations } from '../localization/LocalizationProvider';
 import { useAppTheme } from '../theme/ThemeProvider';
+import { useAuth } from '../auth/AuthProvider';
 import { Button, Image, Text } from '../components';
 
 export default function HomeScreen() {
   const { theme, themeMode, setThemeMode } = useAppTheme();
   const { language, setLanguage } = useLocalization();
+  const { logout } = useAuth();
   const { t } = useTranslations('app');
 
   const toggleTheme = async () => {
@@ -21,7 +23,7 @@ export default function HomeScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}> 
-      <Image source={require('../../../assets/icon.png')} style={styles.logo} resizeMode="contain" />
+      <Image source={require('../../assets/icon.png')} style={styles.logo} resizeMode="contain" />
       <Text variant="title" weight="bold" style={styles.title}>
         {t('app_name')}
       </Text>
@@ -35,6 +37,7 @@ export default function HomeScreen() {
       <View style={styles.actions}>
         <Button label={t('change_theme')} onPress={toggleTheme} />
         <Button label={t('change_language')} onPress={toggleLanguage} variant="secondary" />
+        <Button label={t('auth_logout')} onPress={logout} variant="secondary" />
       </View>
 
       <Text variant="caption" color={theme.colors.mutedText}>

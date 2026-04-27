@@ -6,6 +6,10 @@ const en = {
   change_language: 'Switch language',
   current_theme: 'Theme mode: {{mode}}',
   current_language: 'Language: {{language}}',
+  auth_title: 'Welcome Back',
+  auth_subtitle: 'Please log in to continue.',
+  auth_login: 'Log In',
+  auth_logout: 'Log Out',
 };
 
 export default en;
