@@ -9,7 +9,9 @@ const fr = {
   auth_title: 'Bon retour',
   auth_subtitle: 'Veuillez vous connecter pour continuer.',
   auth_login: 'Se connecter',
+  auth_login_loading: 'Connexion...',
   auth_logout: 'Se deconnecter',
+  auth_logout_loading: 'Deconnexion...',
 };
 
 export default fr;

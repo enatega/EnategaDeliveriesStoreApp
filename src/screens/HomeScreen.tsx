@@ -2,13 +2,13 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useLocalization, useTranslations } from '../localization/LocalizationProvider';
 import { useAppTheme } from '../theme/ThemeProvider';
-import { useAuth } from '../auth/AuthProvider';
+import { useLogoutMutation } from '../hooks/useAuthMutations';
 import { Button, Image, Text } from '../components';
 
 export default function HomeScreen() {
   const { theme, themeMode, setThemeMode } = useAppTheme();
   const { language, setLanguage } = useLocalization();
-  const { logout } = useAuth();
+  const logoutMutation = useLogoutMutation();
   const { t } = useTranslations('app');
 
   const toggleTheme = async () => {
@@ -37,7 +37,12 @@ export default function HomeScreen() {
       <View style={styles.actions}>
         <Button label={t('change_theme')} onPress={toggleTheme} />
         <Button label={t('change_language')} onPress={toggleLanguage} variant="secondary" />
-        <Button label={t('auth_logout')} onPress={logout} variant="secondary" />
+        <Button
+          label={logoutMutation.isPending ? t('auth_logout_loading') : t('auth_logout')}
+          onPress={() => logoutMutation.mutate()}
+          variant="secondary"
+          disabled={logoutMutation.isPending}
+        />
       </View>
 
       <Text variant="caption" color={theme.colors.mutedText}>

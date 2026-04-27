@@ -9,7 +9,9 @@ const en = {
   auth_title: 'Welcome Back',
   auth_subtitle: 'Please log in to continue.',
   auth_login: 'Log In',
+  auth_login_loading: 'Logging in...',
   auth_logout: 'Log Out',
+  auth_logout_loading: 'Logging out...',
 };
 
 export default en;

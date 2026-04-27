@@ -2,13 +2,17 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Button, Text } from '../components';
 import { useTranslations } from '../localization/LocalizationProvider';
-import { useAuth } from '../auth/AuthProvider';
 import { useAppTheme } from '../theme/ThemeProvider';
+import { useDemoLoginMutation } from '../hooks/useAuthMutations';
 
 export default function LoginScreen() {
   const { t } = useTranslations('app');
-  const { login } = useAuth();
   const { theme } = useAppTheme();
+  const loginMutation = useDemoLoginMutation('store');
+
+  const handleLogin = () => {
+    loginMutation.mutate();
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}> 
@@ -20,7 +24,11 @@ export default function LoginScreen() {
       </Text>
 
       <View style={styles.actions}>
-        <Button label={t('auth_login')} onPress={login} />
+        <Button
+          label={loginMutation.isPending ? t('auth_login_loading') : t('auth_login')}
+          onPress={handleLogin}
+          disabled={loginMutation.isPending}
+        />
       </View>
     </View>
   );
