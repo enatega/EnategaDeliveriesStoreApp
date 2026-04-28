@@ -14,6 +14,7 @@ export const lightColors = {
   gray400: '#9CA3AF',
   gray300: '#D1D5DB',
   gray200: '#E5E7EB',
+  gray50: '#f5f5f5ff'
 };
 
 export const darkColors: typeof lightColors = {
@@ -31,6 +32,7 @@ export const darkColors: typeof lightColors = {
   gray400: '#6B7280',
   gray300: '#374151',
   gray200: '#1F2937',
+  gray50: '#090909ff'
 };
 
 export type ThemeColors = typeof lightColors;
