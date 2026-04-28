@@ -2,6 +2,7 @@ export { default as Text } from './Text';
 export { default as Image } from './Image';
 export { default as Button } from './Button';
 export { default as TextInput } from './TextInput';
+export { default as SelectField } from './SelectField';
 export { default as LoginLogo } from './LoginLogo';
 export { default as BottomTabBar } from './BottomTabBar';
 export { default as ScreenHeader } from './ScreenHeader';

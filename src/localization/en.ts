@@ -42,6 +42,19 @@ const en = {
   // Language
   language_title: 'Language',
   language_update: 'Update Language',
+  // Bank Management
+  bank_title: 'Bank Management',
+  bank_currency: 'Currency',
+  bank_holder_label: 'Full Name of the Bank Account Holder',
+  bank_holder_placeholder: 'e.g. Gabriel Gutkowski',
+  bank_holder_required: 'Account holder name is required',
+  bank_iban_label: 'IBAN / Swift / BSB',
+  bank_iban_placeholder: 'e.g. IT25M0680218128171X4075J102',
+  bank_iban_required: 'IBAN / Swift / BSB is required',
+  bank_account_label: 'Account Number',
+  bank_account_placeholder: 'e.g. 3254465164614411',
+  bank_account_required: 'Account number is required',
+  bank_confirm: 'Confirm',
 };
 
 export default en;

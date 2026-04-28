@@ -27,8 +27,8 @@ type Props = {
   onCloseSidebar: () => void;
   availability: boolean;
   onAvailabilityChange: (v: boolean) => void;
-  // Navigation to stack screens (Language, etc.)
-  onNavigate: (screen: 'Language') => void;
+  // Navigation to stack screens (Language, BankManagement, etc.)
+  onNavigate: (screen: 'Language' | 'BankManagement') => void;
   children: React.ReactNode;
 };
 
