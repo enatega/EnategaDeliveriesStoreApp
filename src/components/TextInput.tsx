@@ -46,7 +46,7 @@ export default function TextInput({
           styles.inputContainer,
           {
             borderColor: error ? '#EF4444' : theme.colors.border,
-            backgroundColor: theme.colors.white,
+            backgroundColor: theme.colors.surface,
           },
         ]}
       >
@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
   input: {
     padding: 0,
     margin: 0,
-    lineHeight: 24,
+    minHeight: 24,
   },
   iconWrapper: {
     width: 20,
