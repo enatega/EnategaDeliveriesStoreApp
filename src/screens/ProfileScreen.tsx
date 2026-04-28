@@ -1,64 +1,90 @@
 import React from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Image, ImageBackground, ScrollView, StyleSheet, View } from 'react-native';
 import { useAppTheme } from '../theme/ThemeProvider';
 import { useTranslations } from '../localization/LocalizationProvider';
+import { useAuth } from '../auth/AuthProvider';
 import Text from '../components/Text';
 import ToggleSwitch from '../components/ToggleSwitch';
 
-// Placeholder profile data — will be replaced by API
-const PROFILE = {
-  initials: 'JS',
-  name: 'John Smith',
-  id: 'ID-7853',
-  vehiclePlate: 'ABC-1234',
-  address: 'Islamabad',
-  phone: '+92312545000',
-  username: 'John@yopmail.com',
-  walletBalance: '$1258.2155',
+export type ProfileScreenProps = {
+  availability?: boolean;
+  onAvailabilityChange?: (v: boolean) => void;
 };
 
-export default function ProfileScreen() {
+export default function ProfileScreen({
+  availability = true,
+  onAvailabilityChange,
+}: ProfileScreenProps) {
   const { theme, themeMode, setThemeMode } = useAppTheme();
   const { t } = useTranslations('app');
+  const { session } = useAuth();
+
+  const user = session.user;
+  const storeProfile = session.profiles?.find((p) => p.key === 'Store')?.data;
+
+  // Derive initials from real name
+  const initials = user?.name
+    ? user.name.split(' ').slice(0, 2).map((w) => w[0]).join('').toUpperCase()
+    : 'JS';
+
+  const coverImage = storeProfile?.coverImage ?? null;
 
   const isDark = themeMode === 'dark';
-
-  const toggleTheme = async () => {
-    await setThemeMode(isDark ? 'light' : 'dark');
-  };
+  const toggleTheme = async () => setThemeMode(isDark ? 'light' : 'dark');
 
   const infoRows = [
-    { label: t('profile_vehicle_plate'), value: PROFILE.vehiclePlate },
-    { label: t('profile_address'), value: PROFILE.address },
-    { label: t('profile_phone'), value: PROFILE.phone },
-    { label: t('profile_username'), value: PROFILE.username },
-    { label: t('profile_wallet_balance'), value: PROFILE.walletBalance },
+    { label: t('profile_vehicle_plate'), value: '—' },
+    { label: t('profile_address'), value: storeProfile?.address ?? '—' },
+    { label: t('profile_phone'), value: user?.phone ?? '—' },
+    { label: t('profile_username'), value: user?.email ?? '—' },
+    { label: t('profile_wallet_balance'), value: '—' },
   ];
 
   return (
     <View style={[styles.flex, { backgroundColor: theme.colors.background }]}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Hero banner */}
-        <View style={styles.heroBanner} />
 
-        {/* Avatar overlaid on banner */}
-        <View style={[styles.avatarRow, { backgroundColor: '#374151' }]}>
-          <View style={[styles.avatarCircle, { backgroundColor: theme.colors.background }]}>
-            <Text variant="body" weight="semiBold" color={theme.colors.primary}>
-              {PROFILE.initials}
-            </Text>
-          </View>
-          <View style={styles.nameBlock}>
-            <Text variant="body" weight="semiBold" color="#FFFFFF">
-              {PROFILE.name}
-            </Text>
-            <Text variant="caption" color="rgba(253,253,253,0.8)">
-              {PROFILE.id}
-            </Text>
-          </View>
-        </View>
+        {/* ── Hero banner with avatar + availability ── */}
+        <ImageBackground
+          source={coverImage ? { uri: coverImage } : undefined}
+          style={styles.heroBanner}
+          imageStyle={styles.heroBannerImage}
+        >
+          {/* Dark gradient overlay so text is always readable */}
+          <View style={styles.heroBannerOverlay} />
 
-        {/* Info rows */}
+          <View style={styles.heroBottom}>
+            {/* Avatar + name */}
+            <View style={styles.heroLeft}>
+              <View style={[styles.avatarCircle, { backgroundColor: theme.colors.background }]}>
+                <Text variant="body" weight="semiBold" color={theme.colors.primary}>
+                  {initials}
+                </Text>
+              </View>
+              <View style={styles.nameBlock}>
+                <Text variant="body" weight="semiBold" color="#FFFFFF">
+                  {user?.name ?? 'Store'}
+                </Text>
+                <Text variant="caption" color="rgba(255,255,255,0.8)">
+                  {storeProfile?.id ? `ID-${storeProfile.id.slice(0, 6)}` : ''}
+                </Text>
+              </View>
+            </View>
+
+            {/* Availability toggle */}
+            <View style={styles.availabilityBlock}>
+              <Text variant="caption" color="#FFFFFF" style={styles.availabilityLabel}>
+                {t('profile_availability')}
+              </Text>
+              <ToggleSwitch
+                value={availability}
+                onValueChange={onAvailabilityChange ?? (() => {})}
+              />
+            </View>
+          </View>
+        </ImageBackground>
+
+        {/* ── Info rows ── */}
         <View style={styles.section}>
           {/* Bank details */}
           <View style={[styles.row, { borderBottomColor: theme.colors.gray300 }]}>
@@ -98,16 +124,30 @@ const styles = StyleSheet.create({
   flex: {
     flex: 1,
   },
+  // Hero banner
   heroBanner: {
-    height: 156,
+    height: 160,
     backgroundColor: '#374151',
-  },
-  avatarRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
+    justifyContent: 'flex-end',
     paddingHorizontal: 16,
     paddingBottom: 16,
+  },
+  heroBannerImage: {
+    resizeMode: 'cover',
+  },
+  heroBannerOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+  },
+  heroBottom: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+  },
+  heroLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
   avatarCircle: {
     width: 54,
@@ -115,15 +155,21 @@ const styles = StyleSheet.create({
     borderRadius: 27,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: -27, // overlap banner
   },
   nameBlock: {
     gap: 4,
   },
+  availabilityBlock: {
+    alignItems: 'flex-end',
+    gap: 4,
+  },
+  availabilityLabel: {
+    fontSize: 12,
+  },
+  // Info rows
   section: {
     paddingHorizontal: 15,
     paddingTop: 8,
-    gap: 0,
   },
   row: {
     flexDirection: 'row',

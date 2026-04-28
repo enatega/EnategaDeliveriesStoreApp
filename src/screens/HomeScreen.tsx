@@ -53,7 +53,12 @@ export default function HomeScreen({ navigation }: Props) {
     switch (activeNavTab) {
       case 'Wallet':   return <WalletScreen />;
       case 'Earnings': return <EarningsScreen />;
-      case 'Profile':  return <ProfileTabScreen />;
+      case 'Profile':  return (
+        <ProfileTabScreen
+          availability={sidebar.availability}
+          onAvailabilityChange={sidebar.setAvailability}
+        />
+      );
       default:
         return (
           <>
