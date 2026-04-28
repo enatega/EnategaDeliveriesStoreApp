@@ -42,6 +42,24 @@ const en = {
   // Language
   language_title: 'Language',
   language_update: 'Update Language',
+  
+  // Orders / NewOrdersScreen
+  orders_tab_delivery: 'Delivery Orders',
+  orders_tab_pickup: 'Pickup Orders',
+  orders_no_more: 'No more orders',
+  orders_empty_delivery: 'No delivery orders',
+  orders_empty_pickup: 'No pickup orders',
+
+  // OrderCard
+  order_card_id_label: 'Order ID:',
+  order_card_col_order: 'ORDER',
+  order_card_col_price: 'PRICE',
+  order_card_total: 'Total',
+  order_card_comment: 'Comment',
+  order_card_type_delivery: 'Delivery',
+  order_card_type_pickup: 'Pickup',
+  order_card_reject: 'Reject',
+  order_card_accept: 'Accept',
 };
 
 export default en;
