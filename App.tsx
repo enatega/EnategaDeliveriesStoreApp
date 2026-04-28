@@ -1,7 +1,7 @@
 import React from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View } from 'react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import RootNavigator from './src/navigation/RootNavigator';
 import { ThemeProvider, useAppTheme } from './src/theme/ThemeProvider';
 import QueryProvider from './src/providers/QueryProvider';
@@ -13,8 +13,13 @@ function ThemedApp() {
   const { theme } = useAppTheme();
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}> 
-      <RootNavigator />
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: theme.colors.background }]}
+        edges={['top', 'left', 'right']}
+      >
+        <RootNavigator />
+      </SafeAreaView>
       <StatusBar style={theme.isDark ? 'light' : 'dark'} />
     </View>
   );

@@ -1,86 +1,85 @@
-import React from 'react';
-import { StyleSheet, View } from 'react-native';
-import { useLocalization, useTranslations } from '../localization/LocalizationProvider';
-import { useAppTheme } from '../theme/ThemeProvider';
-import { useLogoutMutation } from '../hooks/useAuthMutations';
-import { Button, Image, Text } from '../components';
+import React, { useState } from 'react';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { MainStackParamList } from '../navigation/types';
+import { TabKey } from '../components/BottomTabBar';
+import { TabItem } from '../components/TabBar';
+import MainLayout from '../components/MainLayout';
+import TabBar from '../components/TabBar';
+import {
+  OrderTab,
+  NewOrdersScreen,
+  InProgressScreen,
+  ReadyScreen,
+  PickupScreen,
+  CompletedScreen,
+} from './orders';
+import WalletScreen from './WalletScreen';
+import EarningsScreen from './EarningsScreen';
+import ProfileTabScreen from './ProfileTabScreen';
+import { useSidebar } from '../hooks/useSidebar';
 
-export default function HomeScreen() {
-  const { theme, themeMode, setThemeMode } = useAppTheme();
-  const { language, setLanguage } = useLocalization();
-  const logoutMutation = useLogoutMutation();
-  const { t } = useTranslations('app');
+type Props = NativeStackScreenProps<MainStackParamList, 'Home'>;
 
-  const toggleTheme = async () => {
-    const next = themeMode === 'dark' ? 'light' : 'dark';
-    await setThemeMode(next);
+// ─── Order tab config — single source of truth ───────────────────────────────
+
+const ORDER_TABS: TabItem<OrderTab>[] = [
+  { key: 'new', label: 'New Orders' },
+  { key: 'inProgress', label: 'In Progress' },
+  { key: 'ready', label: 'Ready' },
+  { key: 'pickup', label: 'Pickup' },
+  { key: 'completed', label: 'Completed' },
+];
+
+const ORDER_TAB_SCREENS: Record<OrderTab, React.ReactElement> = {
+  new: <NewOrdersScreen />,
+  inProgress: <InProgressScreen />,
+  ready: <ReadyScreen />,
+  pickup: <PickupScreen />,
+  completed: <CompletedScreen />,
+};
+
+// ─── Screen ───────────────────────────────────────────────────────────────────
+
+export default function HomeScreen({ navigation }: Props) {
+  const [activeNavTab, setActiveNavTab] = useState<TabKey>('Home');
+  const [activeOrderTab, setActiveOrderTab] = useState<OrderTab>('new');
+  const sidebar = useSidebar();
+
+  const handleNavigate = (screen: 'Language') => {
+    navigation.navigate(screen);
   };
 
-  const toggleLanguage = async () => {
-    const next = language === 'en' ? 'fr' : 'en';
-    await setLanguage(next);
+  const renderTabContent = () => {
+    switch (activeNavTab) {
+      case 'Wallet':   return <WalletScreen />;
+      case 'Earnings': return <EarningsScreen />;
+      case 'Profile':  return <ProfileTabScreen />;
+      default:
+        return (
+          <>
+            <TabBar
+              tabs={ORDER_TABS}
+              activeTab={activeOrderTab}
+              onTabPress={setActiveOrderTab}
+            />
+            {ORDER_TAB_SCREENS[activeOrderTab]}
+          </>
+        );
+    }
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}> 
-      <Image source={require('../../assets/icon.png')} style={styles.logo} resizeMode="contain" />
-      <Text variant="title" weight="bold" style={styles.title}>
-        {t('app_name')}
-      </Text>
-      <Text variant="subtitle" style={styles.subtitle}>
-        {t('welcome_title')}
-      </Text>
-      <Text variant="body" color={theme.colors.mutedText} style={styles.description}>
-        {t('welcome_subtitle')}
-      </Text>
-
-      <View style={styles.actions}>
-        <Button label={t('change_theme')} onPress={toggleTheme} />
-        <Button label={t('change_language')} onPress={toggleLanguage} variant="secondary" />
-        <Button
-          label={logoutMutation.isPending ? t('auth_logout_loading') : t('auth_logout')}
-          onPress={() => logoutMutation.mutate()}
-          variant="secondary"
-          disabled={logoutMutation.isPending}
-        />
-      </View>
-
-      <Text variant="caption" color={theme.colors.mutedText}>
-        {t('current_theme', { mode: themeMode })}
-      </Text>
-      <Text variant="caption" color={theme.colors.mutedText}>
-        {t('current_language', { language })}
-      </Text>
-    </View>
+    <MainLayout
+      activeTab={activeNavTab}
+      onTabChange={setActiveNavTab}
+      sidebarOpen={sidebar.sidebarOpen}
+      onOpenSidebar={sidebar.openSidebar}
+      onCloseSidebar={sidebar.closeSidebar}
+      availability={sidebar.availability}
+      onAvailabilityChange={sidebar.setAvailability}
+      onNavigate={handleNavigate}
+    >
+      {renderTabContent()}
+    </MainLayout>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 24,
-  },
-  logo: {
-    width: 96,
-    height: 96,
-    marginBottom: 20,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  subtitle: {
-    textAlign: 'center',
-    marginTop: 8,
-  },
-  description: {
-    textAlign: 'center',
-    marginTop: 8,
-  },
-  actions: {
-    width: '100%',
-    marginTop: 24,
-    gap: 12,
-  },
-});

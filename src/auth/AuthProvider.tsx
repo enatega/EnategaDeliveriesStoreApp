@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import type { AuthSessionResponse } from '../api/authTypes';
+import type { AuthSessionResponse, ProfileEntry } from '../api/authTypes';
 import { authSession, AuthSession } from './authSession';
 
 type AuthContextValue = {
@@ -16,6 +16,7 @@ const emptySession: AuthSession = {
   token: null,
   refreshToken: null,
   user: null,
+  profiles: null,
 };
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -39,6 +40,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       token: payload.accessToken,
       refreshToken: payload.refreshToken ?? null,
       user: payload.user,
+      profiles: payload.profiles ?? null,
     });
   };
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, StyleSheet, ViewStyle } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, ViewStyle } from 'react-native';
 import Text from './Text';
 import { useAppTheme } from '../theme/ThemeProvider';
 
@@ -10,9 +10,18 @@ type Props = {
   onPress: () => void;
   variant?: ButtonVariant;
   disabled?: boolean;
+  loading?: boolean;
+  fullWidth?: boolean;
 };
 
-export default function Button({ label, onPress, variant = 'primary', disabled = false }: Props) {
+export default function Button({
+  label,
+  onPress,
+  variant = 'primary',
+  disabled = false,
+  loading = false,
+  fullWidth = true,
+}: Props) {
   const { theme } = useAppTheme();
 
   const containerStyle: ViewStyle = {
@@ -22,36 +31,53 @@ export default function Button({ label, onPress, variant = 'primary', disabled =
         : theme.isDark
           ? theme.colors.surface
           : theme.colors.white,
-    borderColor: variant === 'secondary' ? theme.colors.border : theme.colors.primary,
+    borderColor: variant === 'secondary' ? theme.colors.border : 'transparent',
     borderWidth: variant === 'secondary' ? 1 : 0,
+    alignSelf: fullWidth ? 'stretch' : 'center',
   };
+
+  const textColor = variant === 'primary' ? theme.colors.gray900 : theme.colors.text;
 
   return (
     <Pressable
       onPress={onPress}
-      disabled={disabled}
-      style={({ pressed }) => [styles.container, containerStyle, pressed && styles.pressed, disabled && styles.disabled]}
+      disabled={disabled || loading}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      style={({ pressed }) => [
+        styles.container,
+        containerStyle,
+        pressed && styles.pressed,
+        (disabled || loading) && styles.disabled,
+      ]}
     >
-      <Text
-        variant="body"
-        weight="semiBold"
-        color={variant === 'primary' ? theme.colors.white : theme.colors.text}
-      >
-        {label}
-      </Text>
+      {loading ? (
+        <ActivityIndicator color={textColor} size="small" />
+      ) : (
+        <Text variant="body" weight="medium" color={textColor}>
+          {label}
+        </Text>
+      )}
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    height: 48,
-    borderRadius: 12,
+    height: 54,
+    borderRadius: 40,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: 17,
+    // shadow/sm
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   pressed: {
-    opacity: 0.9,
+    opacity: 0.85,
   },
   disabled: {
     opacity: 0.5,
