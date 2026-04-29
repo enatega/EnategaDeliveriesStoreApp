@@ -3,6 +3,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from '../screens/HomeScreen';
 import LanguageScreen from '../screens/LanguageScreen';
 import BankManagementScreen from '../screens/BankManagementScreen';
+import EarningsDetailScreen from '../screens/EarningsDetailScreen';
+import EarningsOrderDetailScreen from '../screens/EarningsOrderDetailScreen';
 import { MainStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
@@ -13,6 +15,8 @@ export default function MainNavigator() {
       <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
       <Stack.Screen name="Language" component={LanguageScreen} options={{ headerShown: false }} />
       <Stack.Screen name="BankManagement" component={BankManagementScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="EarningsDetail" component={EarningsDetailScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="EarningsOrderDetail" component={EarningsOrderDetailScreen} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 }

@@ -6,4 +6,6 @@ export type MainStackParamList = {
   Home: undefined;
   Language: undefined;
   BankManagement: undefined;
+  EarningsDetail: undefined;
+  EarningsOrderDetail: undefined;
 };

@@ -52,7 +52,7 @@ export default function HomeScreen({ navigation }: Props) {
   const renderTabContent = () => {
     switch (activeNavTab) {
       case 'Wallet':   return <WalletScreen />;
-      case 'Earnings': return <EarningsScreen />;
+      case 'Earnings': return <EarningsScreen navigation={navigation} />;
       case 'Profile':  return (
         <ProfileTabScreen
           availability={sidebar.availability}
