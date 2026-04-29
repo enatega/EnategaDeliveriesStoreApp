@@ -45,7 +45,7 @@ export default function HomeScreen({ navigation }: Props) {
   const [activeOrderTab, setActiveOrderTab] = useState<OrderTab>('new');
   const sidebar = useSidebar();
 
-  const handleNavigate = (screen: 'Language' | 'BankManagement') => {
+  const handleNavigate = (screen: 'Language' | 'BankManagement' | 'WorkSchedule') => {
     navigation.navigate(screen);
   };
 

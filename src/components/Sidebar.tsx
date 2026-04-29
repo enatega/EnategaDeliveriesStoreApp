@@ -50,7 +50,7 @@ type Props = {
   onClose: () => void;
   availability: boolean;
   onAvailabilityChange: (v: boolean) => void;
-  onNavigate: (screen: 'Language' | 'BankManagement') => void;
+  onNavigate: (screen: 'Language' | 'BankManagement' | 'WorkSchedule') => void;
   onSwitchTab?: (tab: 'Profile') => void;
 };
 
@@ -161,7 +161,7 @@ export default function Sidebar({
       type: 'nav',
       label: 'Work schedule',
       icon: <ScheduleIcon />,
-      onPress: onClose,
+      onPress: () => { onClose(); onNavigate('WorkSchedule'); },
     },
     {
       key: 'profile',

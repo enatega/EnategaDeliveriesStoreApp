@@ -28,7 +28,7 @@ type Props = {
   availability: boolean;
   onAvailabilityChange: (v: boolean) => void;
   // Navigation to stack screens (Language, BankManagement, etc.)
-  onNavigate: (screen: 'Language' | 'BankManagement') => void;
+  onNavigate: (screen: 'Language' | 'BankManagement' | 'WorkSchedule') => void;
   children: React.ReactNode;
 };
 
