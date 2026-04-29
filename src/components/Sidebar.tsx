@@ -203,7 +203,7 @@ export default function Sidebar({
   if (!visible) return null;
 
   return (
-    <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
+    <View style={[StyleSheet.absoluteFill, styles.container]} pointerEvents="box-none">
       {/* Animated backdrop */}
       <TouchableWithoutFeedback onPress={onClose} accessibilityLabel="Close sidebar">
         <Animated.View style={[styles.backdrop, { opacity: backdropOpacity }]} />
@@ -369,9 +369,14 @@ function LogoutIcon() {
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
+  container: {
+    zIndex: 999,
+    elevation: 24,
+  },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0,0,0,0.45)',
+    zIndex: 999,
   },
   drawer: {
     position: 'absolute',
@@ -379,11 +384,12 @@ const styles = StyleSheet.create({
     left: 0,
     bottom: 0,
     width: DRAWER_WIDTH,
+    zIndex: 1000,
     shadowColor: '#000',
     shadowOffset: { width: 4, height: 0 },
     shadowOpacity: 0.15,
     shadowRadius: 12,
-    elevation: 16,
+    elevation: 24,
   },
   header: {
     backgroundColor: '#90E36D',
