@@ -42,7 +42,7 @@ const en = {
   // Language
   language_title: 'Language',
   language_update: 'Update Language',
-  
+
   // Orders / NewOrdersScreen
   orders_tab_delivery: 'Delivery Orders',
   orders_tab_pickup: 'Pickup Orders',
@@ -60,6 +60,20 @@ const en = {
   order_card_type_pickup: 'Pickup',
   order_card_reject: 'Reject',
   order_card_accept: 'Accept',
+  order_card_delivered: 'Delivered',
+  order_card_rider_arrived: 'Rider arrived',
+  order_card_preparing: 'Preparing',
+  order_card_mark_ready: 'Mark as Ready',
+  order_card_heading_customer: 'Heading to Customer',
+  order_card_confirm_pickup: 'Confirm Pickup',
+  order_card_rider_name: 'Rider Name',
+  order_card_payment_method: 'Payment method',
+  order_card_date_time: 'Date & Time',
+  order_card_payment_cod: 'COD',
+  minutes_abbr: 'min',
+  no_orders_here: 'No orders here yet',
+  set_preparing_time: 'Set preparing time',
+  done: 'Done',
 };
 
 export default en;

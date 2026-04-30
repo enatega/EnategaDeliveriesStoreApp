@@ -61,6 +61,20 @@ const fr = {
   order_card_type_pickup: "À emporter",
   order_card_reject: "Refuser",
   order_card_accept: "Accepter",
+  order_card_delivered: "Livrée",
+  order_card_rider_arrived: "Livreur arrivé",
+  order_card_preparing: "En préparation",
+  order_card_mark_ready: "Marquer comme prêt",
+  order_card_heading_customer: "En route vers le client",
+  order_card_confirm_pickup: "Confirmer le ramassage",
+  order_card_rider_name: "Nom du livreur",
+  order_card_payment_method: "Méthode de paiement",
+  order_card_date_time: "Date et heure",
+  order_card_payment_cod: "Paiement à la livraison",
+  minutes_abbr: "min",
+  no_orders_here: "Aucune commande ici pour le moment",
+  set_preparing_time: "Définir le temps de préparation",
+  done: "Terminé",
 };
 
 export default fr;

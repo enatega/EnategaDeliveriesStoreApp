@@ -18,9 +18,15 @@ type Props = {
   tabs: TabItem[];
   activeKey: string;
   onTabPress: (key: string) => void;
+  disabled?: boolean;
 };
 
-export default function SegmentedTabs({ tabs, activeKey, onTabPress }: Props) {
+export default function SegmentedTabs({
+  tabs,
+  activeKey,
+  onTabPress,
+  disabled = false,
+}: Props) {
   const { theme } = useAppTheme();
   const [containerWidth, setContainerWidth] = useState(0);
   const scrollX = useRef(new Animated.Value(0)).current;
@@ -77,17 +83,12 @@ export default function SegmentedTabs({ tabs, activeKey, onTabPress }: Props) {
           <Pressable
             key={tab.key}
             style={styles.flexTab}
-            onPress={() => onTabPress(tab.key)}
+            onPress={() => !disabled && onTabPress(tab.key)}
             accessibilityRole="tab"
             accessibilityState={{ selected: isActive }}
           >
             <View style={styles.tabContent}>
-              <Text
-                style={[
-                  styles.label,
-                  { color: isActive ? "#fff" : theme.colors.gray600 },
-                ]}
-              >
+              <Text style={[styles.label, { color: theme.colors.gray600 }]}>
                 {tab.label}
               </Text>
             </View>
@@ -107,16 +108,13 @@ const styles = StyleSheet.create({
   },
   flexTab: {
     flex: 1,
-    zIndex: 2, // Ensure text is above the indicator
   },
   slidingIndicator: {
     position: "absolute",
-    // Match the vertical padding/height of your tabContent
     top: 12,
     bottom: 12,
     left: 16,
     borderRadius: 8,
-    zIndex: 1,
   },
   tabContent: {
     alignItems: "center",

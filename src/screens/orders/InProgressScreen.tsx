@@ -1,22 +1,35 @@
-import React from 'react';
-import { StyleSheet, View } from 'react-native';
-import { useAppTheme } from '../../theme/ThemeProvider';
-import Text from '../../components/Text';
+import React from "react";
+import GenericOrderList from "../../components/orders/GenericOrderList";
+import { useInProgressOrders } from "../../hooks/useOrderQueries";
+import {
+  useUpdateOrderStatus,
+  useUpdatePreparingTime,
+} from "../../hooks/useOrderMutations";
+import { OrderStatus } from "../../api/orderServicesTypes";
 
-/**
- * In Progress tab — orders currently being prepared.
- */
 export default function InProgressScreen() {
-  const { theme } = useAppTheme();
+  const updateStatus = useUpdateOrderStatus();
+  const updateTime = useUpdatePreparingTime();
+
+  const handleMarkReady = (orderId: string) => {
+    updateStatus.mutate({ orderId, data: { status: OrderStatus.READY } });
+  };
+
+  const handleUpdatePreparingTime = (orderId: string, minutes: number) => {
+    updateTime.mutate({ orderId, data: { preparingTimeInMinutes: minutes } });
+  };
+
+  const renderActions = () => ({
+    onMarkReady: handleMarkReady,
+    onUpdatePreparingTime: handleUpdatePreparingTime,
+    isMarkingReady: updateStatus.isPending,
+    isUpdatingTime: updateTime.isPending,
+  });
+
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <Text variant="subtitle" weight="semiBold" color={theme.colors.mutedText}>
-        In Progress
-      </Text>
-    </View>
+    <GenericOrderList
+      useOrdersHook={useInProgressOrders}
+      renderActions={renderActions}
+    />
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-});

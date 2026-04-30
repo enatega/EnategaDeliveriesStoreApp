@@ -1,22 +1,14 @@
-import React from 'react';
-import { StyleSheet, View } from 'react-native';
-import { useAppTheme } from '../../theme/ThemeProvider';
-import Text from '../../components/Text';
+import React from "react";
+import GenericOrderList from "../../components/orders/GenericOrderList";
+import { useCompletedOrders } from "../../hooks/useOrderQueries";
 
-/**
- * Completed tab — fulfilled orders history.
- */
 export default function CompletedScreen() {
-  const { theme } = useAppTheme();
+  const renderActions = () => ({});
+
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <Text variant="subtitle" weight="semiBold" color={theme.colors.mutedText}>
-        Completed
-      </Text>
-    </View>
+    <GenericOrderList
+      useOrdersHook={useCompletedOrders}
+      renderActions={renderActions}
+    />
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-});
