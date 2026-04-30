@@ -45,15 +45,20 @@ export default function HomeScreen({ navigation }: Props) {
   const [activeOrderTab, setActiveOrderTab] = useState<OrderTab>('new');
   const sidebar = useSidebar();
 
-  const handleNavigate = (screen: 'Language') => {
+  const handleNavigate = (screen: 'Language' | 'BankManagement' | 'WorkSchedule') => {
     navigation.navigate(screen);
   };
 
   const renderTabContent = () => {
     switch (activeNavTab) {
       case 'Wallet':   return <WalletScreen />;
-      case 'Earnings': return <EarningsScreen />;
-      case 'Profile':  return <ProfileTabScreen />;
+      case 'Earnings': return <EarningsScreen navigation={navigation} />;
+      case 'Profile':  return (
+        <ProfileTabScreen
+          availability={sidebar.availability}
+          onAvailabilityChange={sidebar.setAvailability}
+        />
+      );
       default:
         return (
           <>

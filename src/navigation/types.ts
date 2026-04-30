@@ -5,4 +5,8 @@ export type AuthStackParamList = {
 export type MainStackParamList = {
   Home: undefined;
   Language: undefined;
+  BankManagement: undefined;
+  WorkSchedule: undefined;
+  EarningsDetail: undefined;
+  EarningsOrderDetail: undefined;
 };
