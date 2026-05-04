@@ -26,6 +26,6 @@ module.exports = {
     web: {
       favicon: './assets/favicon.png',
     },
-    plugins: ['expo-secure-store'],
+    plugins: ['expo-secure-store', 'expo-font'],
   },
 };
