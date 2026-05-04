@@ -14,11 +14,12 @@ type Props = {
   tabs: Tab[];
   activeTab: TabKey;
   onTabPress: (key: TabKey) => void;
+  bottomInset?: number;
 };
 
-export default function BottomTabBar({ tabs, activeTab, onTabPress }: Props) {
+export default function BottomTabBar({ tabs, activeTab, onTabPress, bottomInset = 0 }: Props) {
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingBottom: Math.max(10, bottomInset) }]}>
       {tabs.map((tab) => {
         const isActive = tab.key === activeTab;
         return (

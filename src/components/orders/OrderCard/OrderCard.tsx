@@ -65,7 +65,7 @@ export default function OrderCard({
   const isCompleted = order.status === OrderStatus.DELIVERED;
 
   return (
-    <View style={[styles.card, { backgroundColor: "#FDFDFD", borderColor: theme.colors.gray200 }]}>
+    <View style={[styles.card, { backgroundColor: theme.colors.surface, borderColor: theme.colors.gray200 }]}>
       <OrderHeader
         orderCode={order.orderCode}
         status={order.status}

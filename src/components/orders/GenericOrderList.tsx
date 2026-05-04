@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import {
   ActivityIndicator,
-  FlatList,
-  RefreshControl,
   StyleSheet,
   View,
 } from "react-native";
@@ -13,6 +11,7 @@ import OrderCard from "./OrderCard/OrderCard";
 import SegmentedTabs from "../SegmentedTabs";
 import EmptyOrdersSection from "./EmptyOrdersSection";
 import { Order } from "../../api/orderServicesTypes";
+import VerticalList from "../VerticalList";
 
 type OrderTypeFilter = "delivery" | "pickup";
 
@@ -115,7 +114,7 @@ export default function GenericOrderList({
           <ActivityIndicator color={theme.colors.primary} size="large" />
         </View>
       ) : (
-        <FlatList
+        <VerticalList
           data={orders}
           keyExtractor={(item) => item.orderId}
           renderItem={({ item }) => {
@@ -138,13 +137,8 @@ export default function GenericOrderList({
           }}
           contentContainerStyle={styles.listContent}
           ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
-          refreshControl={
-            <RefreshControl
-              refreshing={isRefetching}
-              onRefresh={refetch}
-              tintColor={theme.colors.primary}
-            />
-          }
+          refreshing={isRefetching}
+          onRefresh={refetch}
           onEndReached={() => {
             if (hasNextPage && !isFetchingNextPage) fetchNextPage();
           }}

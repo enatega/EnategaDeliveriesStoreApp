@@ -1,11 +1,12 @@
 import React from 'react';
-import { FlatList, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useAppTheme } from '../theme/ThemeProvider';
 import { MainStackParamList } from '../navigation/types';
 import ScreenHeader from '../components/ScreenHeader';
 import EarningsOrderCard from '../components/EarningsOrderCard';
 import Text from '../components/Text';
+import VerticalList from '../components/VerticalList';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'EarningsOrderDetail'>;
 
@@ -40,7 +41,7 @@ export default function EarningsOrderDetailScreen({ navigation }: Props) {
       </View>
 
       {/* Order cards */}
-      <FlatList
+      <VerticalList
         data={ORDERS}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
@@ -51,7 +52,6 @@ export default function EarningsOrderDetailScreen({ navigation }: Props) {
             payment={item.payment}
           />
         )}
-        showsVerticalScrollIndicator={false}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
       />
     </View>
