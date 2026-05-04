@@ -21,8 +21,7 @@ type Props = {
 
 /**
  * Calendar range picker modal.
- * Selecting a date auto-selects the full week (Sun–Sat) containing that date,
- * matching the green pill highlight shown in the design.
+ * Select a start date, then select an end date to highlight the full range.
  */
 export default function CalendarRangePicker({ visible, onClose, onApply, initialRange }: Props) {
   const { theme } = useAppTheme();
@@ -31,13 +30,19 @@ export default function CalendarRangePicker({ visible, onClose, onApply, initial
   const [viewYear, setViewYear] = useState(initialRange?.start.getFullYear() ?? today.getFullYear());
   const [viewMonth, setViewMonth] = useState(initialRange?.start.getMonth() ?? today.getMonth());
   const [selectedRange, setSelectedRange] = useState<DateRange | null>(initialRange ?? null);
+  const [rangeStart, setRangeStart] = useState<Date | null>(null);
+  
 
   const prevMonth = () => {
+    setSelectedRange(null);
+    setRangeStart(null);
     if (viewMonth === 0) { setViewMonth(11); setViewYear((y) => y - 1); }
     else setViewMonth((m) => m - 1);
   };
 
   const nextMonth = () => {
+    setSelectedRange(null);
+    setRangeStart(null);
     if (viewMonth === 11) { setViewMonth(0); setViewYear((y) => y + 1); }
     else setViewMonth((m) => m + 1);
   };
@@ -69,30 +74,40 @@ export default function CalendarRangePicker({ visible, onClose, onApply, initial
   };
 
   const handleDayPress = (date: Date) => {
-    // Select the full week (Sun–Sat) containing the tapped date
-    const day = date.getDay();
     const start = new Date(date);
-    start.setDate(date.getDate() - day);
     start.setHours(0, 0, 0, 0);
-    const end = new Date(start);
-    end.setDate(start.getDate() + 6);
+    if (!isCurrentMonth(start)) return;
+
+    if (!rangeStart) {
+      const end = new Date(start);
+      end.setHours(23, 59, 59, 999);
+      setRangeStart(start);
+      setSelectedRange({ start, end });
+      return;
+    }
+
+    const normalizedStart = rangeStart <= start ? rangeStart : start;
+    const normalizedEnd = rangeStart <= start ? start : rangeStart;
+    const end = new Date(normalizedEnd);
     end.setHours(23, 59, 59, 999);
-    setSelectedRange({ start, end });
+
+    setSelectedRange({ start: normalizedStart, end });
+    setRangeStart(null);
   };
 
   const isInRange = (date: Date): boolean => {
     if (!selectedRange) return false;
-    return date >= selectedRange.start && date <= selectedRange.end;
+    return isCurrentMonth(date) && date >= selectedRange.start && date <= selectedRange.end;
   };
 
   const isRangeStart = (date: Date): boolean => {
     if (!selectedRange) return false;
-    return date.toDateString() === selectedRange.start.toDateString();
+    return isCurrentMonth(date) && date.toDateString() === selectedRange.start.toDateString();
   };
 
   const isRangeEnd = (date: Date): boolean => {
     if (!selectedRange) return false;
-    return date.toDateString() === selectedRange.end.toDateString();
+    return isCurrentMonth(date) && date.toDateString() === selectedRange.end.toDateString();
   };
 
   const isCurrentMonth = (date: Date): boolean => date.getMonth() === viewMonth;
@@ -147,6 +162,7 @@ export default function CalendarRangePicker({ visible, onClose, onApply, initial
                   <Pressable
                     key={colIdx}
                     onPress={() => handleDayPress(date)}
+                    disabled={!isCurrent}
                     style={[
                       styles.dayCell,
                       inRange && styles.inRangeCell,
