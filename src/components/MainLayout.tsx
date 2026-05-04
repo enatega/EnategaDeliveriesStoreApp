@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppTheme } from '../theme/ThemeProvider';
 import { useTranslations } from '../localization/LocalizationProvider';
 import ScreenHeader from './ScreenHeader';
@@ -50,6 +51,7 @@ export default function MainLayout({
 }: Props) {
   const { theme } = useAppTheme();
   const { t } = useTranslations('app');
+  const insets = useSafeAreaInsets();
 
   const navTabs = [
     {
@@ -90,6 +92,7 @@ export default function MainLayout({
         tabs={navTabs}
         activeTab={activeTab}
         onTabPress={onTabChange}
+        bottomInset={insets.bottom}
       />
 
       {/* Sidebar overlay — above everything */}
