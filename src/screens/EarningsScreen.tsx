@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useAppTheme } from '../theme/ThemeProvider';
@@ -6,32 +6,30 @@ import { MainStackParamList } from '../navigation/types';
 import BarChart, { BarChartDataPoint } from '../components/BarChart';
 import EarningsActivityRow from '../components/EarningsActivityRow';
 import Text from '../components/Text';
+import { useEarningsGraphQuery, useEarningsHistoryQuery } from '../hooks/useEarningsQueries';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'EarningsDetail'> | { navigation?: any };
-
-// ─── Dummy data ───────────────────────────────────────────────────────────────
-
-const CHART_DATA: BarChartDataPoint[] = [
-  { label: '23 Jan-\n29 Jan', value: 200, displayValue: '$200' },
-  { label: '23 Jan-\n29 Jan', value: 400, displayValue: '$400' },
-  { label: '23 Jan-\n29 Jan', value: 600, displayValue: '$600' },
-  { label: '23 Jan-\n29 Jan', value: 300, displayValue: '$300' },
-];
-
-const ACTIVITY_DATA = [
-  { id: '1', date: '20.02.2023', label: 'Total Earning', amount: '$600' },
-  { id: '2', date: '20.02.2023', label: 'Total Earning', amount: '$100' },
-  { id: '3', date: '20.02.2023', label: 'Total Earning', amount: '$100' },
-  { id: '4', date: '20.02.2023', label: 'Total Earning', amount: '$100' },
-  { id: '5', date: '20.02.2023', label: 'Total Earning', amount: '$100' },
-  { id: '6', date: '20.02.2023', label: 'Total Earning', amount: '$100' },
-  { id: '7', date: '20.02.2023', label: 'Total Earning', amount: '$100' },
-];
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
 export default function EarningsScreen({ navigation }: any) {
   const { theme } = useAppTheme();
+  const { data: earningsGraphData } = useEarningsGraphQuery({
+    params: { page: 1, limit: 10 },
+  });
+
+  const chartData = useMemo<BarChartDataPoint[]>(
+    () =>
+      earningsGraphData?.graph.map((item) => ({
+        label: item.label.replace(' - ', '-\n'),
+        value: item.total_amount,
+        displayValue: `$${item.total_amount}`,
+      })) ?? [],
+    [earningsGraphData],
+  );
+  const { data: earningsHistoryData } = useEarningsHistoryQuery({
+    params: { page: 1, limit: 10 },
+  });
 
   const handleSeeMore = () => navigation?.navigate?.('EarningsDetail');
   const handleRowPress = () => navigation?.navigate?.('EarningsOrderDetail');
@@ -44,7 +42,7 @@ export default function EarningsScreen({ navigation }: any) {
     >
       {/* Bar chart */}
       <View style={styles.chartSection}>
-        <BarChart data={CHART_DATA} height={200} />
+        <BarChart data={chartData} height={200} />
       </View>
 
       {/* Recent Activity header */}
@@ -61,15 +59,10 @@ export default function EarningsScreen({ navigation }: any) {
 
       {/* Activity rows */}
       <View style={styles.activityList}>
-        {ACTIVITY_DATA.map((item) => (
-          <EarningsActivityRow
-            key={item.id}
-            date={item.date}
-            label={item.label}
-            amount={item.amount}
-            onPress={handleRowPress}
-          />
-        ))}
+        <EarningsActivityRow
+          items={earningsHistoryData?.data ?? []}
+          onPressItem={handleRowPress}
+        />
       </View>
     </ScrollView>
   );

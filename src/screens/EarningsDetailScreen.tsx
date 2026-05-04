@@ -4,7 +4,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useAppTheme } from '../theme/ThemeProvider';
 import { MainStackParamList } from '../navigation/types';
 import ScreenHeader from '../components/ScreenHeader';
-import EarningsActivityRow from '../components/EarningsActivityRow';
+import EarningsActivityRow, { EarningsActivityItem } from '../components/EarningsActivityRow';
 import CalendarRangePicker from '../components/CalendarRangePicker';
 import Text from '../components/Text';
 
@@ -12,14 +12,21 @@ type Props = NativeStackScreenProps<MainStackParamList, 'EarningsDetail'>;
 
 // ─── Dummy data ───────────────────────────────────────────────────────────────
 
-const ACTIVITY_DATA = [
-  { id: '1', date: '20.02.2023', label: 'Total Earning', amount: '$600' },
-  { id: '2', date: '20.02.2023', label: 'Total Earning', amount: '$100' },
-  { id: '3', date: '20.02.2023', label: 'Total Earning', amount: '$100' },
-  { id: '4', date: '20.02.2023', label: 'Total Earning', amount: '$100' },
-  { id: '5', date: '20.02.2023', label: 'Total Earning', amount: '$100' },
-  { id: '6', date: '20.02.2023', label: 'Total Earning', amount: '$100' },
-  { id: '7', date: '20.02.2023', label: 'Total Earning', amount: '$100' },
+const ACTIVITY_DATA: EarningsActivityItem[] = [
+  {
+    order_id: '332dd06d-a52f-4403-a925-dbb1405fb76a',
+    payment_amount: 16,
+    status: 'delivered',
+    created_at: '2026-04-27T08:08:25.697Z',
+    label: 'Total Earning',
+  },
+  {
+    order_id: '2a8fef3d-8057-4029-b133-fc8f9ff9a500',
+    payment_amount: 42,
+    status: 'delivered',
+    created_at: '2026-04-26T11:30:12.120Z',
+    label: 'Total Earning',
+  },
 ];
 
 const SUMMARY = { orders: 267, totalEarnings: '$1200' };
@@ -88,15 +95,10 @@ export default function EarningsDetailScreen({ navigation }: Props) {
 
         {/* Activity list */}
         <View style={styles.activityList}>
-          {ACTIVITY_DATA.map((item) => (
-            <EarningsActivityRow
-              key={item.id}
-              date={item.date}
-              label={item.label}
-              amount={item.amount}
-              onPress={() => navigation.navigate('EarningsOrderDetail')}
-            />
-          ))}
+          <EarningsActivityRow
+            items={ACTIVITY_DATA}
+            onPressItem={() => navigation.navigate('EarningsOrderDetail')}
+          />
         </View>
       </ScrollView>
 

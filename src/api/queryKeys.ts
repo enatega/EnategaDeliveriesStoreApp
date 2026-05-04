@@ -1,4 +1,8 @@
 import { GetOrdersParams } from "./orderServicesTypes";
+import {
+  GetEarningsGraphParams,
+  GetEarningsHistoryParams,
+} from "./earningsServiceTypes";
 
 export const authKeys = {
   all: ["auth"] as const,
@@ -50,4 +54,14 @@ export const completedOrdersKeys = {
   lists: () => [...ordersKeys.completed(), "list"] as const,
   list: (params: GetOrdersParams) =>
     [...completedOrdersKeys.lists(), params] as const,
+};
+
+export const earningsKeys = {
+  all: ["earnings"] as const,
+  graph: () => [...earningsKeys.all, "graph"] as const,
+  graphList: (params: GetEarningsGraphParams) =>
+    [...earningsKeys.graph(), params] as const,
+  history: () => [...earningsKeys.all, "history"] as const,
+  historyList: (params: GetEarningsHistoryParams) =>
+    [...earningsKeys.history(), params] as const,
 };

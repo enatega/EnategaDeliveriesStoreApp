@@ -1,42 +1,78 @@
 import React from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import Text from './Text';
 import { useAppTheme } from '../theme/ThemeProvider';
 
-type Props = {
-  date: string;
+export type EarningsActivityItem = {
+  order_id: string;
+  payment_amount: number;
+  status: string;
+  created_at: string;
   label: string;
-  amount: string;
-  onPress?: () => void;
 };
 
-/**
- * Single row in the earnings activity list.
- * date | label | amount | chevron
- */
-export default function EarningsActivityRow({ date, label, amount, onPress }: Props) {
+type Props = {
+  items: EarningsActivityItem[];
+  onPressItem?: (item: EarningsActivityItem) => void;
+};
+
+function formatDisplayDate(isoDate: string) {
+  const date = new Date(isoDate);
+  if (Number.isNaN(date.getTime())) {
+    return isoDate;
+  }
+
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+
+  return `${day}.${month}.${year}`;
+}
+
+function Row({
+  item,
+  onPress,
+}: {
+  item: EarningsActivityItem;
+  onPress?: (item: EarningsActivityItem) => void;
+}) {
   const { theme } = useAppTheme();
+  console.log('EarningsActivityItem:', item.created_at);
+  
 
   return (
     <Pressable
-      onPress={onPress}
+      onPress={() => onPress?.(item)}
       accessibilityRole="button"
       style={({ pressed }) => [
         styles.row,
         { borderBottomColor: theme.colors.gray200, opacity: pressed ? 0.7 : 1 },
       ]}
     >
+
       <Text variant="caption" color={theme.colors.gray500} style={styles.date}>
-        {date}
+        {formatDisplayDate(item.created_at)}
       </Text>
       <Text variant="body" weight="semiBold" color={theme.colors.text} style={styles.label}>
-        {label}
+        {item.label}
       </Text>
+
       <Text variant="body" weight="bold" color={theme.colors.text} style={styles.amount}>
-        {amount}
+        ${item.payment_amount}
       </Text>
       <View style={[styles.chevron, { borderColor: theme.colors.gray500 }]} />
     </Pressable>
+  );
+}
+
+export default function EarningsActivityRow({ items, onPressItem }: Props) {
+  return (
+    <FlatList
+      data={items}
+      keyExtractor={(item) => item.order_id}
+      renderItem={({ item }) => <Row item={item} onPress={onPressItem} />}
+      scrollEnabled={false}
+    />
   );
 }
 
@@ -50,7 +86,7 @@ const styles = StyleSheet.create({
   },
   date: {
     fontSize: 12,
-    minWidth: 72,
+    marginRight: 6,
   },
   label: {
     flex: 1,
