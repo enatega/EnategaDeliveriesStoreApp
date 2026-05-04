@@ -7,7 +7,7 @@ export { default as LoginLogo } from './LoginLogo';
 export { default as BottomTabBar } from './BottomTabBar';
 export { default as ScreenHeader } from './ScreenHeader';
 export { default as TabBar } from './TabBar';
-export { default as OrderCard } from './OrderCard';
+export { default as OrderCard } from './orders/OrderCard/OrderCard';
 export { default as ToggleSwitch } from './ToggleSwitch';
 export { default as Sidebar } from './Sidebar';
 export { default as MainLayout } from './MainLayout';

@@ -1,22 +1,14 @@
-import React from 'react';
-import { StyleSheet, View } from 'react-native';
-import { useAppTheme } from '../../theme/ThemeProvider';
-import Text from '../../components/Text';
+import React from "react";
+import GenericOrderList from "../../components/orders/GenericOrderList";
+import { usePickupOrders } from "../../hooks/useOrderQueries";
 
-/**
- * Pickup tab — orders ready for customer self-pickup.
- */
 export default function PickupScreen() {
-  const { theme } = useAppTheme();
+  const renderActions = () => ({});
+
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <Text variant="subtitle" weight="semiBold" color={theme.colors.mutedText}>
-        Pickup
-      </Text>
-    </View>
+    <GenericOrderList
+      useOrdersHook={usePickupOrders}
+      renderActions={renderActions}
+    />
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-});

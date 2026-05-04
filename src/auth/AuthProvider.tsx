@@ -50,6 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const isAuthenticated = Boolean(session.token);
+  console.log("🚀 ~ AuthProvider ~ session.token:", session.token)
 
   const value = useMemo(
     () => ({

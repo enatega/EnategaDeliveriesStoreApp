@@ -125,11 +125,11 @@ export default function Sidebar({
   const user = session.user;
   const initials = user?.name
     ? user.name
-        .split(' ')
-        .slice(0, 2)
-        .map((w) => w[0])
-        .join('')
-        .toUpperCase()
+      .split(' ')
+      .slice(0, 2)
+      .map((w) => w[0])
+      .join('')
+      .toUpperCase()
     : 'JS';
 
   const menuItems: MenuItem[] = [

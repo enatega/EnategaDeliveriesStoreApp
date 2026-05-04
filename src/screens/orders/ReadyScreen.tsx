@@ -1,22 +1,26 @@
-import React from 'react';
-import { StyleSheet, View } from 'react-native';
-import { useAppTheme } from '../../theme/ThemeProvider';
-import Text from '../../components/Text';
+import React from "react";
+import GenericOrderList from "../../components/orders/GenericOrderList";
+import { useReadyOrders } from "../../hooks/useOrderQueries";
+import { useUpdateOrderStatus } from "../../hooks/useOrderMutations";
+import { OrderStatus } from "../../api/orderServicesTypes";
 
-/**
- * Ready tab — orders prepared and waiting for pickup/handover.
- */
 export default function ReadyScreen() {
-  const { theme } = useAppTheme();
+  const updateStatus = useUpdateOrderStatus();
+
+  // Todo30April: need huzaifa assistance here for confirming the status of the order. 
+  const handleConfirmPickup = (orderId: string) => {
+    updateStatus.mutate({ orderId, data: { status: OrderStatus.PICKED_UP } });
+  };
+
+  const renderActions = () => ({
+    onConfirmPickup: handleConfirmPickup,
+    isConfirmingPickup: updateStatus.isPending,
+  });
+
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <Text variant="subtitle" weight="semiBold" color={theme.colors.mutedText}>
-        Ready
-      </Text>
-    </View>
+    <GenericOrderList
+      useOrdersHook={useReadyOrders}
+      renderActions={renderActions}
+    />
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-});
