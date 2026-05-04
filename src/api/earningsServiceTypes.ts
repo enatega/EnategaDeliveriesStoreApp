@@ -10,6 +10,13 @@ export type GetEarningsHistoryParams = {
   endDate?: string;
 };
 
+export type GetEarningsSummaryParams = {
+  page?: number;
+  limit?: number;
+  startDate: string;
+  endDate: string;
+};
+
 export interface EarningsGraphItem {
   label: string;
   total_amount: number;
@@ -38,4 +45,11 @@ export interface EarningsHistoryResponse {
   totalPages: number;
   hasNextPage: boolean;
   hasPreviousPage: boolean;
+}
+
+export interface EarningsSummaryResponse {
+  total_orders: number;
+  total_earnings: number;
+  start_date: string;
+  end_date: string;
 }

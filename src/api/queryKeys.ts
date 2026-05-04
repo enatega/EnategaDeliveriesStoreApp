@@ -2,6 +2,7 @@ import { GetOrdersParams } from "./orderServicesTypes";
 import {
   GetEarningsGraphParams,
   GetEarningsHistoryParams,
+  GetEarningsSummaryParams,
 } from "./earningsServiceTypes";
 
 export const authKeys = {
@@ -64,4 +65,7 @@ export const earningsKeys = {
   history: () => [...earningsKeys.all, "history"] as const,
   historyList: (params: GetEarningsHistoryParams) =>
     [...earningsKeys.history(), params] as const,
+  summary: () => [...earningsKeys.all, "summary"] as const,
+  summaryDetail: (params: GetEarningsSummaryParams) =>
+    [...earningsKeys.summary(), params] as const,
 };

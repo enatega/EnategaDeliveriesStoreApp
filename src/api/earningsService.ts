@@ -2,8 +2,10 @@ import apiClient from "./apiClient";
 import {
   EarningsHistoryResponse,
   EarningsGraphResponse,
+  EarningsSummaryResponse,
   GetEarningsHistoryParams,
   GetEarningsGraphParams,
+  GetEarningsSummaryParams,
 } from "./earningsServiceTypes";
 
 const BASE_PATH = "/apps/deliveries/store/wallet/earnings";
@@ -22,6 +24,16 @@ export const earningsService = {
         limit: params.limit,
         ...(params.startDate ? { startDate: params.startDate } : {}),
         ...(params.endDate ? { endDate: params.endDate } : {}),
+      },
+    ),
+  getEarningsSummary: (params: GetEarningsSummaryParams) =>
+    apiClient.get<EarningsSummaryResponse>(
+      `${BASE_PATH}/summary`,
+      {
+        page: params.page,
+        limit: params.limit,
+        startDate: params.startDate,
+        endDate: params.endDate,
       },
     ),
 };

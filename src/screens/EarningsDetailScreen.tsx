@@ -1,35 +1,17 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useAppTheme } from '../theme/ThemeProvider';
 import { MainStackParamList } from '../navigation/types';
-import ScreenHeader from '../components/ScreenHeader';
-import EarningsActivityRow, { EarningsActivityItem } from '../components/EarningsActivityRow';
+import EarningsActivityRow from '../components/EarningsActivityRow';
 import CalendarRangePicker from '../components/CalendarRangePicker';
 import Text from '../components/Text';
+import {
+  useEarningsHistoryQuery,
+  useEarningsSummaryQuery,
+} from '../hooks/useEarningsQueries';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'EarningsDetail'>;
-
-// ─── Dummy data ───────────────────────────────────────────────────────────────
-
-const ACTIVITY_DATA: EarningsActivityItem[] = [
-  {
-    order_id: '332dd06d-a52f-4403-a925-dbb1405fb76a',
-    payment_amount: 16,
-    status: 'delivered',
-    created_at: '2026-04-27T08:08:25.697Z',
-    label: 'Total Earning',
-  },
-  {
-    order_id: '2a8fef3d-8057-4029-b133-fc8f9ff9a500',
-    payment_amount: 42,
-    status: 'delivered',
-    created_at: '2026-04-26T11:30:12.120Z',
-    label: 'Total Earning',
-  },
-];
-
-const SUMMARY = { orders: 267, totalEarnings: '$1200' };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -48,6 +30,23 @@ export default function EarningsDetailScreen({ navigation }: Props) {
   const [calendarOpen, setCalendarOpen] = useState(false);
 
   const dateRangeLabel = `${formatDate(range.start)} - ${formatDate(range.end)}`;
+  const historyParams = useMemo(
+    () => ({
+      page: 1,
+      limit: 10,
+      startDate: range.start.toISOString(),
+      endDate: range.end.toISOString(),
+    }),
+    [range.end, range.start],
+  );
+  const { data: earningsHistoryData } = useEarningsHistoryQuery({
+    params: historyParams,
+    staleTime: Infinity,
+  });
+  const { data: earningsSummaryData } = useEarningsSummaryQuery({
+    params: historyParams,
+    staleTime: Infinity,
+  });
 
   return (
     <View style={[styles.flex, { backgroundColor: theme.colors.background }]}>
@@ -80,14 +79,14 @@ export default function EarningsDetailScreen({ navigation }: Props) {
             <View style={styles.summaryItem}>
               <Text variant="caption" color={theme.colors.gray500}>Orders</Text>
               <Text variant="subtitle" weight="bold" color={theme.colors.text}>
-                {SUMMARY.orders}
+                {earningsSummaryData?.total_orders ?? 0}
               </Text>
             </View>
             <View style={[styles.summaryDivider, { backgroundColor: theme.colors.gray300 }]} />
             <View style={styles.summaryItem}>
               <Text variant="caption" color={theme.colors.gray500}>Total Earnings</Text>
               <Text variant="subtitle" weight="bold" color={theme.colors.text}>
-                {SUMMARY.totalEarnings}
+                ${earningsSummaryData?.total_earnings ?? 0}
               </Text>
             </View>
           </View>
@@ -96,7 +95,7 @@ export default function EarningsDetailScreen({ navigation }: Props) {
         {/* Activity list */}
         <View style={styles.activityList}>
           <EarningsActivityRow
-            items={ACTIVITY_DATA}
+            items={earningsHistoryData?.data ?? []}
             onPressItem={() => navigation.navigate('EarningsOrderDetail')}
           />
         </View>

@@ -4,8 +4,10 @@ import { earningsService } from "../api/earningsService";
 import {
   EarningsHistoryResponse,
   EarningsGraphResponse,
+  EarningsSummaryResponse,
   GetEarningsGraphParams,
   GetEarningsHistoryParams,
+  GetEarningsSummaryParams,
 } from "../api/earningsServiceTypes";
 import { earningsKeys } from "../api/queryKeys";
 
@@ -41,7 +43,29 @@ export function useEarningsHistoryQuery({
 }: UseEarningsHistoryOptions = {}) {
   return useQuery<EarningsHistoryResponse, ApiError>({
     queryKey: earningsKeys.historyList(params),
-    queryFn: () => earningsService.getEarningsHistory(params),
+    queryFn: () => {
+      console.log("EarningsHistoryParams", params);
+      return earningsService.getEarningsHistory(params);
+    },
+    staleTime: 60 * 1000,
+    ...options,
+  });
+}
+
+type UseEarningsSummaryOptions = {
+  params: GetEarningsSummaryParams;
+} & Omit<
+  UseQueryOptions<EarningsSummaryResponse, ApiError>,
+  "queryKey" | "queryFn"
+>;
+
+export function useEarningsSummaryQuery({
+  params,
+  ...options
+}: UseEarningsSummaryOptions) {
+  return useQuery<EarningsSummaryResponse, ApiError>({
+    queryKey: earningsKeys.summaryDetail(params),
+    queryFn: () => earningsService.getEarningsSummary(params),
     staleTime: 60 * 1000,
     ...options,
   });

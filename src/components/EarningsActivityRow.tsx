@@ -1,7 +1,8 @@
 import React from 'react';
-import { FlatList, Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import Text from './Text';
 import { useAppTheme } from '../theme/ThemeProvider';
+import VerticalList from './VerticalList';
 
 export type EarningsActivityItem = {
   order_id: string;
@@ -37,8 +38,6 @@ function Row({
   onPress?: (item: EarningsActivityItem) => void;
 }) {
   const { theme } = useAppTheme();
-  console.log('EarningsActivityItem:', item.created_at);
-  
 
   return (
     <Pressable
@@ -67,7 +66,7 @@ function Row({
 
 export default function EarningsActivityRow({ items, onPressItem }: Props) {
   return (
-    <FlatList
+    <VerticalList
       data={items}
       keyExtractor={(item) => item.order_id}
       renderItem={({ item }) => <Row item={item} onPress={onPressItem} />}
