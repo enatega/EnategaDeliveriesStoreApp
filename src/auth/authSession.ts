@@ -1,4 +1,5 @@
 import * as SecureStore from 'expo-secure-store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { tokenManager } from '../api/apiClient';
 import type { AuthSessionResponse, AuthUser, ProfileEntry } from '../api/authTypes';
 
@@ -13,12 +14,12 @@ export type AuthSession = {
 };
 
 const getUser = async (): Promise<AuthUser | null> => {
-  const raw = await SecureStore.getItemAsync(USER_KEY);
+  const raw = await AsyncStorage.getItem(USER_KEY);
   return raw ? (JSON.parse(raw) as AuthUser) : null;
 };
 
 const getProfiles = async (): Promise<ProfileEntry[] | null> => {
-  const raw = await SecureStore.getItemAsync(PROFILES_KEY);
+  const raw = await AsyncStorage.getItem(PROFILES_KEY);
   return raw ? (JSON.parse(raw) as ProfileEntry[]) : null;
 };
 
@@ -32,12 +33,12 @@ export const authSession = {
       await tokenManager.removeRefreshToken();
     }
 
-    await SecureStore.setItemAsync(USER_KEY, JSON.stringify(payload.user));
+    await AsyncStorage.setItem(USER_KEY, JSON.stringify(payload.user));
 
     if (payload.profiles) {
-      await SecureStore.setItemAsync(PROFILES_KEY, JSON.stringify(payload.profiles));
+      await AsyncStorage.setItem(PROFILES_KEY, JSON.stringify(payload.profiles));
     } else {
-      await SecureStore.deleteItemAsync(PROFILES_KEY);
+      await AsyncStorage.removeItem(PROFILES_KEY);
     }
 
     return payload;
@@ -56,7 +57,6 @@ export const authSession = {
 
   clearSession: async () => {
     await tokenManager.clearAll();
-    await SecureStore.deleteItemAsync(USER_KEY);
-    await SecureStore.deleteItemAsync(PROFILES_KEY);
+    await AsyncStorage.multiRemove([USER_KEY, PROFILES_KEY]);
   },
 };

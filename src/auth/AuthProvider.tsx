@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import type { AuthSessionResponse, ProfileEntry } from '../api/authTypes';
 import { authSession, AuthSession } from './authSession';
+import { sessionExpiryBus } from './sessionExpiryBus';
 
 type AuthContextValue = {
   session: AuthSession;
@@ -34,6 +35,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
   }, []);
 
+  useEffect(() => {
+    const unsubscribe = sessionExpiryBus.subscribe(() => {
+      setSession(emptySession);
+    });
+    return unsubscribe;
+  }, []);
+
   const setSessionFromResponse = async (payload: AuthSessionResponse) => {
     await authSession.setSession(payload);
     setSession({
@@ -50,7 +58,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const isAuthenticated = Boolean(session.token);
-  console.log("🚀 ~ AuthProvider ~ session.token:", session.token)
 
   const value = useMemo(
     () => ({
