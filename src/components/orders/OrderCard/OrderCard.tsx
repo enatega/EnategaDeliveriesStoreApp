@@ -46,8 +46,6 @@ export default function OrderCard({
   const displayAddress =
     order.orderType === "delivery" ? order.deliveryAddress : order.pickupAddress;
 
-  // Todo30April: some fixes should be done here because
-  // the time is not working correctly may be we need to use remainingSeconds here
   const startTime = order.preparationStartedAt
     ? new Date(order.preparationStartedAt).getTime()
     : null;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   KeyboardAvoidingView,
   Modal,
@@ -6,18 +6,20 @@ import {
   Pressable,
   StyleSheet,
   View,
-} from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Text from './Text';
-import TextInput from './TextInput';
-import Button from './Button';
-import { useAppTheme } from '../theme/ThemeProvider';
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Text from "./Text";
+import TextInput from "./TextInput";
+import Button from "./Button";
+import { useAppTheme } from "../theme/ThemeProvider";
+import { useTranslations } from "../localization/LocalizationProvider";
 
 type Props = {
   visible: boolean;
   availableAmount: string;
   onClose: () => void;
   onConfirm: (amount: string) => void;
+  isSubmitting?: boolean;
 };
 
 /**
@@ -28,26 +30,29 @@ export default function WithdrawBottomSheet({
   availableAmount,
   onClose,
   onConfirm,
+  isSubmitting,
 }: Props) {
   const { theme } = useAppTheme();
+  const { t } = useTranslations("app");
   const insets = useSafeAreaInsets();
-  const [amount, setAmount] = useState('');
-  const [error, setError] = useState('');
+  const [amount, setAmount] = useState("");
+  const [error, setError] = useState("");
 
   const handleConfirm = () => {
+    if (isSubmitting) return;
     const num = parseFloat(amount);
     if (!amount || isNaN(num) || num <= 0) {
-      setError('Please enter a valid amount');
+      setError("Please enter a valid amount");
       return;
     }
-    setError('');
+    setError("");
     onConfirm(amount);
-    setAmount('');
+    setAmount("");
   };
 
   const handleClose = () => {
-    setAmount('');
-    setError('');
+    setAmount("");
+    setError("");
     onClose();
   };
 
@@ -62,7 +67,7 @@ export default function WithdrawBottomSheet({
       <Pressable style={styles.backdrop} onPress={handleClose} />
 
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.kvWrapper}
       >
         <View
@@ -75,12 +80,19 @@ export default function WithdrawBottomSheet({
           ]}
         >
           {/* Handle */}
-          <View style={[styles.handle, { backgroundColor: theme.colors.gray300 }]} />
+          <View
+            style={[styles.handle, { backgroundColor: theme.colors.gray300 }]}
+          />
 
           {/* Available amount row */}
-          <View style={[styles.availableRow, { borderBottomColor: theme.colors.gray200 }]}>
+          <View
+            style={[
+              styles.availableRow,
+              { borderBottomColor: theme.colors.gray200 },
+            ]}
+          >
             <Text variant="body" color={theme.colors.text}>
-              Available Amount
+              {t("wallet_available_amount_label")}
             </Text>
             <Text variant="body" weight="bold" color={theme.colors.text}>
               {availableAmount}
@@ -90,12 +102,12 @@ export default function WithdrawBottomSheet({
           {/* Amount input */}
           <View style={styles.inputSection}>
             <TextInput
-              label="Enter Amount"
+              label={t("wallet_enter_amount")}
               placeholder="$0.00"
               value={amount}
               onChangeText={(v) => {
                 setAmount(v);
-                if (error) setError('');
+                if (error) setError("");
               }}
               error={error}
               keyboardType="decimal-pad"
@@ -106,7 +118,12 @@ export default function WithdrawBottomSheet({
 
           {/* Confirm button */}
           <View style={styles.actions}>
-            <Button label="Confirm Withdraw" onPress={handleConfirm} />
+            <Button
+              label={t("wallet_confirm_withdraw")}
+              onPress={handleConfirm}
+              loading={isSubmitting}
+              disabled={isSubmitting}
+            />
           </View>
         </View>
       </KeyboardAvoidingView>
@@ -117,17 +134,17 @@ export default function WithdrawBottomSheet({
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.35)',
+    backgroundColor: "rgba(0,0,0,0.35)",
   },
   kvWrapper: {
-    justifyContent: 'flex-end',
+    justifyContent: "flex-end",
   },
   sheet: {
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     paddingTop: 12,
     paddingHorizontal: 16,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: -3 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -137,13 +154,13 @@ const styles = StyleSheet.create({
     width: 40,
     height: 4,
     borderRadius: 2,
-    alignSelf: 'center',
+    alignSelf: "center",
     marginBottom: 16,
   },
   availableRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingVertical: 14,
     borderBottomWidth: 1,
     marginBottom: 16,

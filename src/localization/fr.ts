@@ -88,6 +88,22 @@ const fr = {
   bank_account_placeholder: 'ex. 3254465164614411',
   bank_account_required: 'Le numéro de compte est requis',
   bank_confirm: 'Confirmer',
+
+
+  // Wallet
+wallet_current_balance: 'Solde actuel',
+wallet_available_for_withdrawal: 'Disponible pour retrait :',
+wallet_withdraw_now: 'Retirer maintenant',
+wallet_available_amount_label: 'Montant disponible',
+wallet_enter_amount: 'Entrez le montant',
+wallet_confirm_withdraw: 'Confirmer le retrait',
+wallet_invalid_amount: 'Veuillez entrer un montant valide',
+wallet_pending_request: 'Demande en attente',
+wallet_recent_transactions: 'Transactions récentes',
+wallet_no_transactions: 'Aucune transaction pour le moment',
+wallet_withdrawal_submitted: 'Votre demande de retrait a été soumise',
+wallet_withdrawal_eta: 'Cela prend généralement 1 à 2 jours ouvrables',
+wallet_withdrawal_failed: 'Échec du retrait',
 };
 
 export default fr;
