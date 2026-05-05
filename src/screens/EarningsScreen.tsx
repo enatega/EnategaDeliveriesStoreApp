@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useAppTheme } from '../theme/ThemeProvider';
@@ -14,6 +14,7 @@ type Props = NativeStackScreenProps<MainStackParamList, 'EarningsDetail'> | { na
 
 export default function EarningsScreen({ navigation }: any) {
   const { theme } = useAppTheme();
+  const [hasReachedListEnd, setHasReachedListEnd] = useState(false);
   const { data: earningsGraphData } = useEarningsGraphQuery({
     params: { page: 1, limit: 10 },
   });
@@ -27,9 +28,24 @@ export default function EarningsScreen({ navigation }: any) {
       })) ?? [],
     [earningsGraphData],
   );
-  const { data: earningsDailyData } = useEarningsDailyQuery({
+  const {
+    data: earningsDailyData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useEarningsDailyQuery({
     params: { page: 1, limit: 10 },
   });
+
+  const earningsItems = useMemo(
+    () => earningsDailyData?.pages.flatMap((page) => page.earnings_by_date) ?? [],
+    [earningsDailyData],
+  );
+  useEffect(() => {
+    if (hasNextPage) {
+      setHasReachedListEnd(false);
+    }
+  }, [hasNextPage]);
 
   const handleSeeMore = () => navigation?.navigate?.('EarningsDetail');
   const handleRowPress = (item: { date: string }) =>
@@ -40,6 +56,22 @@ export default function EarningsScreen({ navigation }: any) {
       style={{ backgroundColor: theme.colors.background }}
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
+      scrollEventThrottle={16}
+      onScroll={({ nativeEvent }) => {
+        const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
+        const paddingToBottom = 120;
+        const isNearBottom =
+          layoutMeasurement.height + contentOffset.y >=
+          contentSize.height - paddingToBottom;
+
+        if (isNearBottom && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+
+        if (isNearBottom && !hasNextPage && earningsItems.length > 0) {
+          setHasReachedListEnd(true);
+        }
+      }}
     >
       {/* Bar chart */}
       <View style={styles.chartSection}>
@@ -61,8 +93,9 @@ export default function EarningsScreen({ navigation }: any) {
       {/* Activity rows */}
       <View style={styles.activityList}>
         <EarningsActivityRow
-          items={earningsDailyData?.earnings_by_date ?? []}
+          items={earningsItems}
           onPressItem={handleRowPress}
+          showNoMoreEarningFooter={hasReachedListEnd && !hasNextPage}
         />
       </View>
     </ScrollView>

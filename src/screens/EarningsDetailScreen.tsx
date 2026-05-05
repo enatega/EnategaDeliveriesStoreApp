@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useAppTheme } from '../theme/ThemeProvider';
@@ -28,6 +28,7 @@ export default function EarningsDetailScreen({ navigation }: Props) {
 
   const [range, setRange] = useState({ start: defaultStart, end: defaultEnd });
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [hasReachedListEnd, setHasReachedListEnd] = useState(false);
 
   const dateRangeLabel = `${formatDate(range.start)} - ${formatDate(range.end)}`;
   const dateRangeParams = useMemo(
@@ -39,14 +40,28 @@ export default function EarningsDetailScreen({ navigation }: Props) {
     }),
     [range.end, range.start],
   );
-  const { data: earningsDailyData } = useEarningsDailyQuery({
+  const {
+    data: earningsDailyData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useEarningsDailyQuery({
     params: dateRangeParams,
     staleTime: Infinity,
   });
+  const earningsItems = useMemo(
+    () => earningsDailyData?.pages.flatMap((page) => page.earnings_by_date) ?? [],
+    [earningsDailyData],
+  );
   const { data: earningsSummaryData } = useEarningsSummaryQuery({
     params: dateRangeParams,
     staleTime: Infinity,
   });
+  useEffect(() => {
+    if (hasNextPage) {
+      setHasReachedListEnd(false);
+    }
+  }, [hasNextPage]);
 
   return (
     <View style={[styles.flex, { backgroundColor: theme.colors.background }]}>
@@ -69,7 +84,25 @@ export default function EarningsDetailScreen({ navigation }: Props) {
         </Pressable>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        scrollEventThrottle={16}
+        onScroll={({ nativeEvent }) => {
+          const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
+          const paddingToBottom = 120;
+          const isNearBottom =
+            layoutMeasurement.height + contentOffset.y >=
+            contentSize.height - paddingToBottom;
+
+          if (isNearBottom && hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+          }
+
+          if (isNearBottom && !hasNextPage && earningsItems.length > 0) {
+            setHasReachedListEnd(true);
+          }
+        }}
+      >
         {/* Summary card */}
         <View style={[styles.summaryCard, { backgroundColor: theme.colors.gray200 }]}>
           <Text variant="body" weight="semiBold" color={theme.colors.text} style={styles.summaryTitle}>
@@ -95,10 +128,11 @@ export default function EarningsDetailScreen({ navigation }: Props) {
         {/* Activity list */}
         <View style={styles.activityList}>
           <EarningsActivityRow
-            items={earningsDailyData?.earnings_by_date ?? []}
+            items={earningsItems}
             onPressItem={(item) =>
               navigation.navigate('EarningsOrderDetail', { date: item.date })
             }
+            showNoMoreEarningFooter={hasReachedListEnd && !hasNextPage}
           />
         </View>
       </ScrollView>

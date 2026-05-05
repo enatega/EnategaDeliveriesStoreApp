@@ -1,4 +1,9 @@
-import { UseQueryOptions, useQuery } from "@tanstack/react-query";
+import {
+  UseInfiniteQueryOptions,
+  UseQueryOptions,
+  useInfiniteQuery,
+  useQuery,
+} from "@tanstack/react-query";
 import { ApiError } from "../api/apiClient";
 import { earningsService } from "../api/earningsService";
 import {
@@ -35,17 +40,41 @@ export function useEarningsGraphQuery({
 type UseEarningsDailyOptions = {
   params?: GetEarningsDailyParams;
 } & Omit<
-  UseQueryOptions<EarningsDailyResponse, ApiError>,
-  "queryKey" | "queryFn"
+  UseInfiniteQueryOptions<EarningsDailyResponse, ApiError>,
+  "queryKey" | "queryFn" | "initialPageParam" | "getNextPageParam" | "select"
 >;
 
 export function useEarningsDailyQuery({
   params = {},
   ...options
 }: UseEarningsDailyOptions = {}) {
-  return useQuery<EarningsDailyResponse, ApiError>({
+  const limit = params.limit ?? 10;
+
+  return useInfiniteQuery({
     queryKey: earningsKeys.dailyList(params),
-    queryFn: () => earningsService.getEarningsDaily(params),
+    queryFn: ({ pageParam }) =>
+      earningsService.getEarningsDaily({
+        ...params,
+        limit,
+        page: pageParam as number,
+      }),
+    initialPageParam: params.page ?? 1,
+    getNextPageParam: (lastPage, allPages) => {
+      const loadedCount = allPages.reduce(
+        (count, page) => count + page.earnings_by_date.length,
+        0,
+      );
+
+      if (typeof lastPage.total_days === "number" && loadedCount >= lastPage.total_days) {
+        return undefined;
+      }
+
+      if (lastPage.earnings_by_date.length < limit) {
+        return undefined;
+      }
+
+      return (params.page ?? 1) + allPages.length;
+    },
     staleTime: 60 * 1000,
     ...options,
   });

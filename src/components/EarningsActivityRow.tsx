@@ -12,6 +12,7 @@ export type EarningsActivityItem = {
 type Props = {
   items: EarningsActivityItem[];
   onPressItem?: (item: EarningsActivityItem) => void;
+  showNoMoreEarningFooter?: boolean;
 };
 
 function formatDisplayDate(isoDate: string) {
@@ -56,13 +57,28 @@ function Row({
   );
 }
 
-export default function EarningsActivityRow({ items, onPressItem }: Props) {
+export default function EarningsActivityRow({
+  items,
+  onPressItem,
+  showNoMoreEarningFooter = false,
+}: Props) {
+  const { theme } = useAppTheme();
+
   return (
     <VerticalList
       data={items}
       keyExtractor={(item) => item.date}
       renderItem={({ item }) => <Row item={item} onPress={onPressItem} />}
       scrollEnabled={false}
+      ListFooterComponent={
+        showNoMoreEarningFooter && items.length > 0 ? (
+          <View style={styles.footerMessage}>
+            <Text variant="caption" color={theme.colors.gray500}>
+              There is no more earning
+            </Text>
+          </View>
+        ) : null
+      }
     />
   );
 }
@@ -93,5 +109,9 @@ const styles = StyleSheet.create({
     borderTopWidth: 2,
     transform: [{ rotate: '45deg' }],
     marginLeft: 4,
+  },
+  footerMessage: {
+    paddingVertical: 10,
+    alignItems: 'center',
   },
 });
