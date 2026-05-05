@@ -1,4 +1,5 @@
 import { GetOrdersParams } from "./orderServicesTypes";
+import { GetWalletHistoryParams } from "./walletServicesTypes";
 
 export const authKeys = {
   all: ["auth"] as const,
@@ -50,4 +51,12 @@ export const completedOrdersKeys = {
   lists: () => [...ordersKeys.completed(), "list"] as const,
   list: (params: GetOrdersParams) =>
     [...completedOrdersKeys.lists(), params] as const,
+};
+
+export const walletKeys = {
+  all: ["wallet"] as const,
+  balance: () => [...walletKeys.all, "balance"] as const,
+  history: () => [...walletKeys.all, "history"] as const,
+  historyList: (params: GetWalletHistoryParams) =>
+    [...walletKeys.history(), params] as const,
 };
