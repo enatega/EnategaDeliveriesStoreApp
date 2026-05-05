@@ -31,14 +31,14 @@ export function useAcceptOrder(
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (orderId: string) => orderServices.acceptOrder(orderId),
-    onSuccess: (data, orderId, context) => {
+    onSuccess: (data, orderId, onMutateResult, context) => {
       // Invalidate all order lists because the order moved from "new" to "in-progress"
       queryClient.invalidateQueries({ queryKey: newOrdersKeys.lists() });
       queryClient.invalidateQueries({ queryKey: inProgressOrdersKeys.lists() });
       queryClient.invalidateQueries({ queryKey: readyOrdersKeys.lists() });
       queryClient.invalidateQueries({ queryKey: pickupOrdersKeys.lists() });
       queryClient.invalidateQueries({ queryKey: completedOrdersKeys.lists() });
-      options?.onSuccess?.(data, orderId, context);
+      options?.onSuccess?.(data, orderId, onMutateResult, context);
     },
     ...options,
   });
@@ -51,14 +51,14 @@ export function useRejectOrder(
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (orderId: string) => orderServices.rejectOrder(orderId),
-    onSuccess: (data, orderId, context) => {
+    onSuccess: (data, orderId, onMutateResult, context) => {
       // Invalidate all lists because rejected order disappears from active tabs
       queryClient.invalidateQueries({ queryKey: newOrdersKeys.lists() });
       queryClient.invalidateQueries({ queryKey: inProgressOrdersKeys.lists() });
       queryClient.invalidateQueries({ queryKey: readyOrdersKeys.lists() });
       queryClient.invalidateQueries({ queryKey: pickupOrdersKeys.lists() });
       queryClient.invalidateQueries({ queryKey: completedOrdersKeys.lists() });
-      options?.onSuccess?.(data, orderId, context);
+      options?.onSuccess?.(data, orderId, onMutateResult, context);
     },
     ...options,
   });
@@ -76,13 +76,13 @@ export function useUpdateOrderStatus(
   return useMutation({
     mutationFn: ({ orderId, data }) =>
       orderServices.updateOrderStatus(orderId, data),
-    onSuccess: (response, variables, context) => {
+    onSuccess: (response, variables, onMutateResult, context) => {
       // Invalidate affected lists based on new status
       // For example, if moving to "ready", it leaves in-progress and enters ready
       queryClient.invalidateQueries({ queryKey: inProgressOrdersKeys.lists() });
       queryClient.invalidateQueries({ queryKey: readyOrdersKeys.lists() });
       queryClient.invalidateQueries({ queryKey: pickupOrdersKeys.lists() });
-      options?.onSuccess?.(response, variables, context);
+      options?.onSuccess?.(response, variables, onMutateResult, context);
     },
     ...options,
   });
@@ -100,11 +100,11 @@ export function useUpdatePreparingTime(
   return useMutation({
     mutationFn: ({ orderId, data }) =>
       orderServices.updatePreparingTime(orderId, data),
-    onSuccess: (response, variables, context) => {
+    onSuccess: (response, variables, onMutateResult, context) => {
       // After updating preparing time, the order remains in the same list,
       // but we might want to refetch to show the updated value.
       queryClient.invalidateQueries({ queryKey: inProgressOrdersKeys.lists() });
-      options?.onSuccess?.(response, variables, context);
+      options?.onSuccess?.(response, variables, onMutateResult, context);
     },
     ...options,
   });

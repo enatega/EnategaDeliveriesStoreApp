@@ -1,6 +1,6 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import HomeScreen from '../screens/HomeScreen';
+import MainTabsNavigator from './MainTabsNavigator';
 import LanguageScreen from '../screens/LanguageScreen';
 import BankManagementScreen from '../screens/BankManagementScreen';
 import WorkScheduleScreen from '../screens/WorkScheduleScreen';
@@ -13,7 +13,7 @@ const Stack = createNativeStackNavigator<MainStackParamList>();
 export default function MainNavigator() {
   return (
     <Stack.Navigator>
-      <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="Home" component={MainTabsNavigator} options={{ headerShown: false }} />
       <Stack.Screen name="Language" component={LanguageScreen} options={{ headerShown: false }} />
       <Stack.Screen name="BankManagement" component={BankManagementScreen} options={{ headerShown: false }} />
       <Stack.Screen name="WorkSchedule" component={WorkScheduleScreen} options={{ headerShown: false }} />
