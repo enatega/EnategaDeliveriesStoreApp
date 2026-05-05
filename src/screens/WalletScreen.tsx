@@ -1,44 +1,109 @@
-import React, { useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
-import { useAppTheme } from '../theme/ThemeProvider';
-import WalletBalanceCard from '../components/WalletBalanceCard';
-import WalletTransactionRow from '../components/WalletTransactionRow';
-import WithdrawBottomSheet from '../components/WithdrawBottomSheet';
-import WithdrawSuccessModal from '../components/WithdrawSuccessModal';
-import Text from '../components/Text';
+import React, { useState } from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  View,
+  ActivityIndicator,
+  RefreshControl,
+} from "react-native";
+import { useAppTheme } from "../theme/ThemeProvider";
+import WalletBalanceCard from "../components/WalletBalanceCard";
+import WalletTransactionRow from "../components/WalletTransactionRow";
+import WithdrawBottomSheet from "../components/WithdrawBottomSheet";
+import WithdrawMessageModal from "../components/WithdrawMessageModal";
+import Text from "../components/Text";
+import { useWalletBalance, useWalletHistory } from "../hooks/useWalletQueries";
+import { useWithdraw } from "../hooks/useWalletMutations";
+import { WithdrawSuccessResponse } from "../api/walletServicesTypes";
+import { ApiError } from "../api/apiClient";
+import { useTranslations } from "../localization/LocalizationProvider";
 
-// ─── Dummy data ───────────────────────────────────────────────────────────────
-
-const BALANCE = '$250';
-const AVAILABLE_AMOUNT = '$250';
-
-const PENDING_REQUESTS = [
-  { id: '1', label: 'Requested', date: '17 Dec 2025', amount: '$100' },
-];
-
-const TRANSACTIONS = [
-  { id: '1', label: 'Cash out', date: '20 Feb', amount: '$100' },
-  { id: '2', label: 'Cash out', date: '20 Feb', amount: '$60' },
-  { id: '3', label: 'Cash out', date: '20 Feb', amount: '$50' },
-  { id: '4', label: 'Cash out', date: '20 Feb', amount: '$46' },
-];
-
-// ─── Screen ───────────────────────────────────────────────────────────────────
-
-/**
- * Wallet tab content.
- * Shell (header, bottom nav, sidebar) is provided by MainLayout in HomeScreen.
- */
 export default function WalletScreen() {
   const { theme } = useAppTheme();
+  const { t } = useTranslations("app");
   const [withdrawOpen, setWithdrawOpen] = useState(false);
-  const [successOpen, setSuccessOpen] = useState(false);
+  const [successData, setSuccessData] =
+    useState<WithdrawSuccessResponse | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleWithdrawConfirm = (_amount: string) => {
-    setWithdrawOpen(false);
-    setSuccessOpen(true);
-    // API integration will be wired here
+  // Fetch real data
+  const {
+    data: balanceData,
+    isLoading: balanceLoading,
+    refetch: refetchBalance,
+  } = useWalletBalance();
+  const {
+    data: historyData,
+    isLoading: historyLoading,
+    refetch: refetchHistory,
+  } = useWalletHistory({ params: { limit: 10, page: 1 } });
+  const withdrawMutation = useWithdraw();
+
+  const handleWithdrawConfirm = (amount: string) => {
+    const numericAmount = parseFloat(amount);
+    if (isNaN(numericAmount)) return;
+
+    withdrawMutation.mutate(
+      { amount: numericAmount, notes: "Withdrawal request from store app" },
+      {
+        onSuccess: (response) => {
+          setSuccessData(response);
+          setErrorMessage(null);
+          setWithdrawOpen(false);
+        },
+        onError: (error: ApiError) => {
+          // Extract error message from API response
+          const msg =
+            typeof error.message === "string"
+              ? error.message
+              : error.message?.join(", ") ||
+                "Withdrawal failed. Please try again.";
+          setErrorMessage(msg);
+          setWithdrawOpen(false);
+        },
+      },
+    );
   };
+
+  const closeModal = () => {
+    setSuccessData(null);
+    setErrorMessage(null);
+  };
+
+  const isLoading = balanceLoading || historyLoading;
+  const isRefreshing = withdrawMutation.isPending;
+
+  const onRefresh = () => {
+    refetchBalance();
+    refetchHistory();
+  };
+
+  const formatCurrency = (amount: number) => `$${amount.toLocaleString()}`;
+  const formatDate = (isoString: string) =>
+    new Date(isoString).toLocaleDateString("en-US", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+
+  if (isLoading && !balanceData) {
+    return (
+      <View
+        style={[styles.centered, { backgroundColor: theme.colors.background }]}
+      >
+        <ActivityIndicator color={theme.colors.primary} />
+      </View>
+    );
+  }
+
+  const currentBalance = balanceData?.current_balance ?? 0;
+  const availableAmount = balanceData?.available_amount ?? 0;
+  const pendingRequest = balanceData?.pending_request;
+  const transactions = historyData?.data ?? [];
+
+  // Decide modal visibility and content
+  const isSuccessModalVisible = !!successData && !withdrawMutation.isPending;
+  const isErrorModalVisible = !!errorMessage && !withdrawMutation.isPending;
 
   return (
     <>
@@ -46,73 +111,121 @@ export default function WalletScreen() {
         style={{ backgroundColor: theme.colors.background }}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={onRefresh}
+            tintColor={theme.colors.primary}
+          />
+        }
       >
-        {/* Balance card */}
         <WalletBalanceCard
-          balance={BALANCE}
+          currentBalance={currentBalance}
+          availableAmount={availableAmount}
           onWithdraw={() => setWithdrawOpen(true)}
         />
 
-        {/* Pending Requests */}
-        <View style={styles.section}>
-          <Text variant="subtitle" weight="bold" color={theme.colors.text} style={styles.sectionTitle}>
-            Pending Request
-          </Text>
-          {PENDING_REQUESTS.map((item) => (
+        {pendingRequest && (
+          <View style={styles.section}>
+            <Text
+              variant="subtitle"
+              weight="bold"
+              color={theme.colors.text}
+              style={styles.sectionTitle}
+            >
+              {t("wallet_pending_request")}
+            </Text>
             <WalletTransactionRow
-              key={item.id}
               iconType="pending"
-              label={item.label}
-              date={item.date}
-              amount={item.amount}
+              label="Requested"
+              date={formatDate(pendingRequest.requested_at)}
+              amount={formatCurrency(pendingRequest.amount)}
               amountColor="#EF4444"
             />
-          ))}
-        </View>
+          </View>
+        )}
 
-        {/* Recent Transactions */}
         <View style={styles.section}>
-          <Text variant="subtitle" weight="bold" color={theme.colors.text} style={styles.sectionTitle}>
-            Recent Transactions
+          <Text
+            variant="subtitle"
+            weight="bold"
+            color={theme.colors.text}
+            style={styles.sectionTitle}
+          >
+            {t("wallet_recent_transactions")}
           </Text>
-          {TRANSACTIONS.map((item) => (
-            <WalletTransactionRow
-              key={item.id}
-              iconType="cashout"
-              label={item.label}
-              date={item.date}
-              amount={item.amount}
-            />
-          ))}
+          {transactions.length === 0 ? (
+            <Text
+              variant="body"
+              color={theme.colors.mutedText}
+              style={styles.emptyText}
+            >
+              {t("wallet_no_transactions")}
+            </Text>
+          ) : (
+            transactions.map((item) => (
+              <WalletTransactionRow
+                key={item.transaction_id}
+                iconType={item.type === "debit" ? "cashout" : "pending"}
+                label={item.label}
+                date={formatDate(item.created_at)}
+                amount={formatCurrency(item.amount)}
+                amountColor={item.type === "debit" ? undefined : "#10B981"}
+              />
+            ))
+          )}
         </View>
       </ScrollView>
 
-      {/* Withdraw bottom sheet */}
       <WithdrawBottomSheet
         visible={withdrawOpen}
-        availableAmount={AVAILABLE_AMOUNT}
+        availableAmount={formatCurrency(availableAmount)}
         onClose={() => setWithdrawOpen(false)}
         onConfirm={handleWithdrawConfirm}
+        isSubmitting={withdrawMutation.isPending}
       />
 
-      {/* Success modal */}
-      <WithdrawSuccessModal
-        visible={successOpen}
-        onClose={() => setSuccessOpen(false)}
-      />
+      {/* Success Modal */}
+      {isSuccessModalVisible && (
+        <WithdrawMessageModal
+          visible={true}
+          title={successData.message || t("wallet_withdrawal_submitted")}
+          message={successData.eta_message || t("wallet_withdrawal_eta")}
+          onClose={closeModal}
+          isError={false}
+        />
+      )}
+
+      {/* Error Modal */}
+      {isErrorModalVisible && (
+        <WithdrawMessageModal
+          visible={true}
+          title={t("wallet_withdrawal_failed")}
+          message={errorMessage}
+          onClose={closeModal}
+          isError={true}
+        />
+      )}
     </>
   );
 }
 
 const styles = StyleSheet.create({
   content: {
-    paddingBottom: 32,
+    paddingBottom: 3,
   },
   section: {
     paddingHorizontal: 16,
     marginTop: 24,
   },
-  sectionTitle: {
-    marginBottom: 8,
+  sectionTitle: { marginBottom: 8 },
+  emptyText: {
+    textAlign: "center",
+    marginTop: 20,
+  },
+  centered: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

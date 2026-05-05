@@ -19,5 +19,5 @@ export { default as DayScheduleCard } from './DayScheduleCard';
 export { default as WalletBalanceCard } from './WalletBalanceCard';
 export { default as WalletTransactionRow } from './WalletTransactionRow';
 export { default as WithdrawBottomSheet } from './WithdrawBottomSheet';
-export { default as WithdrawSuccessModal } from './WithdrawSuccessModal';
+export { default as WithdrawSuccessModal } from './WithdrawMessageModal';
 export { default as VerticalList } from './VerticalList';

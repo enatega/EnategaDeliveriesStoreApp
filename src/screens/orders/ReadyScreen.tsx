@@ -7,7 +7,6 @@ import { OrderStatus } from "../../api/orderServicesTypes";
 export default function ReadyScreen() {
   const updateStatus = useUpdateOrderStatus();
 
-  // Todo30April: need huzaifa assistance here for confirming the status of the order. 
   const handleConfirmPickup = (orderId: string) => {
     updateStatus.mutate({ orderId, data: { status: OrderStatus.PICKED_UP } });
   };
