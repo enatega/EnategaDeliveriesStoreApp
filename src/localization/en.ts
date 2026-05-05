@@ -88,6 +88,22 @@ const en = {
   no_orders_here: 'No orders here yet',
   set_preparing_time: 'Set preparing time',
   done: 'Done',
+
+  // Wallet
+wallet_current_balance: 'Current Balance',
+wallet_available_for_withdrawal: 'Available for withdrawal:',
+wallet_withdraw_now: 'Withdraw Now',
+wallet_available_amount_label: 'Available Amount',
+wallet_enter_amount: 'Enter Amount',
+wallet_confirm_withdraw: 'Confirm Withdraw',
+wallet_invalid_amount: 'Please enter a valid amount',
+wallet_pending_request: 'Pending Request',
+wallet_recent_transactions: 'Recent Transactions',
+wallet_no_transactions: 'No transactions yet',
+wallet_withdrawal_submitted: 'Your request for withdrawal has been submitted',
+wallet_withdrawal_eta: 'Usually it takes 1-2 business days',
+  wallet_withdrawal_failed: 'Withdrawal Failed',
+
 };
 
 export default en;
