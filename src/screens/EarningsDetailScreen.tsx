@@ -1,28 +1,17 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useAppTheme } from '../theme/ThemeProvider';
 import { MainStackParamList } from '../navigation/types';
-import ScreenHeader from '../components/ScreenHeader';
 import EarningsActivityRow from '../components/EarningsActivityRow';
 import CalendarRangePicker from '../components/CalendarRangePicker';
 import Text from '../components/Text';
+import {
+  useEarningsDailyQuery,
+  useEarningsSummaryQuery,
+} from '../hooks/useEarningsQueries';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'EarningsDetail'>;
-
-// ─── Dummy data ───────────────────────────────────────────────────────────────
-
-const ACTIVITY_DATA = [
-  { id: '1', date: '20.02.2023', label: 'Total Earning', amount: '$600' },
-  { id: '2', date: '20.02.2023', label: 'Total Earning', amount: '$100' },
-  { id: '3', date: '20.02.2023', label: 'Total Earning', amount: '$100' },
-  { id: '4', date: '20.02.2023', label: 'Total Earning', amount: '$100' },
-  { id: '5', date: '20.02.2023', label: 'Total Earning', amount: '$100' },
-  { id: '6', date: '20.02.2023', label: 'Total Earning', amount: '$100' },
-  { id: '7', date: '20.02.2023', label: 'Total Earning', amount: '$100' },
-];
-
-const SUMMARY = { orders: 267, totalEarnings: '$1200' };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -39,8 +28,40 @@ export default function EarningsDetailScreen({ navigation }: Props) {
 
   const [range, setRange] = useState({ start: defaultStart, end: defaultEnd });
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [hasReachedListEnd, setHasReachedListEnd] = useState(false);
 
   const dateRangeLabel = `${formatDate(range.start)} - ${formatDate(range.end)}`;
+  const dateRangeParams = useMemo(
+    () => ({
+      page: 1,
+      limit: 10,
+      startDate: range.start.toISOString(),
+      endDate: range.end.toISOString(),
+    }),
+    [range.end, range.start],
+  );
+  const {
+    data: earningsDailyData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useEarningsDailyQuery({
+    params: dateRangeParams,
+    staleTime: Infinity,
+  });
+  const earningsItems = useMemo(
+    () => earningsDailyData?.pages.flatMap((page) => page.earnings_by_date) ?? [],
+    [earningsDailyData],
+  );
+  const { data: earningsSummaryData } = useEarningsSummaryQuery({
+    params: dateRangeParams,
+    staleTime: Infinity,
+  });
+  useEffect(() => {
+    if (hasNextPage) {
+      setHasReachedListEnd(false);
+    }
+  }, [hasNextPage]);
 
   return (
     <View style={[styles.flex, { backgroundColor: theme.colors.background }]}>
@@ -63,7 +84,25 @@ export default function EarningsDetailScreen({ navigation }: Props) {
         </Pressable>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        scrollEventThrottle={16}
+        onScroll={({ nativeEvent }) => {
+          const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
+          const paddingToBottom = 120;
+          const isNearBottom =
+            layoutMeasurement.height + contentOffset.y >=
+            contentSize.height - paddingToBottom;
+
+          if (isNearBottom && hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+          }
+
+          if (isNearBottom && !hasNextPage && earningsItems.length > 0) {
+            setHasReachedListEnd(true);
+          }
+        }}
+      >
         {/* Summary card */}
         <View style={[styles.summaryCard, { backgroundColor: theme.colors.gray200 }]}>
           <Text variant="body" weight="semiBold" color={theme.colors.text} style={styles.summaryTitle}>
@@ -73,14 +112,14 @@ export default function EarningsDetailScreen({ navigation }: Props) {
             <View style={styles.summaryItem}>
               <Text variant="caption" color={theme.colors.gray500}>Orders</Text>
               <Text variant="subtitle" weight="bold" color={theme.colors.text}>
-                {SUMMARY.orders}
+                {earningsSummaryData?.total_orders ?? 0}
               </Text>
             </View>
             <View style={[styles.summaryDivider, { backgroundColor: theme.colors.gray300 }]} />
             <View style={styles.summaryItem}>
               <Text variant="caption" color={theme.colors.gray500}>Total Earnings</Text>
               <Text variant="subtitle" weight="bold" color={theme.colors.text}>
-                {SUMMARY.totalEarnings}
+                ${earningsSummaryData?.total_earnings ?? 0}
               </Text>
             </View>
           </View>
@@ -88,15 +127,13 @@ export default function EarningsDetailScreen({ navigation }: Props) {
 
         {/* Activity list */}
         <View style={styles.activityList}>
-          {ACTIVITY_DATA.map((item) => (
-            <EarningsActivityRow
-              key={item.id}
-              date={item.date}
-              label={item.label}
-              amount={item.amount}
-              onPress={() => navigation.navigate('EarningsOrderDetail')}
-            />
-          ))}
+          <EarningsActivityRow
+            items={earningsItems}
+            onPressItem={(item) =>
+              navigation.navigate('EarningsOrderDetail', { date: item.date })
+            }
+            showNoMoreEarningFooter={hasReachedListEnd && !hasNextPage}
+          />
         </View>
       </ScrollView>
 

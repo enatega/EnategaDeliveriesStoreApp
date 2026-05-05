@@ -2,18 +2,17 @@ import React, { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Text from './Text';
 import { useAppTheme } from '../theme/ThemeProvider';
+import { EarningsHistoryItem } from '../api/earningsServiceTypes';
 
 type Props = {
-  orderId: string;
-  status: string;
-  payment: string;
+  item: EarningsHistoryItem;
 };
 
 /**
  * Expandable order card used on the Earnings order detail screen.
  * Shows Order ID + status badge, Payment row, and collapsible Order Details.
  */
-export default function EarningsOrderCard({ orderId, status, payment }: Props) {
+export default function EarningsOrderCard({ item }: Props) {
   const { theme } = useAppTheme();
   const [expanded, setExpanded] = useState(false);
 
@@ -23,13 +22,13 @@ export default function EarningsOrderCard({ orderId, status, payment }: Props) {
       <View style={styles.topRow}>
         <Text variant="body" color={theme.colors.text}>
           Order ID{' '}
-          <Text variant="body" weight="semiBold" color={theme.colors.text}>
-            {orderId}
-          </Text>
-        </Text>
+          {/* <Text variant="body" weight="semiBold" color={theme.colors.text}>
+            {item.order_id}
+          </Text> */}
+        </Text> 
         <View style={styles.badge}>
           <Text variant="caption" color="#16A34A" style={styles.badgeText}>
-            {status}
+            {item.status}
           </Text>
         </View>
       </View>
@@ -43,7 +42,7 @@ export default function EarningsOrderCard({ orderId, status, payment }: Props) {
           Payment
         </Text>
         <Text variant="body" weight="bold" color={theme.colors.text}>
-          {payment}
+          ${item.payment_amount}
         </Text>
       </View>
 
@@ -73,7 +72,10 @@ export default function EarningsOrderCard({ orderId, status, payment }: Props) {
       {expanded && (
         <View style={[styles.expandedContent, { borderTopColor: theme.colors.gray200 }]}>
           <Text variant="caption" color={theme.colors.mutedText}>
-            Order details will appear here once API is integrated.
+            {item.label}
+          </Text>
+          <Text variant="caption" color={theme.colors.mutedText}>
+            {item.created_at}
           </Text>
         </View>
       )}
