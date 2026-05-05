@@ -7,24 +7,30 @@ import ScreenHeader from '../components/ScreenHeader';
 import EarningsOrderCard from '../components/EarningsOrderCard';
 import Text from '../components/Text';
 import VerticalList from '../components/VerticalList';
+import { useEarningsHistoryQuery } from '../hooks/useEarningsQueries';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'EarningsOrderDetail'>;
 
-// ─── Dummy data ───────────────────────────────────────────────────────────────
+function getNextDate(date: string) {
+  const [year, month, day] = date.split('-').map(Number);
+  const nextDate = new Date(Date.UTC(year, month - 1, day + 1));
 
-const ORDERS = [
-  { id: '1', orderId: '#1234UA', status: 'Delivered', payment: '$150' },
-  { id: '2', orderId: '#1234UA', status: 'Delivered', payment: '$150' },
-  { id: '3', orderId: '#1234UA', status: 'Delivered', payment: '$150' },
-  { id: '4', orderId: '#1234UA', status: 'Delivered', payment: '$150' },
-];
-
-const TOTAL_EARNINGS = '$600';
+  return nextDate.toISOString().slice(0, 10);
+}
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
-export default function EarningsOrderDetailScreen({ navigation }: Props) {
+export default function EarningsOrderDetailScreen({ navigation, route }: Props) {
   const { theme } = useAppTheme();
+  const selectedDate = route.params.date;
+  const { data: earningsHistoryData } = useEarningsHistoryQuery({
+    params: {
+      page: 1,
+      limit: 10,
+      startDate: selectedDate,
+      endDate: getNextDate(selectedDate),
+    },
+  });
 
   return (
     <View style={[styles.flex, { backgroundColor: theme.colors.background }]}>
@@ -36,22 +42,16 @@ export default function EarningsOrderDetailScreen({ navigation }: Props) {
           Total Earnings
         </Text>
         <Text variant="body" weight="bold" color={theme.colors.text}>
-          {TOTAL_EARNINGS}
+          ${earningsHistoryData?.total_earnings ?? 0}
         </Text>
       </View>
 
       {/* Order cards */}
       <VerticalList
-        data={ORDERS}
-        keyExtractor={(item) => item.id}
+        data={earningsHistoryData?.data ?? []}
+        keyExtractor={(item) => item.order_id}
         contentContainerStyle={styles.listContent}
-        renderItem={({ item }) => (
-          <EarningsOrderCard
-            orderId={item.orderId}
-            status={item.status}
-            payment={item.payment}
-          />
-        )}
+        renderItem={({ item }) => <EarningsOrderCard item={item} />}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
       />
     </View>

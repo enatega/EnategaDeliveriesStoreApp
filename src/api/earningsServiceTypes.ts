@@ -3,7 +3,7 @@ export type GetEarningsGraphParams = {
   limit?: number;
 };
 
-export type GetEarningsHistoryParams = {
+export type GetEarningsDailyParams = {
   page?: number;
   limit?: number;
   startDate?: string;
@@ -11,6 +11,13 @@ export type GetEarningsHistoryParams = {
 };
 
 export type GetEarningsSummaryParams = {
+  page?: number;
+  limit?: number;
+  startDate: string;
+  endDate: string;
+};
+
+export type GetEarningsHistoryParams = {
   page?: number;
   limit?: number;
   startDate: string;
@@ -25,6 +32,25 @@ export interface EarningsGraphItem {
 export interface EarningsGraphResponse {
   graph: EarningsGraphItem[];
   total_weeks: number;
+  start_date: string;
+  end_date: string;
+}
+
+export interface EarningsDailyItem {
+  date: string;
+  total_amount: number;
+}
+
+export interface EarningsDailyResponse {
+  earnings_by_date: EarningsDailyItem[];
+  start_date: string | null;
+  end_date: string | null;
+  total_days: number;
+}
+
+export interface EarningsSummaryResponse {
+  total_orders: number;
+  total_earnings: number;
   start_date: string;
   end_date: string;
 }
@@ -45,11 +71,5 @@ export interface EarningsHistoryResponse {
   totalPages: number;
   hasNextPage: boolean;
   hasPreviousPage: boolean;
-}
-
-export interface EarningsSummaryResponse {
-  total_orders: number;
   total_earnings: number;
-  start_date: string;
-  end_date: string;
 }

@@ -6,7 +6,7 @@ import { MainStackParamList } from '../navigation/types';
 import BarChart, { BarChartDataPoint } from '../components/BarChart';
 import EarningsActivityRow from '../components/EarningsActivityRow';
 import Text from '../components/Text';
-import { useEarningsGraphQuery, useEarningsHistoryQuery } from '../hooks/useEarningsQueries';
+import { useEarningsDailyQuery, useEarningsGraphQuery } from '../hooks/useEarningsQueries';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'EarningsDetail'> | { navigation?: any };
 
@@ -27,12 +27,13 @@ export default function EarningsScreen({ navigation }: any) {
       })) ?? [],
     [earningsGraphData],
   );
-  const { data: earningsHistoryData } = useEarningsHistoryQuery({
+  const { data: earningsDailyData } = useEarningsDailyQuery({
     params: { page: 1, limit: 10 },
   });
 
   const handleSeeMore = () => navigation?.navigate?.('EarningsDetail');
-  const handleRowPress = () => navigation?.navigate?.('EarningsOrderDetail');
+  const handleRowPress = (item: { date: string }) =>
+    navigation?.navigate?.('EarningsOrderDetail', { date: item.date });
 
   return (
     <ScrollView
@@ -60,7 +61,7 @@ export default function EarningsScreen({ navigation }: any) {
       {/* Activity rows */}
       <View style={styles.activityList}>
         <EarningsActivityRow
-          items={earningsHistoryData?.data ?? []}
+          items={earningsDailyData?.earnings_by_date ?? []}
           onPressItem={handleRowPress}
         />
       </View>

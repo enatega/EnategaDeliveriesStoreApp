@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Modal, Pressable, StyleSheet, View } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Text from './Text';
 import Button from './Button';
 import { useAppTheme } from '../theme/ThemeProvider';
@@ -9,6 +9,7 @@ const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December',
 ];
+const YEAR_RANGE_SIZE = 24;
 
 type DateRange = { start: Date; end: Date };
 
@@ -31,7 +32,11 @@ export default function CalendarRangePicker({ visible, onClose, onApply, initial
   const [viewMonth, setViewMonth] = useState(initialRange?.start.getMonth() ?? today.getMonth());
   const [selectedRange, setSelectedRange] = useState<DateRange | null>(initialRange ?? null);
   const [rangeStart, setRangeStart] = useState<Date | null>(null);
-  
+  const [mode, setMode] = useState<'calendar' | 'years'>('calendar');
+  const visibleYears = useMemo(() => {
+    const startYear = viewYear - Math.floor(YEAR_RANGE_SIZE / 2);
+    return Array.from({ length: YEAR_RANGE_SIZE }, (_, index) => startYear + index);
+  }, [viewYear]);
 
   const prevMonth = () => {
     setSelectedRange(null);
@@ -45,6 +50,13 @@ export default function CalendarRangePicker({ visible, onClose, onApply, initial
     setRangeStart(null);
     if (viewMonth === 11) { setViewMonth(0); setViewYear((y) => y + 1); }
     else setViewMonth((m) => m + 1);
+  };
+
+  const handleYearSelect = (year: number) => {
+    setSelectedRange(null);
+    setRangeStart(null);
+    setViewYear(year);
+    setMode('calendar');
   };
 
   // Build calendar grid — 6 rows × 7 cols
@@ -127,64 +139,130 @@ export default function CalendarRangePicker({ visible, onClose, onApply, initial
 
           {/* Month navigation */}
           <View style={styles.monthNav}>
-            <Pressable onPress={prevMonth} hitSlop={12} accessibilityLabel="Previous month">
+            <Pressable
+              onPress={mode === 'calendar' ? prevMonth : () => setViewYear((year) => year - YEAR_RANGE_SIZE)}
+              hitSlop={12}
+              accessibilityLabel={mode === 'calendar' ? 'Previous month' : 'Previous years'}
+            >
               <Text style={styles.navArrow} color={theme.colors.gray500}>{'<'}</Text>
             </Pressable>
-            <Text variant="body" weight="bold" color={theme.colors.text}>
-              {MONTHS[viewMonth]}
-            </Text>
-            <Pressable onPress={nextMonth} hitSlop={12} accessibilityLabel="Next month">
+            {mode === 'calendar' ? (
+              <View style={styles.monthTitle}>
+                <Text variant="body" weight="bold" color={theme.colors.text}>
+                  {MONTHS[viewMonth]}
+                </Text>
+                <Pressable
+                  onPress={() => setMode('years')}
+                  hitSlop={8}
+                  accessibilityRole="button"
+                  accessibilityLabel="Select year"
+                >
+                  <Text variant="body" weight="bold" color={theme.colors.text}>
+                    {viewYear}
+                  </Text>
+                </Pressable>
+              </View>
+            ) : (
+              <Pressable
+                onPress={() => setMode('calendar')}
+                hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel="Back to calendar"
+              >
+                <Text variant="body" weight="bold" color={theme.colors.text}>
+                  Select Year
+                </Text>
+              </Pressable>
+            )}
+            <Pressable
+              onPress={mode === 'calendar' ? nextMonth : () => setViewYear((year) => year + YEAR_RANGE_SIZE)}
+              hitSlop={12}
+              accessibilityLabel={mode === 'calendar' ? 'Next month' : 'Next years'}
+            >
               <Text style={styles.navArrow} color={theme.colors.gray500}>{'>'}</Text>
             </Pressable>
           </View>
 
-          {/* Day headers */}
-          <View style={styles.dayHeaders}>
-            {DAYS.map((d, i) => (
-              <Text key={i} variant="caption" color={theme.colors.gray400} style={styles.dayHeader}>
-                {d}
-              </Text>
-            ))}
-          </View>
+          {mode === 'calendar' ? (
+            <>
+              {/* Day headers */}
+              <View style={styles.dayHeaders}>
+                {DAYS.map((d, i) => (
+                  <Text key={i} variant="caption" color={theme.colors.gray400} style={styles.dayHeader}>
+                    {d}
+                  </Text>
+                ))}
+              </View>
 
-          {/* Calendar grid */}
-          {grid.map((row, rowIdx) => (
-            <View key={rowIdx} style={styles.week}>
-              {row.map((date, colIdx) => {
-                if (!date) return <View key={colIdx} style={styles.dayCell} />;
+              {/* Calendar grid */}
+              {grid.map((row, rowIdx) => (
+                <View key={rowIdx} style={styles.week}>
+                  {row.map((date, colIdx) => {
+                    if (!date) return <View key={colIdx} style={styles.dayCell} />;
 
-                const inRange = isInRange(date);
-                const isStart = isRangeStart(date);
-                const isEnd = isRangeEnd(date);
-                const isCurrent = isCurrentMonth(date);
+                    const inRange = isInRange(date);
+                    const isStart = isRangeStart(date);
+                    const isEnd = isRangeEnd(date);
+                    const isCurrent = isCurrentMonth(date);
 
-                return (
-                  <Pressable
-                    key={colIdx}
-                    onPress={() => handleDayPress(date)}
-                    disabled={!isCurrent}
-                    style={[
-                      styles.dayCell,
-                      inRange && styles.inRangeCell,
-                      inRange && { backgroundColor: theme.colors.primary },
-                      isStart && styles.rangeStart,
-                      isEnd && styles.rangeEnd,
-                    ]}
-                    accessibilityLabel={date.toDateString()}
-                  >
-                    <Text
-                      variant="body"
-                      color={inRange ? '#111827' : isCurrent ? theme.colors.text : theme.colors.gray400}
-                      weight={inRange ? 'semiBold' : 'regular'}
-                      style={styles.dayText}
+                    return (
+                      <Pressable
+                        key={colIdx}
+                        onPress={() => handleDayPress(date)}
+                        disabled={!isCurrent}
+                        style={[
+                          styles.dayCell,
+                          inRange && styles.inRangeCell,
+                          inRange && { backgroundColor: theme.colors.primary },
+                          isStart && styles.rangeStart,
+                          isEnd && styles.rangeEnd,
+                        ]}
+                        accessibilityLabel={date.toDateString()}
+                      >
+                        <Text
+                          variant="body"
+                          color={inRange ? '#111827' : isCurrent ? theme.colors.text : theme.colors.gray400}
+                          weight={inRange ? 'semiBold' : 'regular'}
+                          style={styles.dayText}
+                        >
+                          {date.getDate()}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              ))}
+            </>
+          ) : (
+            <ScrollView style={styles.yearList} showsVerticalScrollIndicator={false}>
+              <View style={styles.yearGrid}>
+                {visibleYears.map((year) => {
+                  const selected = year === viewYear;
+
+                  return (
+                    <Pressable
+                      key={year}
+                      onPress={() => handleYearSelect(year)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Select ${year}`}
+                      style={[
+                        styles.yearCell,
+                        selected && { backgroundColor: theme.colors.primary },
+                      ]}
                     >
-                      {date.getDate()}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-          ))}
+                      <Text
+                        variant="body"
+                        weight={selected ? 'bold' : 'regular'}
+                        color={selected ? '#111827' : theme.colors.text}
+                      >
+                        {year}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </ScrollView>
+          )}
 
           {/* Apply button */}
           <View style={styles.applyBtn}>
@@ -243,6 +321,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
   },
+  monthTitle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
   dayHeaders: {
     flexDirection: 'row',
     marginBottom: 4,
@@ -275,6 +358,22 @@ const styles = StyleSheet.create({
   },
   dayText: {
     fontSize: 16,
+  },
+  yearList: {
+    maxHeight: 280,
+  },
+  yearGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  yearCell: {
+    width: '30%',
+    minWidth: 84,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   applyBtn: {
     marginTop: 20,

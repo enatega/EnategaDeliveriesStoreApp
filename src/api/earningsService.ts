@@ -1,10 +1,12 @@
 import apiClient from "./apiClient";
 import {
-  EarningsHistoryResponse,
+  EarningsDailyResponse,
   EarningsGraphResponse,
+  EarningsHistoryResponse,
   EarningsSummaryResponse,
-  GetEarningsHistoryParams,
+  GetEarningsDailyParams,
   GetEarningsGraphParams,
+  GetEarningsHistoryParams,
   GetEarningsSummaryParams,
 } from "./earningsServiceTypes";
 
@@ -16,9 +18,9 @@ export const earningsService = {
       `${BASE_PATH}/graph`,
       params as Record<string, unknown>,
     ),
-  getEarningsHistory: (params: GetEarningsHistoryParams = {}) =>
-    apiClient.get<EarningsHistoryResponse>(
-      `${BASE_PATH}/history`,
+  getEarningsDaily: (params: GetEarningsDailyParams = {}) =>
+    apiClient.get<EarningsDailyResponse>(
+      `${BASE_PATH}/daily`,
       {
         page: params.page,
         limit: params.limit,
@@ -29,6 +31,16 @@ export const earningsService = {
   getEarningsSummary: (params: GetEarningsSummaryParams) =>
     apiClient.get<EarningsSummaryResponse>(
       `${BASE_PATH}/summary`,
+      {
+        page: params.page,
+        limit: params.limit,
+        startDate: params.startDate,
+        endDate: params.endDate,
+      },
+    ),
+  getEarningsHistory: (params: GetEarningsHistoryParams) =>
+    apiClient.get<EarningsHistoryResponse>(
+      `${BASE_PATH}/history`,
       {
         page: params.page,
         limit: params.limit,

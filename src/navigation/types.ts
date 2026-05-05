@@ -8,5 +8,5 @@ export type MainStackParamList = {
   BankManagement: undefined;
   WorkSchedule: undefined;
   EarningsDetail: undefined;
-  EarningsOrderDetail: undefined;
+  EarningsOrderDetail: { date: string };
 };

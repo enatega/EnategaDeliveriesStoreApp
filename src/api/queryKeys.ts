@@ -1,5 +1,6 @@
 import { GetOrdersParams } from "./orderServicesTypes";
 import {
+  GetEarningsDailyParams,
   GetEarningsGraphParams,
   GetEarningsHistoryParams,
   GetEarningsSummaryParams,
@@ -62,10 +63,13 @@ export const earningsKeys = {
   graph: () => [...earningsKeys.all, "graph"] as const,
   graphList: (params: GetEarningsGraphParams) =>
     [...earningsKeys.graph(), params] as const,
-  history: () => [...earningsKeys.all, "history"] as const,
-  historyList: (params: GetEarningsHistoryParams) =>
-    [...earningsKeys.history(), params] as const,
+  daily: () => [...earningsKeys.all, "daily"] as const,
+  dailyList: (params: GetEarningsDailyParams) =>
+    [...earningsKeys.daily(), params] as const,
   summary: () => [...earningsKeys.all, "summary"] as const,
   summaryDetail: (params: GetEarningsSummaryParams) =>
     [...earningsKeys.summary(), params] as const,
+  history: () => [...earningsKeys.all, "history"] as const,
+  historyList: (params: GetEarningsHistoryParams) =>
+    [...earningsKeys.history(), params] as const,
 };

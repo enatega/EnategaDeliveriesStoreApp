@@ -7,7 +7,7 @@ import EarningsActivityRow from '../components/EarningsActivityRow';
 import CalendarRangePicker from '../components/CalendarRangePicker';
 import Text from '../components/Text';
 import {
-  useEarningsHistoryQuery,
+  useEarningsDailyQuery,
   useEarningsSummaryQuery,
 } from '../hooks/useEarningsQueries';
 
@@ -30,7 +30,7 @@ export default function EarningsDetailScreen({ navigation }: Props) {
   const [calendarOpen, setCalendarOpen] = useState(false);
 
   const dateRangeLabel = `${formatDate(range.start)} - ${formatDate(range.end)}`;
-  const historyParams = useMemo(
+  const dateRangeParams = useMemo(
     () => ({
       page: 1,
       limit: 10,
@@ -39,12 +39,12 @@ export default function EarningsDetailScreen({ navigation }: Props) {
     }),
     [range.end, range.start],
   );
-  const { data: earningsHistoryData } = useEarningsHistoryQuery({
-    params: historyParams,
+  const { data: earningsDailyData } = useEarningsDailyQuery({
+    params: dateRangeParams,
     staleTime: Infinity,
   });
   const { data: earningsSummaryData } = useEarningsSummaryQuery({
-    params: historyParams,
+    params: dateRangeParams,
     staleTime: Infinity,
   });
 
@@ -95,8 +95,10 @@ export default function EarningsDetailScreen({ navigation }: Props) {
         {/* Activity list */}
         <View style={styles.activityList}>
           <EarningsActivityRow
-            items={earningsHistoryData?.data ?? []}
-            onPressItem={() => navigation.navigate('EarningsOrderDetail')}
+            items={earningsDailyData?.earnings_by_date ?? []}
+            onPressItem={(item) =>
+              navigation.navigate('EarningsOrderDetail', { date: item.date })
+            }
           />
         </View>
       </ScrollView>

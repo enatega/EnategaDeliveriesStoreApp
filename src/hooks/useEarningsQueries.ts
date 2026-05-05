@@ -2,10 +2,12 @@ import { UseQueryOptions, useQuery } from "@tanstack/react-query";
 import { ApiError } from "../api/apiClient";
 import { earningsService } from "../api/earningsService";
 import {
-  EarningsHistoryResponse,
+  EarningsDailyResponse,
   EarningsGraphResponse,
+  EarningsHistoryResponse,
   EarningsSummaryResponse,
   GetEarningsGraphParams,
+  GetEarningsDailyParams,
   GetEarningsHistoryParams,
   GetEarningsSummaryParams,
 } from "../api/earningsServiceTypes";
@@ -30,23 +32,20 @@ export function useEarningsGraphQuery({
   });
 }
 
-type UseEarningsHistoryOptions = {
-  params?: GetEarningsHistoryParams;
+type UseEarningsDailyOptions = {
+  params?: GetEarningsDailyParams;
 } & Omit<
-  UseQueryOptions<EarningsHistoryResponse, ApiError>,
+  UseQueryOptions<EarningsDailyResponse, ApiError>,
   "queryKey" | "queryFn"
 >;
 
-export function useEarningsHistoryQuery({
+export function useEarningsDailyQuery({
   params = {},
   ...options
-}: UseEarningsHistoryOptions = {}) {
-  return useQuery<EarningsHistoryResponse, ApiError>({
-    queryKey: earningsKeys.historyList(params),
-    queryFn: () => {
-      console.log("EarningsHistoryParams", params);
-      return earningsService.getEarningsHistory(params);
-    },
+}: UseEarningsDailyOptions = {}) {
+  return useQuery<EarningsDailyResponse, ApiError>({
+    queryKey: earningsKeys.dailyList(params),
+    queryFn: () => earningsService.getEarningsDaily(params),
     staleTime: 60 * 1000,
     ...options,
   });
@@ -66,6 +65,25 @@ export function useEarningsSummaryQuery({
   return useQuery<EarningsSummaryResponse, ApiError>({
     queryKey: earningsKeys.summaryDetail(params),
     queryFn: () => earningsService.getEarningsSummary(params),
+    staleTime: 60 * 1000,
+    ...options,
+  });
+}
+
+type UseEarningsHistoryOptions = {
+  params: GetEarningsHistoryParams;
+} & Omit<
+  UseQueryOptions<EarningsHistoryResponse, ApiError>,
+  "queryKey" | "queryFn"
+>;
+
+export function useEarningsHistoryQuery({
+  params,
+  ...options
+}: UseEarningsHistoryOptions) {
+  return useQuery<EarningsHistoryResponse, ApiError>({
+    queryKey: earningsKeys.historyList(params),
+    queryFn: () => earningsService.getEarningsHistory(params),
     staleTime: 60 * 1000,
     ...options,
   });
