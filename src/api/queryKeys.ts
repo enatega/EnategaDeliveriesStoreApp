@@ -83,3 +83,12 @@ export const walletKeys = {
   historyList: (params: GetWalletHistoryParams) =>
     [...walletKeys.history(), params] as const,
 };
+
+export const profileKeys = {
+  all: ['profile'] as const,
+  profile: () => [...profileKeys.all, 'me'] as const,
+  availability: () => [...profileKeys.all, 'availability'] as const,
+  workSchedule: () => [...profileKeys.all, 'workSchedule'] as const,
+  language: () => [...profileKeys.all, 'language'] as const,
+  bankManagement: () => [...profileKeys.all, 'bankManagement'] as const,
+};
