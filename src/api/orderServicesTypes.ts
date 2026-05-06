@@ -38,7 +38,7 @@ export type GetOrdersParams = {
 export interface OrderItem {
   productId: string;
   name: string;
-  image: string;
+  image: string | null;
   quantity: number;
   unitPrice: number;
   totalPrice: number;
@@ -56,13 +56,13 @@ export interface Order {
   statusLabel: string; // e.g. "New Order", "In Progress", "Ready", "Pickup", "Completed"
   orderType: OrderType;
   customerName: string;
-  customerPhone: string;
-  deliveryAddress: string;
-  pickupAddress: string;
+  customerPhone: string | null;
+  deliveryAddress: string | null;
+  pickupAddress: string | null;
   orderAmount: number;
   itemCount: number;
   items: OrderItem[];
-  customerComment: string;
+  customerComment: string | null;
   preparingTimeInMinutes: number | null;
   preparationStartedAt: string | null;
   remainingSeconds?: number;
