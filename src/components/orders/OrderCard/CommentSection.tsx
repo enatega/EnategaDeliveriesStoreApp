@@ -5,7 +5,7 @@ import Text from "../../Text";
 import { styles } from "./styles";
 
 type Props = {
-    comment: string;
+    comment: string | null;
     theme: any;
 };
 

@@ -3,6 +3,7 @@ import { ActivityIndicator, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { useAppTheme } from '../theme/ThemeProvider';
 import { useAuth } from '../auth/AuthProvider';
+import { useStoreOrderSocketSync } from '../hooks/useStoreOrderSocketSync';
 import AuthNavigator from './AuthNavigator';
 import MainNavigator from './MainNavigator';
 import { buildNavigationTheme } from './navigationTheme';
@@ -10,6 +11,7 @@ import { buildNavigationTheme } from './navigationTheme';
 export default function RootNavigator() {
   const { theme } = useAppTheme();
   const { isAuthenticated, isReady } = useAuth();
+  useStoreOrderSocketSync();
 
   if (!isReady) {
     return (
