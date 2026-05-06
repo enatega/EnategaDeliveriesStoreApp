@@ -65,7 +65,11 @@ export default function ProfileScreen() {
     : "JS";
 
   const coverImage = profile.image || null;
-  const storeId = basicInformation.storeId;
+  const storeId = basicInformation.storeId
+    ? basicInformation.storeId.length > 10
+      ? basicInformation.storeId.substring(0, 10) + "..."
+      : basicInformation.storeId
+    : "";
 
   const isDark = themeMode === "dark";
   const toggleTheme = async () => setThemeMode(isDark ? "light" : "dark");
@@ -111,7 +115,7 @@ export default function ProfileScreen() {
                   {profile.name}
                 </Text>
                 <Text variant="caption" color="rgba(255,255,255,0.8)">
-                  {storeId ? `ID-${storeId.slice(0, 6)}` : ""}
+                  {storeId ?? ""}
                 </Text>
               </View>
             </View>
