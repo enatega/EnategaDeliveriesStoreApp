@@ -9,7 +9,7 @@ export { default as ScreenHeader } from './ScreenHeader';
 export { default as TabBar } from './TabBar';
 export { default as OrderCard } from './orders/OrderCard/OrderCard';
 export { default as ToggleSwitch } from './ToggleSwitch';
-export { default as Sidebar } from './Sidebar';
+export { default as Sidebar } from './sidebar/Sidebar';
 export { default as MainLayout } from './MainLayout';
 export { default as BarChart } from './BarChart';
 export { default as EarningsActivityRow } from './EarningsActivityRow';

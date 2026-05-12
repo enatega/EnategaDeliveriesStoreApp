@@ -1,92 +1,78 @@
-import React, { useState } from 'react';
+import React from "react";
 import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   StyleSheet,
   View,
-} from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useAppTheme } from '../theme/ThemeProvider';
-import { useTranslations } from '../localization/LocalizationProvider';
-import { useAuth } from '../auth/AuthProvider';
-import { MainStackParamList } from '../navigation/types';
-import ScreenHeader from '../components/ScreenHeader';
-import TextInput from '../components/TextInput';
-import SelectField from '../components/SelectField';
-import Button from '../components/Button';
+} from "react-native";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { useAppTheme } from "../theme/ThemeProvider";
+import { useTranslations } from "../localization/LocalizationProvider";
+import { MainStackParamList } from "../navigation/types";
+import ScreenHeader from "../components/ScreenHeader";
+import TextInput from "../components/TextInput";
+import SelectField from "../components/SelectField";
+import Button from "../components/Button";
+import { useBankManagementScreen } from "../hooks/useBankManagementScreen";
 
-type Props = NativeStackScreenProps<MainStackParamList, 'BankManagement'>;
-
-// ─── Currency options ─────────────────────────────────────────────────────────
+type Props = NativeStackScreenProps<MainStackParamList, "BankManagement">;
 
 const CURRENCY_OPTIONS = [
-  { value: 'EUR', label: 'EUR', prefix: '🇪🇺' },
-  { value: 'USD', label: 'USD', prefix: '🇺🇸' },
-  { value: 'GBP', label: 'GBP', prefix: '🇬🇧' },
-  { value: 'PKR', label: 'PKR', prefix: '🇵🇰' },
-  { value: 'SAR', label: 'SAR', prefix: '🇸🇦' },
+  { value: "EUR", label: "EUR", prefix: "🇪🇺" },
+  { value: "USD", label: "USD", prefix: "🇺🇸" },
+  { value: "GBP", label: "GBP", prefix: "🇬🇧" },
+  { value: "PKR", label: "PKR", prefix: "🇵🇰" },
+  { value: "SAR", label: "SAR", prefix: "🇸🇦" },
 ];
-
-// ─── Screen ───────────────────────────────────────────────────────────────────
 
 export default function BankManagementScreen({ navigation }: Props) {
   const { theme } = useAppTheme();
-  const { t } = useTranslations('app');
-  const { session } = useAuth();
+  const { t } = useTranslations("app");
 
-  const storeProfile = session.profiles?.find((p) => p.key === 'Store')?.data;
+  const {
+    isLoadingBank,
+    isPending,
+    currency,
+    setCurrency,
+    accountHolder,
+    setAccountHolder,
+    bankName,
+    setBankName,
+    accountNumber,
+    setAccountNumber,
+    branchCode,
+    setBranchCode,
+    errors,
+    setErrors,
+    handleConfirm,
+  } = useBankManagementScreen({ onSuccess: () => navigation.goBack() });
 
-  // Pre-fill from session if available
-  const [currency, setCurrency] = useState('EUR');
-  const [accountHolder, setAccountHolder] = useState(
-    storeProfile?.account_holder_name ?? ''
-  );
-  const [iban, setIban] = useState('');
-  const [accountNumber, setAccountNumber] = useState(
-    storeProfile?.account_number ?? ''
-  );
-
-  // Validation errors
-  const [errors, setErrors] = useState({
-    accountHolder: '',
-    iban: '',
-    accountNumber: '',
-  });
-
-  const validate = (): boolean => {
-    const next = { accountHolder: '', iban: '', accountNumber: '' };
-    let valid = true;
-
-    if (!accountHolder.trim()) {
-      next.accountHolder = t('bank_holder_required');
-      valid = false;
-    }
-    if (!iban.trim()) {
-      next.iban = t('bank_iban_required');
-      valid = false;
-    }
-    if (!accountNumber.trim()) {
-      next.accountNumber = t('bank_account_required');
-      valid = false;
-    }
-
-    setErrors(next);
-    return valid;
-  };
-
-  const handleConfirm = () => {
-    if (!validate()) return;
-    // API integration will be wired here
-  };
+  if (isLoadingBank) {
+    return (
+      <View
+        style={[
+          styles.flex,
+          {
+            backgroundColor: theme.colors.background,
+            justifyContent: "center",
+            alignItems: "center",
+          },
+        ]}
+      >
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+      </View>
+    );
+  }
 
   return (
     <KeyboardAvoidingView
       style={[styles.flex, { backgroundColor: theme.colors.background }]}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <ScreenHeader
-        title={t('bank_title')}
+        title={t("bank_title")}
         onBack={() => navigation.goBack()}
       />
 
@@ -95,60 +81,75 @@ export default function BankManagementScreen({ navigation }: Props) {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* Currency */}
         <SelectField
-          label={t('bank_currency')}
+          label={t("bank_currency")}
           value={currency}
           options={CURRENCY_OPTIONS}
           onSelect={setCurrency}
         />
 
-        {/* Account holder */}
         <TextInput
-          label={t('bank_holder_label')}
-          placeholder={t('bank_holder_placeholder')}
+          label={t("bank_holder_label")}
+          placeholder={t("bank_holder_placeholder")}
           value={accountHolder}
           onChangeText={(v) => {
             setAccountHolder(v);
-            if (errors.accountHolder) setErrors((e) => ({ ...e, accountHolder: '' }));
+            if (errors.accountHolder)
+              setErrors((e) => ({ ...e, accountHolder: "" }));
           }}
           error={errors.accountHolder}
           autoCapitalize="words"
           returnKeyType="next"
         />
 
-        {/* IBAN / Swift / BSB */}
         <TextInput
-          label={t('bank_iban_label')}
-          placeholder={t('bank_iban_placeholder')}
-          value={iban}
+          label={t("bank_name_label")}
+          placeholder={t("bank_name_placeholder")}
+          value={bankName}
           onChangeText={(v) => {
-            setIban(v.toUpperCase());
-            if (errors.iban) setErrors((e) => ({ ...e, iban: '' }));
+            setBankName(v);
+            if (errors.bankName) setErrors((e) => ({ ...e, bankName: "" }));
           }}
-          error={errors.iban}
-          autoCapitalize="characters"
+          error={errors.bankName}
+          autoCapitalize="words"
           returnKeyType="next"
         />
 
-        {/* Account number */}
         <TextInput
-          label={t('bank_account_label')}
-          placeholder={t('bank_account_placeholder')}
+          label={t("bank_account_label")}
+          placeholder={t("bank_account_placeholder")}
           value={accountNumber}
           onChangeText={(v) => {
             setAccountNumber(v);
-            if (errors.accountNumber) setErrors((e) => ({ ...e, accountNumber: '' }));
+            if (errors.accountNumber)
+              setErrors((e) => ({ ...e, accountNumber: "" }));
           }}
           error={errors.accountNumber}
           keyboardType="number-pad"
+          returnKeyType="next"
+        />
+
+        <TextInput
+          label={t("bank_branch_code_label")}
+          placeholder={t("bank_branch_code_placeholder")}
+          value={branchCode}
+          onChangeText={(v) => {
+            setBranchCode(v);
+            if (errors.branchCode) setErrors((e) => ({ ...e, branchCode: "" }));
+          }}
+          error={errors.branchCode}
+          autoCapitalize="characters"
           returnKeyType="done"
           onSubmitEditing={handleConfirm}
         />
 
-        {/* Confirm */}
         <View style={styles.actions}>
-          <Button label={t('bank_confirm')} onPress={handleConfirm} />
+          <Button
+            label={t("bank_confirm")}
+            onPress={handleConfirm}
+            loading={isPending}
+            disabled={isPending}
+          />
         </View>
       </ScrollView>
     </KeyboardAvoidingView>

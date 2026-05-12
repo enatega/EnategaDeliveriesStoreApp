@@ -1,9 +1,9 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import ScreenHeader from './ScreenHeader';
-import Sidebar from './Sidebar';
+import Sidebar from './sidebar/Sidebar';
 import { useTranslations } from '../localization/LocalizationProvider';
-import { useSidebar } from '../hooks/useSidebar';
+import { useSidebarToggler } from '../hooks/useSidebarToggler';
 
 type Props = {
   titleKey: string;
@@ -14,20 +14,18 @@ type Props = {
 
 export default function TabShell({ titleKey, onNavigate, onSwitchToProfile, children }: Props) {
   const { t } = useTranslations('app');
-  const sidebar = useSidebar();
+  const { sidebarOpen, openSidebar, closeSidebar } = useSidebarToggler();
 
   return (
     <View style={styles.flex}>
-      <ScreenHeader title={t(titleKey)} onMenuPress={sidebar.openSidebar} />
+      <ScreenHeader title={t(titleKey)} onMenuPress={openSidebar} />
       <View style={styles.flex}>{children}</View>
       <Sidebar
-        visible={sidebar.sidebarOpen}
-        onClose={sidebar.closeSidebar}
-        availability={sidebar.availability}
-        onAvailabilityChange={sidebar.setAvailability}
+        visible={sidebarOpen}
+        onClose={closeSidebar}
         onNavigate={onNavigate}
         onSwitchTab={() => {
-          sidebar.closeSidebar();
+          closeSidebar();
           onSwitchToProfile?.();
         }}
       />
