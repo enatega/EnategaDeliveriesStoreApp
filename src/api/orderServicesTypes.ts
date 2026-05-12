@@ -70,6 +70,8 @@ export interface Order {
   riderPhone: string | null;
   riderVehicle: string | null;
   riderArrived: boolean;
+  riderStatus: string | null;
+  riderStatusLabel: string | null;
   createdAt: string;
   canAccept: boolean;
   canReject: boolean;

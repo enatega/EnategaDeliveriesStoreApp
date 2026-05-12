@@ -45,6 +45,8 @@ type StoreHomeOrderCardDto = {
   riderPhone: string | null;
   riderVehicle: string | null;
   riderArrived: boolean;
+  riderStatus: string | null;
+  riderStatusLabel: string | null;
   createdAt: string;
   canAccept: boolean;
   canReject: boolean;
@@ -53,6 +55,35 @@ type StoreHomeOrderCardDto = {
 export type StoreHomeOrderCreatedPayload = {
   storeId: string;
   order: StoreHomeOrderCardDto;
+};
+
+export type StoreOrderStatusUpdatedPayload = {
+  orderId: string;
+  status:
+    | "scheduled"
+    | "pending"
+    | "accepted"
+    | "preparing"
+    | "ready"
+    | "rider_assigned"
+    | "picked_up"
+    | "out_for_delivery"
+    | "arrived"
+    | "delivered"
+    | "cancelled"
+    | "rejected"
+    | "failed";
+  riderStatus: string | null;
+  riderId: string | null;
+  updatedAt: string;
+};
+
+export type StoreRiderStatusUpdatedPayload = {
+  orderId: string;
+  riderStatus: string | null;
+  riderId: string | null;
+  riderName: string | null;
+  updatedAt: string;
 };
 
 type StoreSocketSession = {
@@ -157,6 +188,24 @@ class StoreOrdersSocketClient {
 
     return () => {
       socket.off("store-home-order-created", handler);
+    };
+  }
+
+  subscribeOrderStatusUpdated(handler: (payload: StoreOrderStatusUpdatedPayload) => void) {
+    const socket = this.ensureSocket();
+    socket.on("order-status-updated", handler);
+
+    return () => {
+      socket.off("order-status-updated", handler);
+    };
+  }
+
+  subscribeRiderStatusUpdated(handler: (payload: StoreRiderStatusUpdatedPayload) => void) {
+    const socket = this.ensureSocket();
+    socket.on("rider-status-updated", handler);
+
+    return () => {
+      socket.off("rider-status-updated", handler);
     };
   }
 }

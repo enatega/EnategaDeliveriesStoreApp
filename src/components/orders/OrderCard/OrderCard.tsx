@@ -58,9 +58,12 @@ export default function OrderCard({
   const isReadyOrPickup =
     order.status === OrderStatus.READY ||
     order.status === OrderStatus.PICKED_UP ||
-    order.status === OrderStatus.OUT_FOR_DELIVERY;
+    order.status === OrderStatus.OUT_FOR_DELIVERY ||
+    order.status === OrderStatus.ARRIVED;
 
   const isCompleted = order.status === OrderStatus.DELIVERED;
+  const canMarkReady =
+    order.status === OrderStatus.RIDER_ASSIGNED || Boolean(order.riderName);
 
   return (
     <View style={[styles.card, { backgroundColor: theme.colors.surface, borderColor: theme.colors.gray200 }]}>
@@ -82,12 +85,15 @@ export default function OrderCard({
         <InProgressSection
           orderId={order.orderId}
           riderArrived={order.riderArrived}
+          riderStatus={order.riderStatus}
+          riderStatusLabel={order.riderStatusLabel}
           riderName={order.riderName}
           riderVehicle={order.riderVehicle}
           preparingTimeInMinutes={order.preparingTimeInMinutes ?? 0}
           startTime={startTime}
           onMarkReady={onMarkReady}
           onUpdatePreparingTime={onUpdatePreparingTime}
+          canMarkReady={canMarkReady}
           isMarkingReady={isMarkingReady}
           isUpdatingTime={isUpdatingTime}
           theme={theme}
@@ -99,6 +105,8 @@ export default function OrderCard({
           status={order.status}
           orderId={order.orderId}
           riderArrived={order.riderArrived}
+          riderStatus={order.riderStatus}
+          riderStatusLabel={order.riderStatusLabel}
           riderName={order.riderName}
           riderVehicle={order.riderVehicle}
           riderPhone={order.riderPhone}

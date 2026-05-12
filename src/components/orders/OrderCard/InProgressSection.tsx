@@ -6,16 +6,20 @@ import { Feather } from "@expo/vector-icons";
 import Svg from "../../Svg";
 import CountdownTimer from "../../CountdownTimer";
 import { styles } from "./styles";
+import { getReadableRiderStatus } from "./riderStatusLabel";
 
 type Props = {
     orderId: string;
     riderArrived: boolean;
+    riderStatus: string | null;
+    riderStatusLabel: string | null;
     riderName: string | null;
     riderVehicle: string | null;
     preparingTimeInMinutes: number;
     startTime: number | null;
     onMarkReady: (orderId: string) => void;
     onUpdatePreparingTime: (orderId: string, minutes: number) => void;
+    canMarkReady: boolean;
     theme: any;
     isMarkingReady?: boolean;
     isUpdatingTime?: boolean;
@@ -24,22 +28,34 @@ type Props = {
 export default function InProgressSection({
     orderId,
     riderArrived,
+    riderStatus,
+    riderStatusLabel,
     riderName,
     riderVehicle,
     preparingTimeInMinutes,
     startTime,
     onMarkReady,
     onUpdatePreparingTime,
+    canMarkReady,
     isMarkingReady,
     isUpdatingTime,
     theme,
 }: Props) {
     const { t } = useTranslations("app");
+    const formattedRiderStatus = getReadableRiderStatus(null, riderStatus, riderStatusLabel);
 
     return (
         <>
             <View style={[styles.divider, { backgroundColor: theme.colors.gray200, marginVertical: 12 }]} />
             <View style={{ gap: 10 }}>
+                {formattedRiderStatus && (
+                    <View style={styles.riderStatusBadge}>
+                        <Feather name="navigation" size={14} color="#1D4ED8" />
+                        <Text style={[styles.riderStatusText, { color: "#1D4ED8" }]}>
+                            {formattedRiderStatus}
+                        </Text>
+                    </View>
+                )}
                 {riderArrived && (
                     <View style={[styles.riderStatusBadge, styles.riderArrivedBadge]}>
                         <Feather name="check-circle" size={14} color="#059669" />
@@ -82,9 +98,16 @@ export default function InProgressSection({
                     )}
                 </Pressable>
                 <Pressable
-                    style={[styles.btnMarkReady, { backgroundColor: theme.colors.primary }, isMarkingReady && { opacity: 0.6 }]}
-                    onPress={() => onMarkReady(orderId)}
-                    disabled={isMarkingReady}
+                    style={[
+                      styles.btnMarkReady,
+                      { backgroundColor: canMarkReady ? theme.colors.primary : theme.colors.gray300 },
+                      (isMarkingReady || !canMarkReady) && { opacity: 0.6 },
+                    ]}
+                    onPress={() => {
+                      if (!canMarkReady) return;
+                      onMarkReady(orderId);
+                    }}
+                    disabled={isMarkingReady || !canMarkReady}
                 >
                     {isMarkingReady ? (
                         <ActivityIndicator size="small" color={theme.colors.gray900} />

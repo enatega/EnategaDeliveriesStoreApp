@@ -6,11 +6,14 @@ import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import LocationPin from "../../LocationPin";
 import { OrderStatus } from "../../../api/orderServicesTypes";
 import { styles } from "./styles";
+import { getReadableRiderStatus } from "./riderStatusLabel";
 
 type Props = {
     status: OrderStatus;
     orderId: string;
     riderArrived: boolean;
+    riderStatus: string | null;
+    riderStatusLabel: string | null;
     riderName: string | null;
     riderVehicle: string | null;
     riderPhone: string | null;
@@ -24,6 +27,8 @@ export default function ReadyPickupSection({
     status,
     orderId,
     riderArrived,
+    riderStatus,
+    riderStatusLabel,
     riderName,
     riderVehicle,
     riderPhone,
@@ -34,25 +39,40 @@ export default function ReadyPickupSection({
 }: Props) {
     const { t } = useTranslations("app");
     const isReady = status === OrderStatus.READY;
-    const isPickedUp = status === OrderStatus.PICKED_UP || status === OrderStatus.OUT_FOR_DELIVERY;
+    const isOutForDelivery = status === OrderStatus.OUT_FOR_DELIVERY || riderStatus === "out_for_delivery";
+    const formattedRiderStatus = getReadableRiderStatus(status, riderStatus, riderStatusLabel);
+    const shouldShowAssignedFallback = !formattedRiderStatus && !!riderName && isReady;
 
     return (
         <>
             <View style={[styles.divider, { backgroundColor: theme.colors.gray200, marginVertical: 8 }]} />
             <View style={styles.readyTopRow}>
-                {isReady && riderArrived && (
-                    <View style={styles.readyRiderBadge}>
-                        <LocationPin color="#059669" />
-                        <Text style={[styles.readyRiderText, { color: "#059669" }]}>{t("order_card_rider_arrived")}</Text>
-                    </View>
-                )}
-                {isPickedUp && (
-                    <View style={styles.pickupRiderBadge}>
-                        <Feather name="navigation" size={14} color="#CA8A04" style={{ transform: [{ rotate: "45deg" }] }} />
-                        <Text style={styles.pickupRiderText}>{t("order_card_heading_customer")}</Text>
-                    </View>
-                )}
-                <View style={{ flex: 1 }} />
+                <View style={styles.readyStatusColumn}>
+                    {!!formattedRiderStatus && (
+                        <View style={styles.riderStatusBadge}>
+                            <Feather name="navigation" size={14} color="#1D4ED8" />
+                            <Text style={[styles.riderStatusText, { color: "#1D4ED8" }]}>{formattedRiderStatus}</Text>
+                        </View>
+                    )}
+                    {shouldShowAssignedFallback && (
+                        <View style={styles.riderStatusBadge}>
+                            <Feather name="user-check" size={14} color="#1D4ED8" />
+                            <Text style={[styles.riderStatusText, { color: "#1D4ED8" }]}>Rider assigned</Text>
+                        </View>
+                    )}
+                    {isReady && riderArrived && (
+                        <View style={styles.readyRiderBadge}>
+                            <LocationPin color="#059669" />
+                            <Text style={[styles.readyRiderText, { color: "#059669" }]}>{t("order_card_rider_arrived")}</Text>
+                        </View>
+                    )}
+                    {isOutForDelivery && (
+                        <View style={styles.pickupRiderBadge}>
+                            <Feather name="navigation" size={14} color="#CA8A04" style={{ transform: [{ rotate: "45deg" }] }} />
+                            <Text style={styles.pickupRiderText}>{t("order_card_heading_customer")}</Text>
+                        </View>
+                    )}
+                </View>
                 <View style={styles.actionButtonsRow}>
                     <Pressable style={styles.iconBtn}>
                         <Feather name="phone" size={20} color="#374151" />

@@ -245,6 +245,11 @@ export const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginTop: 12,
   },
+  readyStatusColumn: {
+    flex: 1,
+    gap: 8,
+    paddingRight: 8,
+  },
   readyRiderBadge: {
     flexDirection: "row",
     alignItems: "center",

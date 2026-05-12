@@ -3,11 +3,24 @@ import { InfiniteData, useQueryClient } from "@tanstack/react-query";
 import { AppState, type AppStateStatus } from "react-native";
 import NetInfo from "@react-native-community/netinfo";
 import { useAuth } from "../auth/AuthProvider";
-import { newOrdersKeys } from "../api/queryKeys";
-import type { GetOrdersParams, Order, PaginatedOrdersResponse } from "../api/orderServicesTypes";
+import {
+  completedOrdersKeys,
+  inProgressOrdersKeys,
+  newOrdersKeys,
+  pickupOrdersKeys,
+  readyOrdersKeys,
+} from "../api/queryKeys";
+import type {
+  GetOrdersParams,
+  Order,
+  PaginatedOrdersResponse,
+} from "../api/orderServicesTypes";
+import { OrderStatus as StoreOrderStatus } from "../api/orderServicesTypes";
 import {
   storeOrdersSocketClient,
   type StoreHomeOrderCreatedPayload,
+  type StoreOrderStatusUpdatedPayload,
+  type StoreRiderStatusUpdatedPayload,
 } from "../socket/storeOrdersSocket";
 
 function matchesOrderTypeFilter(params: GetOrdersParams | undefined, nextType: Order["orderType"]) {
@@ -72,8 +85,13 @@ export function useStoreOrderSocketSync() {
       return undefined;
     }
 
-    const unsubscribe = storeOrdersSocketClient.subscribeStoreHomeOrderCreated(
+    const unsubscribeCreated = storeOrdersSocketClient.subscribeStoreHomeOrderCreated(
       (payload: StoreHomeOrderCreatedPayload) => {
+        console.log("[store][socket] store-home-order-created received", {
+          currentStoreId,
+          payloadStoreId: payload?.storeId,
+          orderId: payload?.order?.orderId,
+        });
         if (payload.storeId !== currentStoreId) return;
 
         const incomingOrder = payload.order as Order;
@@ -98,7 +116,29 @@ export function useStoreOrderSocketSync() {
       },
     );
 
-    return unsubscribe;
+    const unsubscribeOrderStatus = storeOrdersSocketClient.subscribeOrderStatusUpdated(
+      (payload: StoreOrderStatusUpdatedPayload) => {
+        console.log("[store][socket] order-status-updated received", payload);
+        if (!payload?.orderId || !payload?.status) return;
+        invalidateStoreTabsForOrderStatus(queryClient, payload.status);
+      },
+    );
+
+    const unsubscribeRiderStatus = storeOrdersSocketClient.subscribeRiderStatusUpdated(
+      (payload: StoreRiderStatusUpdatedPayload) => {
+        console.log("[store][socket] rider-status-updated received", payload);
+        if (!payload?.orderId) return;
+        queryClient.invalidateQueries({ queryKey: inProgressOrdersKeys.lists() });
+        queryClient.invalidateQueries({ queryKey: readyOrdersKeys.lists() });
+        queryClient.invalidateQueries({ queryKey: pickupOrdersKeys.lists() });
+      },
+    );
+
+    return () => {
+      unsubscribeCreated();
+      unsubscribeOrderStatus();
+      unsubscribeRiderStatus();
+    };
   }, [currentStoreId, isAuthenticated, queryClient, token]);
 
   useEffect(() => {
@@ -132,4 +172,38 @@ export function useStoreOrderSocketSync() {
       netInfoSubscription();
     };
   }, [isAuthenticated, token]);
+}
+
+function invalidateStoreTabsForOrderStatus(
+  queryClient: ReturnType<typeof useQueryClient>,
+  status: string,
+) {
+  const invalidate = (key: readonly unknown[]) =>
+    queryClient.invalidateQueries({ queryKey: key });
+
+  const statusToKeys: Record<string, Array<readonly unknown[]>> = {
+    [StoreOrderStatus.SCHEDULED]: [newOrdersKeys.lists()],
+    [StoreOrderStatus.PENDING]: [newOrdersKeys.lists()],
+    [StoreOrderStatus.ACCEPTED]: [inProgressOrdersKeys.lists()],
+    [StoreOrderStatus.PREPARING]: [inProgressOrdersKeys.lists()],
+    [StoreOrderStatus.RIDER_ASSIGNED]: [inProgressOrdersKeys.lists()],
+    [StoreOrderStatus.READY]: [readyOrdersKeys.lists()],
+    [StoreOrderStatus.PICKED_UP]: [pickupOrdersKeys.lists()],
+    [StoreOrderStatus.OUT_FOR_DELIVERY]: [pickupOrdersKeys.lists()],
+    [StoreOrderStatus.ARRIVED]: [pickupOrdersKeys.lists()],
+    [StoreOrderStatus.DELIVERED]: [completedOrdersKeys.lists()],
+    [StoreOrderStatus.CANCELLED]: [completedOrdersKeys.lists()],
+    [StoreOrderStatus.REJECTED]: [completedOrdersKeys.lists()],
+    [StoreOrderStatus.FAILED]: [completedOrdersKeys.lists()],
+  };
+
+  const impactedKeys = statusToKeys[status] ?? [
+    newOrdersKeys.lists(),
+    inProgressOrdersKeys.lists(),
+    readyOrdersKeys.lists(),
+    pickupOrdersKeys.lists(),
+    completedOrdersKeys.lists(),
+  ];
+
+  impactedKeys.forEach(invalidate);
 }

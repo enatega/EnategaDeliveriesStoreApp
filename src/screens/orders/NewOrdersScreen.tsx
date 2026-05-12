@@ -17,29 +17,29 @@ export default function NewOrdersScreen() {
   const updateTimeMutation = useUpdatePreparingTime();
 
   const handleAccept = (orderId: string) => {
-    acceptMutation.mutate(orderId, {
-      onSuccess: () => {
-        setPendingOrderId(orderId);
-        setModalVisible(true);
-      },
-    });
+    setPendingOrderId(orderId);
+    setModalVisible(true);
   };
 
   const handleReject = (orderId: string) => {
     rejectMutation.mutate(orderId);
   };
 
-  const handleSetPreparingTime = (minutes: number) => {
-    if (pendingOrderId) {
-      updateTimeMutation.mutate(
-        { orderId: pendingOrderId, data: { preparingTimeInMinutes: minutes } },
-        {
-          onSuccess: () => {
-            setModalVisible(false);
-            setPendingOrderId(null);
-          },
-        },
-      );
+  const handleSetPreparingTime = async (minutes: number) => {
+    if (!pendingOrderId) return;
+
+    const orderId = pendingOrderId;
+
+    try {
+      await acceptMutation.mutateAsync(orderId);
+      await updateTimeMutation.mutateAsync({
+        orderId,
+        data: { preparingTimeInMinutes: minutes },
+      });
+      setModalVisible(false);
+      setPendingOrderId(null);
+    } catch {
+      // Keep modal open so user can retry if needed.
     }
   };
 
@@ -51,7 +51,7 @@ export default function NewOrdersScreen() {
   const renderActions = () => ({
     onAccept: handleAccept,
     onReject: handleReject,
-    isAccepting: acceptMutation.isPending,
+    isAccepting: acceptMutation.isPending || updateTimeMutation.isPending,
     isRejecting: rejectMutation.isPending,
   });
 
