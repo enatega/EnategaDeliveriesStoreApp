@@ -1,9 +1,9 @@
 module.exports = {
   expo: {
-    name: "EnategaDeliveriesStoreApp",
-    slug: "enatega-deliveries-store-app",
-    owner: "ninjas_code",
-    version: "1.0.0",
+    name: "Shaaneiol Store",
+    slug: "shaaneiol-store",
+
+  version: "1.0.5",
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "automatic",
@@ -14,14 +14,14 @@ module.exports = {
     },
     ios: {
       supportsTablet: true,
-      bundleIdentifier: "com.enatega.deliveries.store",
+      bundleIdentifier: "com.shaaneiol.store",
     },
     android: {
       adaptiveIcon: {
         foregroundImage: "./assets/adaptive-icon.png",
         backgroundColor: "#ffffff",
       },
-      package: "com.enatega.deliveries.store",
+      package: "com.shaaneiol.store",
       edgeToEdgeEnabled: true,
     },
     web: {
@@ -36,7 +36,7 @@ module.exports = {
     plugins: ["expo-secure-store", "expo-font"],
     extra: {
       eas: {
-        projectId: "5cf97681-9db5-457b-bf07-07c5ff3f3a9d",
+        projectId: "bcc60324-a0f4-4a82-8440-7235083d272c"
       },
     },
   },
