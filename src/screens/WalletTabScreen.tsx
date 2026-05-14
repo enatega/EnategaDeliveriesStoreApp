@@ -9,9 +9,15 @@ export default function WalletTabScreen() {
   const stackNavigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const onNavigate = (screen: 'Language' | 'BankManagement' | 'WorkSchedule') =>
     stackNavigation.navigate(screen);
+  const onSwitchToProfile = () =>
+    stackNavigation.navigate('Home', { screen: 'ProfileTab' });
 
   return (
-    <TabShell titleKey="nav_wallet" onNavigate={onNavigate}>
+    <TabShell
+      titleKey="nav_wallet"
+      onNavigate={onNavigate}
+      onSwitchToProfile={onSwitchToProfile}
+    >
       <WalletScreen />
     </TabShell>
   );

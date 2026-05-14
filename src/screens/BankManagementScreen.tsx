@@ -19,14 +19,6 @@ import { useBankManagementScreen } from "../hooks/useBankManagementScreen";
 
 type Props = NativeStackScreenProps<MainStackParamList, "BankManagement">;
 
-const CURRENCY_OPTIONS = [
-  { value: "EUR", label: "EUR", prefix: "🇪🇺" },
-  { value: "USD", label: "USD", prefix: "🇺🇸" },
-  { value: "GBP", label: "GBP", prefix: "🇬🇧" },
-  { value: "PKR", label: "PKR", prefix: "🇵🇰" },
-  { value: "SAR", label: "SAR", prefix: "🇸🇦" },
-];
-
 export default function BankManagementScreen({ navigation }: Props) {
   const { theme } = useAppTheme();
   const { t } = useTranslations("app");
@@ -36,6 +28,7 @@ export default function BankManagementScreen({ navigation }: Props) {
     isPending,
     currency,
     setCurrency,
+    currencyOptions,
     accountHolder,
     setAccountHolder,
     bankName,
@@ -84,7 +77,7 @@ export default function BankManagementScreen({ navigation }: Props) {
         <SelectField
           label={t("bank_currency")}
           value={currency}
-          options={CURRENCY_OPTIONS}
+          options={currencyOptions}
           onSelect={setCurrency}
         />
 

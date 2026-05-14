@@ -46,13 +46,22 @@ export function useUpdateAvailability(
       }
       options?.onError?.(error, variables, context);
     },
-    onSettled: () => {
-      // Always refetch after error or success to ensure server state
-      queryClient.invalidateQueries({ queryKey: profileKeys.availability() });
-      options?.onSettled?.();
+    onSuccess: (data, variables, onMutateResult, context) => {
+      // Re-apply the successful value to avoid stale refetch flicker.
+      queryClient.setQueryData<AvailabilityResponse>(profileKeys.availability(), (old) => ({
+        ...old,
+        store_id: old?.store_id ?? data.store_id ?? '',
+        store_available: variables.storeAvailable,
+      }));
+      options?.onSuccess?.(data, variables, onMutateResult, context);
     },
-    onSuccess: (data, variables, context) => {
-      options?.onSuccess?.(data, variables, context);
+    onSettled: (data, error, variables, context) => {
+      // Refetch in background to sync eventual server state.
+      queryClient.invalidateQueries({
+        queryKey: profileKeys.availability(),
+        refetchType: 'inactive',
+      });
+      options?.onSettled?.(data, error, variables, context);
     },
     ...options,
   });

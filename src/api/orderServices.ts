@@ -12,41 +12,59 @@ import {
 
 const BASE_PATH = "/apps/deliveries/store/home/orders";
 
+function logOrdersAddonDebug(source: string, response: PaginatedOrdersResponse) {
+  response.items.forEach((order) => {
+    const addonSnapshot = order.items.map((item) => ({
+      productId: item.productId,
+      name: item.name,
+      selectedOptions: item.selectedOptions,
+      hasAddons: Boolean(item.selectedOptions),
+    }));
+
+    console.log(`[Orders API][${source}]`, {
+      orderId: order.orderId,
+      orderCode: order.orderCode,
+      hasAnyAddons: addonSnapshot.some((entry) => entry.hasAddons),
+      addonSnapshot,
+    });
+  });
+}
+
+async function getOrdersWithDebug(
+  source: string,
+  path: string,
+  params: GetOrdersParams = {},
+) {
+  const response = await apiClient.get<PaginatedOrdersResponse>(
+    path,
+    params as Record<string, unknown>,
+  );
+
+  logOrdersAddonDebug(source, response);
+
+  return response;
+}
+
 export const orderServices = {
   // ─── New Orders (pending/scheduled) ─────────────────────────────
   getNewOrders: (params: GetOrdersParams = {}) =>
-    apiClient.get<PaginatedOrdersResponse>(
-      `${BASE_PATH}/new`,
-      params as Record<string, unknown>,
-    ),
+    getOrdersWithDebug("new", `${BASE_PATH}/new`, params),
 
   // ─── In‑Progress Orders (accepted, preparing, rider_assigned, etc.) ──
   getInProgressOrders: (params: GetOrdersParams = {}) =>
-    apiClient.get<PaginatedOrdersResponse>(
-      `${BASE_PATH}/in-progress`,
-      params as Record<string, unknown>,
-    ),
+    getOrdersWithDebug("in-progress", `${BASE_PATH}/in-progress`, params),
 
   // ─── Ready Orders ───────────────────────────────────────────────
   getReadyOrders: (params: GetOrdersParams = {}) =>
-    apiClient.get<PaginatedOrdersResponse>(
-      `${BASE_PATH}/ready`,
-      params as Record<string, unknown>,
-    ),
+    getOrdersWithDebug("ready", `${BASE_PATH}/ready`, params),
 
   // ─── Pickup Orders (rider arrived / assigned) ──────────────────
   getPickupOrders: (params: GetOrdersParams = {}) =>
-    apiClient.get<PaginatedOrdersResponse>(
-      `${BASE_PATH}/pickup`,
-      params as Record<string, unknown>,
-    ),
+    getOrdersWithDebug("pickup", `${BASE_PATH}/pickup`, params),
 
   // ─── Completed / Cancelled / Failed Orders ─────────────────────
   getCompletedOrders: (params: GetOrdersParams = {}) =>
-    apiClient.get<PaginatedOrdersResponse>(
-      `${BASE_PATH}/completed`,
-      params as Record<string, unknown>,
-    ),
+    getOrdersWithDebug("completed", `${BASE_PATH}/completed`, params),
 
   // ─── Mutations ──────────────────────────────────────────────────
   acceptOrder: (orderId: string) =>
@@ -64,6 +82,9 @@ export const orderServices = {
   updatePreparingTime: (orderId: string, data: UpdatePreparingTimeRequest) =>
     apiClient.patch<UpdatePreparingTimeResponse>(
       `${BASE_PATH}/${orderId}/preparing-time`,
-      data,
+      {
+        preparingTimeInMinutes: data.preparingTimeInMinutes,
+        preparing_time_in_minutes: data.preparingTimeInMinutes,
+      },
     ),
 };

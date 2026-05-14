@@ -9,9 +9,15 @@ export default function EarningsTabScreen() {
   const stackNavigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const onNavigate = (screen: 'Language' | 'BankManagement' | 'WorkSchedule') =>
     stackNavigation.navigate(screen);
+  const onSwitchToProfile = () =>
+    stackNavigation.navigate('Home', { screen: 'ProfileTab' });
 
   return (
-    <TabShell titleKey="nav_earnings" onNavigate={onNavigate}>
+    <TabShell
+      titleKey="nav_earnings"
+      onNavigate={onNavigate}
+      onSwitchToProfile={onSwitchToProfile}
+    >
       <EarningsScreen navigation={stackNavigation} />
     </TabShell>
   );

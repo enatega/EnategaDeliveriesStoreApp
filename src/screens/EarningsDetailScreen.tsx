@@ -10,6 +10,7 @@ import {
   useEarningsDailyQuery,
   useEarningsSummaryQuery,
 } from '../hooks/useEarningsQueries';
+import { useCurrencyFormatter } from '../hooks/useCurrency';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'EarningsDetail'>;
 
@@ -17,11 +18,16 @@ type Props = NativeStackScreenProps<MainStackParamList, 'EarningsDetail'>;
 
 const formatDate = (d: Date) =>
   `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}/${d.getFullYear()}`;
+const toApiDate = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+    d.getDate(),
+  ).padStart(2, "0")}`;
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
 export default function EarningsDetailScreen({ navigation }: Props) {
   const { theme } = useAppTheme();
+  const { formatAmount } = useCurrencyFormatter();
 
   const defaultStart = new Date(2023, 0, 21); // 01/21/2023
   const defaultEnd = new Date(2023, 1, 20);   // 02/20/2023
@@ -35,8 +41,8 @@ export default function EarningsDetailScreen({ navigation }: Props) {
     () => ({
       page: 1,
       limit: 10,
-      startDate: range.start.toISOString(),
-      endDate: range.end.toISOString(),
+      startDate: toApiDate(range.start),
+      endDate: toApiDate(range.end),
     }),
     [range.end, range.start],
   );
@@ -119,7 +125,7 @@ export default function EarningsDetailScreen({ navigation }: Props) {
             <View style={styles.summaryItem}>
               <Text variant="caption" color={theme.colors.gray500}>Total Earnings</Text>
               <Text variant="subtitle" weight="bold" color={theme.colors.text}>
-                ${earningsSummaryData?.total_earnings ?? 0}
+                {formatAmount(earningsSummaryData?.total_earnings ?? 0, 2)}
               </Text>
             </View>
           </View>

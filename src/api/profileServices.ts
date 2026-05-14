@@ -24,7 +24,10 @@ export const profileService = {
     // Availability
     getAvailability: () => apiClient.get<AvailabilityResponse>(`${BASE_PATH}/availability`),
     updateAvailability: (data: UpdateAvailabilityRequest) =>
-        apiClient.patch<UpdateAvailabilityResponse>(`${BASE_PATH}/availability`, data),
+        apiClient.patch<UpdateAvailabilityResponse>(`${BASE_PATH}/availability`, {
+            storeAvailable: data.storeAvailable,
+            store_available: data.storeAvailable,
+        }),
 
     // Work schedule
     getWorkSchedule: () => apiClient.get<WorkScheduleResponse>(`${BASE_PATH}/work-schedule`),

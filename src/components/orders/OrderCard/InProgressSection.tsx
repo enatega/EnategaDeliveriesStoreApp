@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { View, Pressable, ActivityIndicator } from "react-native";
 import { useTranslations } from "../../../localization/LocalizationProvider";
 import Text from "../../Text";
@@ -16,6 +16,7 @@ type Props = {
     riderName: string | null;
     riderVehicle: string | null;
     preparingTimeInMinutes: number;
+    remainingSeconds?: number | null;
     startTime: number | null;
     onMarkReady: (orderId: string) => void;
     onUpdatePreparingTime: (orderId: string, minutes: number) => void;
@@ -33,6 +34,7 @@ export default function InProgressSection({
     riderName,
     riderVehicle,
     preparingTimeInMinutes,
+    remainingSeconds,
     startTime,
     onMarkReady,
     onUpdatePreparingTime,
@@ -43,6 +45,21 @@ export default function InProgressSection({
 }: Props) {
     const { t } = useTranslations("app");
     const formattedRiderStatus = getReadableRiderStatus(null, riderStatus, riderStatusLabel);
+    const initialRemainingSeconds = useMemo(() => {
+        if (
+            typeof remainingSeconds === "number" &&
+            (remainingSeconds > 0 || preparingTimeInMinutes <= 0)
+        ) {
+            return Math.max(0, remainingSeconds);
+        }
+
+        return Math.max(0, preparingTimeInMinutes * 60);
+    }, [preparingTimeInMinutes, remainingSeconds]);
+    const [liveRemainingSeconds, setLiveRemainingSeconds] = useState(initialRemainingSeconds);
+
+    useEffect(() => {
+        setLiveRemainingSeconds(initialRemainingSeconds);
+    }, [initialRemainingSeconds, orderId]);
 
     return (
         <>
@@ -75,20 +92,28 @@ export default function InProgressSection({
                         <Svg name="timer" width={40} height={40} />
                         <Text style={styles.preparingText}>{t("order_card_preparing")}</Text>
                     </View>
-                    {startTime && (
-                        <CountdownTimer
-                            startTimeMs={startTime}
-                            totalMinutes={preparingTimeInMinutes}
-                            style={styles.timerText}
-                        />
-                    )}
+                    <CountdownTimer
+                        startTimeMs={startTime}
+                        totalMinutes={preparingTimeInMinutes}
+                        remainingSecondsOverride={liveRemainingSeconds}
+                        style={styles.timerText}
+                    />
                 </View>
             </View>
 
             <View style={styles.inProgressActions}>
                 <Pressable
                     style={[styles.btnPlusTime, isUpdatingTime && { opacity: 0.6 }]}
-                    onPress={() => onUpdatePreparingTime(orderId, (preparingTimeInMinutes || 0) + 5)}
+                    onPress={() => {
+                        const nextMinutes = (preparingTimeInMinutes || 0) + 5;
+                        setLiveRemainingSeconds((prev) => Math.max(0, prev) + 5 * 60);
+                        console.log("[InProgressSection] +5m tapped", {
+                            orderId,
+                            currentPreparingTimeInMinutes: preparingTimeInMinutes,
+                            nextPreparingTimeInMinutes: nextMinutes,
+                        });
+                        onUpdatePreparingTime(orderId, nextMinutes);
+                    }}
                     disabled={isUpdatingTime}
                 >
                     {isUpdatingTime ? (

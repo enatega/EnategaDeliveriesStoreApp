@@ -3,27 +3,39 @@ import Text from './Text';
 import { StyleProp, TextStyle } from 'react-native';
 
 type Props = {
-    startTimeMs: number;
+    startTimeMs?: number | null;
     totalMinutes: number;
+    remainingSecondsOverride?: number | null;
     style?: StyleProp<TextStyle>;
 };
 
-export default function CountdownTimer({ startTimeMs, totalMinutes, style }: Props) {
+export default function CountdownTimer({
+    startTimeMs,
+    totalMinutes,
+    remainingSecondsOverride,
+    style,
+}: Props) {
     const [remainingSeconds, setRemainingSeconds] = useState(0);
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
-        const updateRemaining = () => {
-            const elapsed = Math.floor((Date.now() - startTimeMs) / 1000);
-            const remaining = Math.max(0, totalMinutes * 60 - elapsed);
-            setRemainingSeconds(remaining);
-        };
-        updateRemaining();
-        intervalRef.current = setInterval(updateRemaining, 1000);
+        const shouldUseRemainingOverride =
+            typeof remainingSecondsOverride === "number" &&
+            (remainingSecondsOverride > 0 || totalMinutes <= 0);
+
+        const initialRemaining =
+            shouldUseRemainingOverride
+                ? Math.max(0, remainingSecondsOverride)
+                : Math.max(0, totalMinutes * 60);
+        setRemainingSeconds(initialRemaining);
+
+        intervalRef.current = setInterval(() => {
+            setRemainingSeconds((prev) => Math.max(0, prev - 1));
+        }, 1000);
         return () => {
             if (intervalRef.current) clearInterval(intervalRef.current);
         };
-    }, [startTimeMs, totalMinutes]);
+    }, [startTimeMs, totalMinutes, remainingSecondsOverride]);
 
     const formatTime = (totalSeconds: number) => {
         const hours = Math.floor(totalSeconds / 3600);

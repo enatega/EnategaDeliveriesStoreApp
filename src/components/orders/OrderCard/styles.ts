@@ -98,6 +98,36 @@ export const styles = StyleSheet.create({
   itemName: {
     fontSize: 14,
   },
+  itemOptionsWrap: {
+    marginTop: 2,
+    gap: 2,
+  },
+  itemOptionRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  itemOptionText: {
+    fontSize: 12,
+    flex: 1,
+  },
+  itemPriceColumn: {
+    minWidth: 72,
+    alignItems: "flex-end",
+    gap: 2,
+  },
+  itemOptionPricesWrap: {
+    marginTop: 2,
+    gap: 2,
+    alignItems: "flex-end",
+  },
+  itemOptionPrice: {
+    fontSize: 12,
+    minWidth: 54,
+    textAlign: "right",
+  },
+  itemOptionPriceGap: {
+    minHeight: 16,
+  },
   itemQty: {
     fontSize: 12,
   },

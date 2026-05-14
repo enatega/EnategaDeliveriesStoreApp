@@ -35,9 +35,15 @@ export default function HomeTabScreen() {
   const stackNavigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const onNavigate = (screen: 'Language' | 'BankManagement' | 'WorkSchedule') =>
     stackNavigation.navigate(screen);
+  const onSwitchToProfile = () =>
+    stackNavigation.navigate('Home', { screen: 'ProfileTab' });
 
   return (
-    <TabShell titleKey="orders_title" onNavigate={onNavigate}>
+    <TabShell
+      titleKey="orders_title"
+      onNavigate={onNavigate}
+      onSwitchToProfile={onSwitchToProfile}
+    >
       <TabBar tabs={ORDER_TABS} activeTab={activeOrderTab} onTabPress={setActiveOrderTab} />
       {ORDER_TAB_SCREENS[activeOrderTab]}
     </TabShell>

@@ -7,6 +7,7 @@ import BarChart, { BarChartDataPoint } from '../components/BarChart';
 import EarningsActivityRow from '../components/EarningsActivityRow';
 import Text from '../components/Text';
 import { useEarningsDailyQuery, useEarningsGraphQuery } from '../hooks/useEarningsQueries';
+import { useCurrencyFormatter } from '../hooks/useCurrency';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'EarningsDetail'> | { navigation?: any };
 
@@ -14,6 +15,7 @@ type Props = NativeStackScreenProps<MainStackParamList, 'EarningsDetail'> | { na
 
 export default function EarningsScreen({ navigation }: any) {
   const { theme } = useAppTheme();
+  const { formatAmount } = useCurrencyFormatter();
   const [hasReachedListEnd, setHasReachedListEnd] = useState(false);
   const { data: earningsGraphData } = useEarningsGraphQuery({
     params: { page: 1, limit: 10 },
@@ -24,9 +26,9 @@ export default function EarningsScreen({ navigation }: any) {
       earningsGraphData?.graph.map((item) => ({
         label: item.label.replace(' - ', '-\n'),
         value: item.total_amount,
-        displayValue: `$${item.total_amount}`,
+        displayValue: formatAmount(item.total_amount, 2),
       })) ?? [],
-    [earningsGraphData],
+    [earningsGraphData, formatAmount],
   );
   const {
     data: earningsDailyData,

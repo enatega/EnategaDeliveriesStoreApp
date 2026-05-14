@@ -90,6 +90,7 @@ export default function OrderCard({
           riderName={order.riderName}
           riderVehicle={order.riderVehicle}
           preparingTimeInMinutes={order.preparingTimeInMinutes ?? 0}
+          remainingSeconds={order.remainingSeconds ?? null}
           startTime={startTime}
           onMarkReady={onMarkReady}
           onUpdatePreparingTime={onUpdatePreparingTime}

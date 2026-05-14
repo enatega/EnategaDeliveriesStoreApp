@@ -8,6 +8,7 @@ import EarningsOrderCard from '../components/EarningsOrderCard';
 import Text from '../components/Text';
 import VerticalList from '../components/VerticalList';
 import { useEarningsHistoryQuery } from '../hooks/useEarningsQueries';
+import { useCurrencyFormatter } from '../hooks/useCurrency';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'EarningsOrderDetail'>;
 
@@ -22,6 +23,7 @@ function getNextDate(date: string) {
 
 export default function EarningsOrderDetailScreen({ navigation, route }: Props) {
   const { theme } = useAppTheme();
+  const { formatAmount } = useCurrencyFormatter();
   const selectedDate = route.params.date;
   const { data: earningsHistoryData } = useEarningsHistoryQuery({
     params: {
@@ -42,7 +44,7 @@ export default function EarningsOrderDetailScreen({ navigation, route }: Props) 
           Total Earnings
         </Text>
         <Text variant="body" weight="bold" color={theme.colors.text}>
-          ${earningsHistoryData?.total_earnings ?? 0}
+          {formatAmount(earningsHistoryData?.total_earnings ?? 0, 2)}
         </Text>
       </View>
 
