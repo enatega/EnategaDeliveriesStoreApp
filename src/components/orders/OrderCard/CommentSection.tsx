@@ -15,7 +15,7 @@ export default function CommentSection({ comment, theme }: Props) {
     if (!comment) return null;
 
     return (
-        <View style={[styles.commentBox, { backgroundColor: theme.colors.background }]}>
+        <View style={[styles.commentBox, { backgroundColor: theme.colors.gray100 }]}>
             <Text style={styles.commentLabel} weight="semiBold">
                 {t("order_card_comment")}
             </Text>

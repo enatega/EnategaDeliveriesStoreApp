@@ -11,6 +11,8 @@ import {
     UpdateBankManagementRequest,
     UpdateBankManagementResponse,
     AvailabilityResponse,
+    UpdateProfileInfoRequest,
+    UpdateProfileInfoResponse,
 } from '../api/profileServicesTypes';
 import { profileKeys } from '../api/queryKeys';
 
@@ -112,6 +114,22 @@ export function useUpdateBankManagement(
         onSuccess: (data, variables, context) => {
             queryClient.invalidateQueries({ queryKey: profileKeys.bankManagement() });
             options?.onSuccess?.(data, variables, context);
+        },
+        ...options,
+    });
+}
+
+// ─── Update Profile Info (Address / Phone) ──────────────────────
+export function useUpdateProfileInfo(
+    options?: UseMutationOptions<UpdateProfileInfoResponse, ApiError, UpdateProfileInfoRequest>
+) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (data) => profileService.updateProfileInfo(data),
+        onSuccess: (data, variables, onMutateResult, context) => {
+            queryClient.invalidateQueries({ queryKey: profileKeys.profile() });
+            options?.onSuccess?.(data, variables, onMutateResult, context);
         },
         ...options,
     });

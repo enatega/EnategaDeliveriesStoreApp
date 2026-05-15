@@ -5,6 +5,7 @@ import { useAppTheme } from '../theme/ThemeProvider';
 import { MainStackParamList } from '../navigation/types';
 import BarChart, { BarChartDataPoint } from '../components/BarChart';
 import EarningsActivityRow from '../components/EarningsActivityRow';
+import EarningsEmptyState from '../components/EarningsEmptyState';
 import Text from '../components/Text';
 import { useEarningsDailyQuery, useEarningsGraphQuery } from '../hooks/useEarningsQueries';
 import { useCurrencyFormatter } from '../hooks/useCurrency';
@@ -52,6 +53,18 @@ export default function EarningsScreen({ navigation }: any) {
   const handleSeeMore = () => navigation?.navigate?.('EarningsDetail');
   const handleRowPress = (item: { date: string }) =>
     navigation?.navigate?.('EarningsOrderDetail', { date: item.date });
+
+  if (earningsItems.length === 0) {
+    return (
+      <ScrollView
+        style={{ backgroundColor: theme.colors.background }}
+        contentContainerStyle={styles.emptyContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <EarningsEmptyState />
+      </ScrollView>
+    );
+  }
 
   return (
     <ScrollView
@@ -107,6 +120,10 @@ export default function EarningsScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   content: {
     paddingBottom: 32,
+  },
+  emptyContent: {
+    paddingBottom: 32,
+    minHeight: 700,
   },
   chartSection: {
     paddingHorizontal: 16,

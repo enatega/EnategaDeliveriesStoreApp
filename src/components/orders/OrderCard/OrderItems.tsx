@@ -1,10 +1,11 @@
-import React from "react";
-import { Image, View } from "react-native";
+import React, { useState } from "react";
+import { Image, Pressable, View } from "react-native";
 import { useTranslations } from "../../../localization/LocalizationProvider";
 import Text from "../../Text";
 import { OrderItem } from "../../../api/orderServicesTypes";
 import { styles } from "./styles";
 import { useCurrencyFormatter } from "../../../hooks/useCurrency";
+import { Feather } from "@expo/vector-icons";
 
 type Props = {
   items: OrderItem[];
@@ -136,18 +137,20 @@ function parseSelectedOptions(selectedOptions: unknown): ParsedOption[] {
 export default function OrderItems({ items, totalAmount, theme }: Props) {
   const { t } = useTranslations("app");
   const { formatAmount } = useCurrencyFormatter();
+  const [expandedAddons, setExpandedAddons] = useState<Record<string, boolean>>({});
 
   if (!items || items.length === 0) return null;
 
   return (
     <>
-      <View style={[styles.divider, { backgroundColor: theme.colors.gray200 }]} />
       <View style={styles.itemsHeader}>
         <Text style={styles.colHeader}>{t("order_card_col_order")}</Text>
         <Text style={styles.colHeaderRight}>{t("order_card_col_price")}</Text>
       </View>
       {items.map((item, idx) => {
         const parsedOptions = parseSelectedOptions(item.selectedOptions);
+        const itemKey = `${item.productId || item.name}-${idx}`;
+        const isExpanded = Boolean(expandedAddons[itemKey]);
 
         return (
           <View key={idx} style={styles.itemRow}>
@@ -180,22 +183,44 @@ export default function OrderItems({ items, totalAmount, theme }: Props) {
                 {item.name}
               </Text>
               {parsedOptions.length > 0 ? (
-                <View style={styles.itemOptionsWrap}>
-                  {parsedOptions.map((option, optionIndex) => (
-                    <View key={`${item.productId}-${optionIndex}`} style={styles.itemOptionRow}>
-                      <Text
-                        style={[
-                          styles.itemOptionText,
-                          { color: theme.colors.gray500 },
-                        ]}
-                      >
-                        {option.label}
-                      </Text>
+                <>
+                  <Pressable
+                    style={styles.addOnToggle}
+                    onPress={() =>
+                      setExpandedAddons((prev) => ({
+                        ...prev,
+                        [itemKey]: !prev[itemKey],
+                      }))
+                    }
+                  >
+                    <Text style={[styles.addOnToggleText, { color: theme.colors.gray600 }]}>
+                      {t("order_card_add_ons")} ({parsedOptions.length})
+                    </Text>
+                    <Feather
+                      name={isExpanded ? "chevron-up" : "chevron-down"}
+                      size={14}
+                      color={theme.colors.gray600}
+                    />
+                  </Pressable>
+                  {isExpanded ? (
+                    <View style={styles.itemOptionsWrap}>
+                      {parsedOptions.map((option, optionIndex) => (
+                        <View key={`${item.productId}-${optionIndex}`} style={styles.itemOptionRow}>
+                          <Text
+                            style={[
+                              styles.itemOptionText,
+                              { color: theme.colors.gray500 },
+                            ]}
+                          >
+                            {option.label}
+                          </Text>
+                        </View>
+                      ))}
                     </View>
-                  ))}
-                </View>
+                  ) : null}
+                </>
               ) : null}
-              <Text style={styles.itemQty} weight="semiBold">
+              <Text style={[styles.itemQty, { backgroundColor: theme.colors.gray100 }]}>
                 x{item.quantity}
               </Text>
             </View>
@@ -203,7 +228,7 @@ export default function OrderItems({ items, totalAmount, theme }: Props) {
               <Text style={styles.itemPrice} weight="semiBold">
                 {formatAmount(item.totalPrice, 2)}
               </Text>
-              {parsedOptions.length > 0 ? (
+              {parsedOptions.length > 0 && isExpanded ? (
                 <View style={styles.itemOptionPricesWrap}>
                   {parsedOptions.map((option, optionIndex) =>
                     typeof option.price === "number" ? (

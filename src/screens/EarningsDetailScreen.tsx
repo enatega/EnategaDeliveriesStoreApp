@@ -4,6 +4,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useAppTheme } from '../theme/ThemeProvider';
 import { MainStackParamList } from '../navigation/types';
 import EarningsActivityRow from '../components/EarningsActivityRow';
+import EarningsEmptyState from '../components/EarningsEmptyState';
 import CalendarRangePicker from '../components/CalendarRangePicker';
 import Text from '../components/Text';
 import {
@@ -68,6 +69,33 @@ export default function EarningsDetailScreen({ navigation }: Props) {
       setHasReachedListEnd(false);
     }
   }, [hasNextPage]);
+
+  if (earningsItems.length === 0) {
+    return (
+      <View style={[styles.flex, { backgroundColor: theme.colors.background }]}>
+        <View style={[styles.header, { backgroundColor: theme.colors.background }]}>
+          <Pressable onPress={() => navigation.goBack()} hitSlop={8} accessibilityLabel="Go back">
+            <View style={[styles.backChevron, { borderColor: theme.colors.text }]} />
+          </Pressable>
+          <Text variant="body" weight="bold" color={theme.colors.text} style={styles.headerTitle}>
+            {dateRangeLabel}
+          </Text>
+          <Pressable onPress={() => setCalendarOpen(true)} hitSlop={8} accessibilityLabel="Filter by date">
+            <FilterIcon color={theme.colors.text} />
+          </Pressable>
+        </View>
+        <ScrollView contentContainerStyle={styles.emptyContent} showsVerticalScrollIndicator={false}>
+          <EarningsEmptyState />
+        </ScrollView>
+        <CalendarRangePicker
+          visible={calendarOpen}
+          onClose={() => setCalendarOpen(false)}
+          onApply={(r) => setRange(r)}
+          initialRange={range}
+        />
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.flex, { backgroundColor: theme.colors.background }]}>
@@ -220,5 +248,9 @@ const styles = StyleSheet.create({
   },
   activityList: {
     paddingHorizontal: 16,
+  },
+  emptyContent: {
+    minHeight: 700,
+    paddingBottom: 32,
   },
 });
