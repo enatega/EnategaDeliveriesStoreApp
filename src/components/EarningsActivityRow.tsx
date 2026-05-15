@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import Text from './Text';
 import { useAppTheme } from '../theme/ThemeProvider';
 import VerticalList from './VerticalList';
+import { useCurrencyFormatter } from '../hooks/useCurrency';
 
 export type EarningsActivityItem = {
   date: string;
@@ -32,6 +33,7 @@ function Row({
   onPress?: (item: EarningsActivityItem) => void;
 }) {
   const { theme } = useAppTheme();
+  const { formatAmount } = useCurrencyFormatter();
 
   return (
     <Pressable
@@ -50,7 +52,7 @@ function Row({
       </Text>
 
       <Text variant="body" weight="bold" color={theme.colors.text} style={styles.amount}>
-        ${item.total_amount}
+        {formatAmount(item.total_amount, 2)}
       </Text>
       <View style={[styles.chevron, { borderColor: theme.colors.gray500 }]} />
     </Pressable>

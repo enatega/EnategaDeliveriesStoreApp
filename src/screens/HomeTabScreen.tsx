@@ -1,7 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { MainStackParamList } from '../navigation/types';
 import { TabItem } from '../components/TabBar';
 import TabBar from '../components/TabBar';
 import TabShell from '../components/TabShell';
@@ -32,12 +29,9 @@ const ORDER_TAB_SCREENS: Record<OrderTab, React.ReactElement> = {
 
 export default function HomeTabScreen() {
   const [activeOrderTab, setActiveOrderTab] = useState<OrderTab>('new');
-  const stackNavigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
-  const onNavigate = (screen: 'Language' | 'BankManagement' | 'WorkSchedule') =>
-    stackNavigation.navigate(screen);
 
   return (
-    <TabShell titleKey="orders_title" onNavigate={onNavigate}>
+    <TabShell titleKey="orders_title">
       <TabBar tabs={ORDER_TABS} activeTab={activeOrderTab} onTabPress={setActiveOrderTab} />
       {ORDER_TAB_SCREENS[activeOrderTab]}
     </TabShell>

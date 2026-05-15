@@ -103,7 +103,7 @@ export default function WithdrawBottomSheet({
           <View style={styles.inputSection}>
             <TextInput
               label={t("wallet_enter_amount")}
-              placeholder="$0.00"
+              placeholder="0.00"
               value={amount}
               onChangeText={(v) => {
                 setAmount(v);

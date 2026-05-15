@@ -4,12 +4,14 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useAppTheme } from '../theme/ThemeProvider';
 import { MainStackParamList } from '../navigation/types';
 import EarningsActivityRow from '../components/EarningsActivityRow';
+import EarningsEmptyState from '../components/EarningsEmptyState';
 import CalendarRangePicker from '../components/CalendarRangePicker';
 import Text from '../components/Text';
 import {
   useEarningsDailyQuery,
   useEarningsSummaryQuery,
 } from '../hooks/useEarningsQueries';
+import { useCurrencyFormatter } from '../hooks/useCurrency';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'EarningsDetail'>;
 
@@ -17,11 +19,16 @@ type Props = NativeStackScreenProps<MainStackParamList, 'EarningsDetail'>;
 
 const formatDate = (d: Date) =>
   `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}/${d.getFullYear()}`;
+const toApiDate = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+    d.getDate(),
+  ).padStart(2, "0")}`;
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
 export default function EarningsDetailScreen({ navigation }: Props) {
   const { theme } = useAppTheme();
+  const { formatAmount } = useCurrencyFormatter();
 
   const defaultStart = new Date(2023, 0, 21); // 01/21/2023
   const defaultEnd = new Date(2023, 1, 20);   // 02/20/2023
@@ -35,8 +42,8 @@ export default function EarningsDetailScreen({ navigation }: Props) {
     () => ({
       page: 1,
       limit: 10,
-      startDate: range.start.toISOString(),
-      endDate: range.end.toISOString(),
+      startDate: toApiDate(range.start),
+      endDate: toApiDate(range.end),
     }),
     [range.end, range.start],
   );
@@ -62,6 +69,33 @@ export default function EarningsDetailScreen({ navigation }: Props) {
       setHasReachedListEnd(false);
     }
   }, [hasNextPage]);
+
+  if (earningsItems.length === 0) {
+    return (
+      <View style={[styles.flex, { backgroundColor: theme.colors.background }]}>
+        <View style={[styles.header, { backgroundColor: theme.colors.background }]}>
+          <Pressable onPress={() => navigation.goBack()} hitSlop={8} accessibilityLabel="Go back">
+            <View style={[styles.backChevron, { borderColor: theme.colors.text }]} />
+          </Pressable>
+          <Text variant="body" weight="bold" color={theme.colors.text} style={styles.headerTitle}>
+            {dateRangeLabel}
+          </Text>
+          <Pressable onPress={() => setCalendarOpen(true)} hitSlop={8} accessibilityLabel="Filter by date">
+            <FilterIcon color={theme.colors.text} />
+          </Pressable>
+        </View>
+        <ScrollView contentContainerStyle={styles.emptyContent} showsVerticalScrollIndicator={false}>
+          <EarningsEmptyState />
+        </ScrollView>
+        <CalendarRangePicker
+          visible={calendarOpen}
+          onClose={() => setCalendarOpen(false)}
+          onApply={(r) => setRange(r)}
+          initialRange={range}
+        />
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.flex, { backgroundColor: theme.colors.background }]}>
@@ -119,7 +153,7 @@ export default function EarningsDetailScreen({ navigation }: Props) {
             <View style={styles.summaryItem}>
               <Text variant="caption" color={theme.colors.gray500}>Total Earnings</Text>
               <Text variant="subtitle" weight="bold" color={theme.colors.text}>
-                ${earningsSummaryData?.total_earnings ?? 0}
+                {formatAmount(earningsSummaryData?.total_earnings ?? 0, 2)}
               </Text>
             </View>
           </View>
@@ -214,5 +248,9 @@ const styles = StyleSheet.create({
   },
   activityList: {
     paddingHorizontal: 16,
+  },
+  emptyContent: {
+    minHeight: 700,
+    paddingBottom: 32,
   },
 });

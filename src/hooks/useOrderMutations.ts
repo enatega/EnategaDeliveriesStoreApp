@@ -5,6 +5,7 @@ import {
   useQueryClient,
   UseMutationOptions,
 } from "@tanstack/react-query";
+import { InfiniteData } from "@tanstack/react-query";
 import { orderServices } from "../api/orderServices";
 import { ApiError } from "../api/apiClient";
 import {
@@ -23,6 +24,7 @@ import {
   pickupOrdersKeys,
   completedOrdersKeys,
 } from "../api/queryKeys";
+import { PaginatedOrdersResponse } from "../api/orderServicesTypes";
 
 // ─── Accept Order ─────────────────────────────────────────────────
 export function useAcceptOrder(
@@ -100,10 +102,74 @@ export function useUpdatePreparingTime(
   return useMutation({
     mutationFn: ({ orderId, data }) =>
       orderServices.updatePreparingTime(orderId, data),
+    onMutate: async (variables) => {
+      await queryClient.cancelQueries({ queryKey: inProgressOrdersKeys.lists() });
+
+      const previousInProgress = queryClient.getQueriesData<
+        InfiniteData<PaginatedOrdersResponse>
+      >({ queryKey: inProgressOrdersKeys.lists() });
+
+      queryClient.setQueriesData<InfiniteData<PaginatedOrdersResponse>>(
+        { queryKey: inProgressOrdersKeys.lists() },
+        (previous) => {
+          if (!previous) return previous;
+
+          return {
+            ...previous,
+            pages: previous.pages.map((page) => ({
+              ...page,
+              items: page.items.map((item) => {
+                if (item.orderId !== variables.orderId) return item;
+
+                const currentRemaining = item.remainingSeconds ?? 0;
+                const bumpedRemaining = Math.max(currentRemaining, 0) + 5 * 60;
+
+                return {
+                  ...item,
+                  preparingTimeInMinutes: variables.data.preparingTimeInMinutes,
+                  remainingSeconds: bumpedRemaining,
+                };
+              }),
+            })),
+          };
+        },
+      );
+
+      return { previousInProgress };
+    },
+    onError: (error, variables, context) => {
+      context?.previousInProgress?.forEach(([queryKey, data]) => {
+        queryClient.setQueryData(queryKey, data);
+      });
+      options?.onError?.(error, variables, context);
+    },
     onSuccess: (response, variables, onMutateResult, context) => {
-      // After updating preparing time, the order remains in the same list,
-      // but we might want to refetch to show the updated value.
-      queryClient.invalidateQueries({ queryKey: inProgressOrdersKeys.lists() });
+      // Keep UI responsive by updating the local in-progress cache immediately.
+      queryClient.setQueriesData<InfiniteData<PaginatedOrdersResponse>>(
+        { queryKey: inProgressOrdersKeys.lists() },
+        (previous) => {
+          if (!previous) return previous;
+
+          return {
+            ...previous,
+            pages: previous.pages.map((page) => ({
+              ...page,
+              items: page.items.map((item) => {
+                if (item.orderId !== variables.orderId) return item;
+
+                const currentRemaining = item.remainingSeconds ?? 0;
+                const bumpedRemaining = Math.max(currentRemaining, 0) + 5 * 60;
+
+                return {
+                  ...item,
+                  preparingTimeInMinutes: response.preparingTimeInMinutes,
+                  remainingSeconds: bumpedRemaining,
+                };
+              }),
+            })),
+          };
+        },
+      );
       options?.onSuccess?.(response, variables, onMutateResult, context);
     },
     ...options,

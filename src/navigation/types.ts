@@ -8,6 +8,11 @@ export type AuthStackParamList = {
 export type MainStackParamList = {
   Home: NavigatorScreenParams<MainTabParamList> | undefined;
   Language: undefined;
+  ProfileDetails: undefined;
+  ProfileFieldEdit: {
+    field: 'address' | 'phone';
+    value: string;
+  };
   BankManagement: undefined;
   WorkSchedule: undefined;
   EarningsDetail: undefined;

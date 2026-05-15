@@ -40,7 +40,7 @@ export default function AcceptRejectButtons({
                     {isRejecting ? (
                         <ActivityIndicator size="small" color="#EF4444" />
                     ) : (
-                        <Text style={styles.btnRejectText} color="#EF4444" weight="semiBold">
+                        <Text style={styles.btnRejectText} color="#EF4444" weight="medium">
                             {t("order_card_reject")}
                         </Text>
                     )}
@@ -55,7 +55,7 @@ export default function AcceptRejectButtons({
                     {isAccepting ? (
                         <ActivityIndicator size="small" color={theme.colors.gray900} />
                     ) : (
-                        <Text style={styles.btnAcceptText} color={theme.colors.gray900} weight="semiBold">
+                        <Text style={styles.btnAcceptText} color={theme.colors.gray900} weight="medium">
                             {t("order_card_accept")}
                         </Text>
                     )}

@@ -12,6 +12,24 @@ import {
 
 const BASE_PATH = "/apps/deliveries/store/wallet/earnings";
 
+function withDateRangeParams(params: {
+  page?: number;
+  limit?: number;
+  startDate?: string;
+  endDate?: string;
+}) {
+  return {
+    page: params.page,
+    limit: params.limit,
+    ...(params.startDate
+      ? { startDate: params.startDate, start_date: params.startDate }
+      : {}),
+    ...(params.endDate
+      ? { endDate: params.endDate, end_date: params.endDate }
+      : {}),
+  };
+}
+
 export const earningsService = {
   getEarningsGraph: (params: GetEarningsGraphParams = {}) =>
     apiClient.get<EarningsGraphResponse>(
@@ -21,31 +39,16 @@ export const earningsService = {
   getEarningsDaily: (params: GetEarningsDailyParams = {}) =>
     apiClient.get<EarningsDailyResponse>(
       `${BASE_PATH}/daily`,
-      {
-        page: params.page,
-        limit: params.limit,
-        ...(params.startDate ? { startDate: params.startDate } : {}),
-        ...(params.endDate ? { endDate: params.endDate } : {}),
-      },
+      withDateRangeParams(params),
     ),
   getEarningsSummary: (params: GetEarningsSummaryParams) =>
     apiClient.get<EarningsSummaryResponse>(
       `${BASE_PATH}/summary`,
-      {
-        page: params.page,
-        limit: params.limit,
-        startDate: params.startDate,
-        endDate: params.endDate,
-      },
+      withDateRangeParams(params),
     ),
   getEarningsHistory: (params: GetEarningsHistoryParams) =>
     apiClient.get<EarningsHistoryResponse>(
       `${BASE_PATH}/history`,
-      {
-        page: params.page,
-        limit: params.limit,
-        startDate: params.startDate,
-        endDate: params.endDate,
-      },
+      withDateRangeParams(params),
     ),
 };

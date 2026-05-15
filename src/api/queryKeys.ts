@@ -84,6 +84,11 @@ export const walletKeys = {
     [...walletKeys.history(), params] as const,
 };
 
+export const currencyKeys = {
+  all: ["currency"] as const,
+  config: () => [...currencyKeys.all, "config"] as const,
+};
+
 export const profileKeys = {
   all: ['profile'] as const,
   profile: () => [...profileKeys.all, 'me'] as const,

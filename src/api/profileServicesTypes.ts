@@ -147,3 +147,17 @@ export interface UpdateBankManagementResponse {
     message: string;
     store_id: string;
 }
+
+// ──────────────────────────────────────────────────────────────────
+// Profile contact/basic info update
+// ──────────────────────────────────────────────────────────────────
+
+export type UpdateProfileInfoRequest = {
+    city?: string;
+    phoneNumber?: string;
+};
+
+export interface UpdateProfileInfoResponse {
+    message: string;
+    store_id: string;
+}
