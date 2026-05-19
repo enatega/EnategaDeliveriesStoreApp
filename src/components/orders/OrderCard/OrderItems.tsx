@@ -165,9 +165,17 @@ export default function OrderItems({ items, totalAmount, theme }: Props) {
             >
               {item.image ? (
                 <Image
-                  source={{ uri: item.image }}
+                  source={{ uri: encodeURI(item.image) }}
                   style={styles.foodImage}
                   resizeMode="cover"
+                  onError={(error) => {
+                    console.log("[OrderItems] image load failed", {
+                      productId: item.productId,
+                      name: item.name,
+                      image: item.image,
+                      error: error.nativeEvent?.error,
+                    });
+                  }}
                 />
               ) : (
                 <View

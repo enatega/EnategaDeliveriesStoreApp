@@ -5,6 +5,7 @@ import EmailIcon from '../components/icons/EmailIcon';
 import { useTranslations } from '../localization/LocalizationProvider';
 import { useAppTheme } from '../theme/ThemeProvider';
 import { useLoginMutation } from '../hooks/useAuthMutations';
+import { getExpoPushTokenForAuth } from '../api/expoPushNotification';
 
 export default function LoginScreen() {
   const { t } = useTranslations('app');
@@ -39,13 +40,18 @@ export default function LoginScreen() {
     return valid;
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!validate()) return;
-    loginMutation.mutate({
+
+    const expoPushToken = await getExpoPushTokenForAuth();
+    const loginPayload = {
       email: email.trim(),
       password,
-      device_push_token: 'fcm-token-optional',
-    });
+      device_push_token: expoPushToken ?? null,
+    };
+
+    console.log("[LoginScreen] login payload", loginPayload);
+    loginMutation.mutate(loginPayload);
   };
 
   const apiError = loginMutation.error?.message ?? null;

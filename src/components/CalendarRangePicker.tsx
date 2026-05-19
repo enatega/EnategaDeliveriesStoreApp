@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Text from './Text';
 import Button from './Button';
@@ -33,28 +33,34 @@ export default function CalendarRangePicker({ visible, onClose, onApply, initial
   const [selectedRange, setSelectedRange] = useState<DateRange | null>(initialRange ?? null);
   const [rangeStart, setRangeStart] = useState<Date | null>(null);
   const [mode, setMode] = useState<'calendar' | 'years'>('calendar');
+
+  useEffect(() => {
+    if (!visible) return;
+    setSelectedRange(initialRange ?? null);
+    setRangeStart(null);
+    setMode('calendar');
+    if (initialRange?.start) {
+      setViewYear(initialRange.start.getFullYear());
+      setViewMonth(initialRange.start.getMonth());
+    }
+  }, [initialRange, visible]);
+
   const visibleYears = useMemo(() => {
     const startYear = viewYear - Math.floor(YEAR_RANGE_SIZE / 2);
     return Array.from({ length: YEAR_RANGE_SIZE }, (_, index) => startYear + index);
   }, [viewYear]);
 
   const prevMonth = () => {
-    setSelectedRange(null);
-    setRangeStart(null);
     if (viewMonth === 0) { setViewMonth(11); setViewYear((y) => y - 1); }
     else setViewMonth((m) => m - 1);
   };
 
   const nextMonth = () => {
-    setSelectedRange(null);
-    setRangeStart(null);
     if (viewMonth === 11) { setViewMonth(0); setViewYear((y) => y + 1); }
     else setViewMonth((m) => m + 1);
   };
 
   const handleYearSelect = (year: number) => {
-    setSelectedRange(null);
-    setRangeStart(null);
     setViewYear(year);
     setMode('calendar');
   };

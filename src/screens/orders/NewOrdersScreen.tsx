@@ -7,6 +7,7 @@ import {
   useUpdatePreparingTime,
 } from "../../hooks/useOrderMutations";
 import SetPreparingTimeModal from "../../components/SetPreparingTimeModal";
+import { Order } from "../../api/orderServicesTypes";
 
 export default function NewOrdersScreen() {
   const [pendingOrderId, setPendingOrderId] = useState<string | null>(null);
@@ -29,6 +30,8 @@ export default function NewOrdersScreen() {
     if (!pendingOrderId) return;
 
     const orderId = pendingOrderId;
+    setModalVisible(false);
+    setPendingOrderId(null);
 
     try {
       await acceptMutation.mutateAsync(orderId);
@@ -36,10 +39,11 @@ export default function NewOrdersScreen() {
         orderId,
         data: { preparingTimeInMinutes: minutes },
       });
-      setModalVisible(false);
-      setPendingOrderId(null);
-    } catch {
-      // Keep modal open so user can retry if needed.
+    } catch (error) {
+      console.log("[NewOrdersScreen] failed to accept order / set preparing time", {
+        orderId,
+        error,
+      });
     }
   };
 
@@ -60,6 +64,9 @@ export default function NewOrdersScreen() {
       <GenericOrderList
         useOrdersHook={useNewOrders}
         renderActions={renderActions}
+        onOrdersDataChange={(orders: Order[]) => {
+          console.log("New Delivery orders data:", orders);
+        }}
       />
       <SetPreparingTimeModal
         visible={modalVisible}

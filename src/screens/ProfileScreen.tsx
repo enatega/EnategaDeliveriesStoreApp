@@ -2,6 +2,7 @@ import React from "react";
 import {
   ActivityIndicator,
   Alert,
+  Image,
   ImageBackground,
   Linking,
   Pressable,
@@ -125,11 +126,15 @@ export default function ProfileScreen() {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.contentContainer}>
         <ImageBackground source={profileBackground} style={styles.hero} imageStyle={styles.heroImage}>
           <View style={styles.profileRow}>
-            <View style={styles.avatarCircle}>
-              <Text weight="semiBold" color={theme.colors.primary} style={styles.avatarText}>
-                {initials}
-              </Text>
-            </View>
+            {profile.image?.trim() ? (
+              <Image source={{ uri: profile.image }} style={styles.avatarImage} />
+            ) : (
+              <View style={styles.avatarCircle}>
+                <Text weight="semiBold" color={theme.colors.primary} style={styles.avatarText}>
+                  {initials}
+                </Text>
+              </View>
+            )}
             <View style={styles.profileTextWrap}>
               <Text weight="semiBold" style={styles.profileName}>
                 {profile.name}
@@ -285,6 +290,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
+  },
+  avatarImage: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    backgroundColor: "#FFFFFF",
   },
   avatarText: {
     fontSize: 16,

@@ -23,8 +23,13 @@ export function useUpdateAvailability(
 ) {
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: (data) => profileService.updateAvailability(data),
+  return useMutation<
+    UpdateAvailabilityResponse,
+    ApiError,
+    UpdateAvailabilityRequest,
+    { previous: AvailabilityResponse | undefined }
+  >({
+    mutationFn: (data: UpdateAvailabilityRequest) => profileService.updateAvailability(data),
     onMutate: async (newData) => {
       // Cancel any outgoing refetches so they don't overwrite our optimistic update
       await queryClient.cancelQueries({ queryKey: profileKeys.availability() });

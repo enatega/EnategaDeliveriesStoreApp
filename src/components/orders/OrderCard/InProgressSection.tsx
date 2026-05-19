@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { View, Pressable, ActivityIndicator } from "react-native";
+import { View, Pressable, ActivityIndicator, Linking } from "react-native";
 import { useTranslations } from "../../../localization/LocalizationProvider";
 import Text from "../../Text";
-import { Feather } from "@expo/vector-icons";
+import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import Svg from "../../Svg";
 import CountdownTimer from "../../CountdownTimer";
 import { styles } from "./styles";
@@ -14,7 +14,10 @@ type Props = {
     riderStatus: string | null;
     riderStatusLabel: string | null;
     riderName: string | null;
+    riderPhone: string | null;
     riderVehicle: string | null;
+    unreadMessagesCount?: number;
+    onOpenChat?: () => void;
     preparingTimeInMinutes: number;
     remainingSeconds?: number | null;
     startTime: number | null;
@@ -32,7 +35,10 @@ export default function InProgressSection({
     riderStatus,
     riderStatusLabel,
     riderName,
+    riderPhone,
     riderVehicle,
+    unreadMessagesCount = 0,
+    onOpenChat,
     preparingTimeInMinutes,
     remainingSeconds,
     startTime,
@@ -56,6 +62,10 @@ export default function InProgressSection({
         return Math.max(0, preparingTimeInMinutes * 60);
     }, [preparingTimeInMinutes, remainingSeconds]);
     const [liveRemainingSeconds, setLiveRemainingSeconds] = useState(initialRemainingSeconds);
+    const handleCallRider = () => {
+        if (!riderPhone) return;
+        Linking.openURL(`tel:${riderPhone}`);
+    };
 
     useEffect(() => {
         setLiveRemainingSeconds(initialRemainingSeconds);
@@ -80,11 +90,35 @@ export default function InProgressSection({
                     </View>
                 )}
                 {riderName && (
-                    <View style={styles.riderInfoRow}>
-                        <Feather name="phone" size={14} color="#4B5563" />
-                        <Text style={styles.riderInfoText}>
-                            {riderName} {riderVehicle ? `• ${riderVehicle}` : ""}
-                        </Text>
+                    <View style={styles.riderDetailsBox}>
+                        <View style={styles.riderAssignedCompact}>
+                            <Text style={styles.riderNameText} weight="semiBold">
+                                {riderName}
+                            </Text>
+                            <View style={styles.actionButtonsRow}>
+                                <Pressable
+                                    style={[styles.iconBtn, !riderPhone && styles.iconBtnDisabled]}
+                                    onPress={handleCallRider}
+                                    disabled={!riderPhone}
+                                >
+                                    <Feather name="phone" size={20} color="#374151" />
+                                </Pressable>
+                                <Pressable style={styles.iconBtn} onPress={onOpenChat}>
+                                    <Feather name="message-circle" size={20} color="#374151" />
+                                    {unreadMessagesCount > 0 ? (
+                                        <View style={styles.badge}>
+                                            <Text style={styles.badgeText}>{unreadMessagesCount}</Text>
+                                        </View>
+                                    ) : null}
+                                </Pressable>
+                            </View>
+                        </View>
+                        <View style={styles.riderVehicleRow}>
+                            <MaterialCommunityIcons name="bike" size={16} color="#4B5563" />
+                            <Text style={styles.riderVehicleText}>
+                                {riderVehicle || "-"}
+                            </Text>
+                        </View>
                     </View>
                 )}
                 <View style={[styles.preparingStatusBox, { backgroundColor: theme.colors.green50 }]}>

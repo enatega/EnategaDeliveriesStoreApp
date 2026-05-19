@@ -5,7 +5,7 @@ export const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     padding: 16,
-    gap: 12,
+    gap: 10,
   },
   headerTopGrid: {
     flexDirection: "row",
@@ -39,6 +39,49 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     color: "#111827",
+  },
+  headerStatusRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 2,
+    marginBottom: 2,
+  },
+  headerStatusLabel: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: "#4B5563",
+  },
+  headerStatusBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: "#DBEAFE",
+    borderColor: "#93C5FD",
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 99,
+  },
+  headerStatusBadgeGreen: {
+    backgroundColor: "#D1FAE5",
+    borderColor: "#6EE7B7",
+  },
+  headerStatusBadgeAmber: {
+    backgroundColor: "#FEF3C7",
+    borderColor: "#FCD34D",
+  },
+  headerStatusText: {
+    fontSize: 12,
+    lineHeight: 16,
+    color: "#1D4ED8",
+    fontWeight: "500",
+  },
+  headerStatusTextGreen: {
+    color: "#047857",
+  },
+  headerStatusTextAmber: {
+    color: "#B45309",
   },
   customerRow: {
     flexDirection: "row",
@@ -112,7 +155,7 @@ export const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    marginVertical: 4.5,
+    marginVertical: 6,
   },
   itemsHeader: {
     flexDirection: "row",
@@ -241,8 +284,8 @@ export const styles = StyleSheet.create({
     gap: 8,
   },
   commentLabel: {
-    fontSize: 12,
-    lineHeight: 18,
+    fontSize: 14,
+    lineHeight: 20,
     color: "#4B5563",
   },
   commentText: {
@@ -363,15 +406,15 @@ export const styles = StyleSheet.create({
   },
   // Ready specific styles
   readyTopRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginTop: 12,
+    flexDirection: "column",
+    alignItems: "flex-start",
+    marginTop: 10,
+    gap: 6,
   },
   readyStatusColumn: {
     flex: 1,
-    gap: 8,
-    paddingRight: 8,
+    gap: 6,
+    paddingRight: 4,
   },
   readyRiderBadge: {
     flexDirection: "row",
@@ -385,7 +428,8 @@ export const styles = StyleSheet.create({
     borderRadius: 50,
   },
   readyRiderText: {
-    fontSize: 14,
+    fontSize: 12,
+    lineHeight: 16,
     color: "#059669",
     fontWeight: "500",
   },
@@ -401,24 +445,28 @@ export const styles = StyleSheet.create({
     borderRadius: 50,
   },
   pickupRiderText: {
-    fontSize: 14,
+    fontSize: 12,
+    lineHeight: 16,
     color: "#CA8A04",
     fontWeight: "500",
   },
   actionButtonsRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    gap: 8,
   },
   iconBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     borderWidth: 1,
     borderColor: "#E5E7EB",
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#FFFFFF",
+  },
+  iconBtnDisabled: {
+    opacity: 0.5,
   },
   badge: {
     position: "absolute",
@@ -439,18 +487,24 @@ export const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   riderDetailsBox: {
-    backgroundColor: "#F9FAFB",
-    marginHorizontal: -16,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    marginTop: 12,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: "#F3F4F6",
-    gap: 6,
+    backgroundColor: "#F3F4F6",
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginTop: 8,
+    width: "100%",
+    gap: 4,
   },
   riderNameText: {
-    fontSize: 15,
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  riderAssignedCompact: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 10,
+    flex: 1,
   },
   riderVehicleRow: {
     flexDirection: "row",
@@ -458,7 +512,9 @@ export const styles = StyleSheet.create({
     gap: 6,
   },
   riderVehicleText: {
-    fontSize: 13,
+    fontSize: 12,
+    lineHeight: 16,
+    color: "#4B5563",
   },
   btnConfirmPickup: {
     height: 48,
@@ -470,6 +526,21 @@ export const styles = StyleSheet.create({
   btnConfirmPickupText: {
     fontSize: 16,
     fontWeight: "600",
+  },
+  confirmPickupContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+  },
+  confirmPickupIconCircle: {
+    width: 18,
+    height: 18,
+    borderRadius: 14,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "transparent",
   },
   // Completed specific styles
   deliveredBadge: {

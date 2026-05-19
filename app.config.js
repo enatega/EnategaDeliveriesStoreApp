@@ -21,6 +21,7 @@ module.exports = {
         foregroundImage: "./assets/adaptive-icon.png",
         backgroundColor: "#ffffff",
       },
+      googleServicesFile: "./google-services.json",
       package: "com.enatega.deliveries.store",
       edgeToEdgeEnabled: true,
     },
@@ -33,7 +34,7 @@ module.exports = {
     runtimeVersion: {
       policy: "appVersion",
     },
-    plugins: ["expo-secure-store", "expo-font"],
+    plugins: ["expo-secure-store", "expo-font", "expo-notifications"],
     extra: {
       eas: {
         projectId: "5cf97681-9db5-457b-bf07-07c5ff3f3a9d",
