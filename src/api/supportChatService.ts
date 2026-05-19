@@ -5,7 +5,7 @@ import {
   SupportChatMessage,
 } from "./supportChatServiceTypes";
 
-const BASE_PATH = "/deliveries/support-chat";
+const BASE_PATH = "/apps/deliveries/chat";
 
 function normalizeMessage(raw: Record<string, unknown>): SupportChatMessage | null {
   const id =

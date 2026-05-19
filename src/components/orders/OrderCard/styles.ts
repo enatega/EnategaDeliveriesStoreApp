@@ -4,18 +4,18 @@ export const styles = StyleSheet.create({
   card: {
     borderRadius: 8,
     borderWidth: 1,
-    padding: 16,
-    gap: 10,
+    padding: 12,
+    gap: 8,
   },
   headerTopGrid: {
     flexDirection: "row",
     justifyContent: "space-between",
-    gap: 8,
+    gap: 6,
   },
   headerInfoItem: {
     flex: 1,
     flexDirection: "row",
-    gap: 10,
+    gap: 8,
     alignItems: "flex-start",
   },
   headerIconWrap: {
@@ -44,8 +44,8 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginTop: 2,
-    marginBottom: 2,
+    marginTop: 1,
+    marginBottom: 1,
   },
   headerStatusLabel: {
     fontSize: 14,
@@ -59,8 +59,8 @@ export const styles = StyleSheet.create({
     backgroundColor: "#DBEAFE",
     borderColor: "#93C5FD",
     borderWidth: 1,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
     borderRadius: 99,
   },
   headerStatusBadgeGreen: {
@@ -86,13 +86,20 @@ export const styles = StyleSheet.create({
   customerRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
+    gap: 8,
   },
   customerAvatar: {
     width: 48,
     height: 48,
     borderRadius: 24,
     backgroundColor: "#F3F4F6",
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+  },
+  customerAvatarImage: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     borderWidth: 1,
     borderColor: "#E5E7EB",
   },
@@ -113,7 +120,7 @@ export const styles = StyleSheet.create({
   addressRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
+    gap: 8,
   },
   rowIconWrap: {
     width: 36,
@@ -141,12 +148,12 @@ export const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E5E7EB",
     borderRadius: 6,
-    paddingHorizontal: 8,
-    paddingVertical: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 4,
     backgroundColor: "#F9FAFB",
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    gap: 4,
   },
   viewMapText: {
     fontSize: 12,
@@ -155,13 +162,13 @@ export const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    marginVertical: 6,
+    marginVertical: 4,
   },
   itemsHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 6,
-    marginTop: 2,
+    marginBottom: 4,
+    marginTop: 0,
   },
   colHeader: {
     fontSize: 12,
@@ -178,7 +185,7 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    marginBottom: 10,
+    marginBottom: 8,
   },
   foodImageBox: {
     width: 48,
@@ -197,7 +204,7 @@ export const styles = StyleSheet.create({
   },
   itemInfo: {
     flex: 1,
-    gap: 6,
+    gap: 4,
   },
   itemName: {
     fontSize: 14,
@@ -265,7 +272,42 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 4,
+    paddingVertical: 2,
+  },
+  billDetailsWrap: {
+    gap: 4,
+    paddingVertical: 2,
+
+  },
+  billHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  billHeaderTitle: {
+    fontSize: 13,
+    lineHeight: 18,
+    marginBottom: 4,
+  },
+  billRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 10,
+  },
+  billRowLabel: {
+    fontSize: 12,
+    lineHeight: 18,
+  },
+  billRowValue: {
+    fontSize: 12,
+    lineHeight: 18,
+    textAlign: "right",
+  },
+  billNoteText: {
+    fontSize: 11,
+    lineHeight: 16,
+    marginTop: 2,
   },
   totalLabel: {
     fontSize: 16,
@@ -279,9 +321,9 @@ export const styles = StyleSheet.create({
   },
   commentBox: {
     borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    gap: 6,
   },
   commentLabel: {
     fontSize: 14,
@@ -296,12 +338,12 @@ export const styles = StyleSheet.create({
   },
   actions: {
     flexDirection: "row",
-    gap: 16,
-    marginTop: 4,
+    gap: 10,
+    marginTop: 2,
   },
   btn: {
     flex: 1,
-    height: 48,
+    height: 42,
     borderRadius: 40,
     alignItems: "center",
     justifyContent: "center",
@@ -353,9 +395,9 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    padding: 12,
+    padding: 10,
     borderRadius: 6,
-    marginTop: 8,
+    marginTop: 6,
   },
   preparingLeft: {
     flexDirection: "row",
@@ -376,11 +418,11 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    marginTop: 12,
+    marginTop: 8,
   },
   btnPlusTime: {
-    paddingHorizontal: 20,
-    height: 48,
+    paddingHorizontal: 14,
+    height: 42,
     borderRadius: 40,
     borderWidth: 1,
     borderColor: "#E4E4E7",
@@ -395,7 +437,7 @@ export const styles = StyleSheet.create({
   },
   btnMarkReady: {
     flex: 1,
-    height: 48,
+    height: 42,
     borderRadius: 40,
     alignItems: "center",
     justifyContent: "center",
@@ -408,8 +450,8 @@ export const styles = StyleSheet.create({
   readyTopRow: {
     flexDirection: "column",
     alignItems: "flex-start",
-    marginTop: 10,
-    gap: 6,
+    marginTop: 8,
+    gap: 4,
   },
   readyStatusColumn: {
     flex: 1,
@@ -489,11 +531,11 @@ export const styles = StyleSheet.create({
   riderDetailsBox: {
     backgroundColor: "#F3F4F6",
     borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    marginTop: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    marginTop: 6,
     width: "100%",
-    gap: 4,
+    gap: 3,
   },
   riderNameText: {
     fontSize: 13,
@@ -517,11 +559,11 @@ export const styles = StyleSheet.create({
     color: "#4B5563",
   },
   btnConfirmPickup: {
-    height: 48,
+    height: 42,
     borderRadius: 40,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 12,
+    marginTop: 8,
   },
   btnConfirmPickupText: {
     fontSize: 16,
@@ -558,8 +600,8 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginTop: 8,
-    marginBottom: 16,
+    marginTop: 6,
+    marginBottom: 10,
   },
   completedRiderInfo: {
     gap: 4,
@@ -574,10 +616,10 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     backgroundColor: "#F9FAFB",
-    marginHorizontal: -16,
-    marginBottom: -16,
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    marginHorizontal: -12,
+    marginBottom: -12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
     borderBottomLeftRadius: 8,
     borderBottomRightRadius: 8,
     borderTopWidth: 1,
