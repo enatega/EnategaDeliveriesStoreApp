@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Image, Pressable, View } from "react-native";
 import { useTranslations } from "../../../localization/LocalizationProvider";
 import Text from "../../Text";
-import { OrderItem } from "../../../api/orderServicesTypes";
+import { OrderItem, OrderSummary } from "../../../api/orderServicesTypes";
 import { styles } from "./styles";
 import { useCurrencyFormatter } from "../../../hooks/useCurrency";
 import { Feather } from "@expo/vector-icons";
@@ -10,6 +10,7 @@ import { Feather } from "@expo/vector-icons";
 type Props = {
   items: OrderItem[];
   totalAmount: number;
+  orderSummary?: OrderSummary | null;
   theme: any;
 };
 
@@ -134,12 +135,29 @@ function parseSelectedOptions(selectedOptions: unknown): ParsedOption[] {
     .map((label) => ({ label }));
 }
 
-export default function OrderItems({ items, totalAmount, theme }: Props) {
+export default function OrderItems({ items, totalAmount, orderSummary, theme }: Props) {
   const { t } = useTranslations("app");
   const { formatAmount } = useCurrencyFormatter();
   const [expandedAddons, setExpandedAddons] = useState<Record<string, boolean>>({});
+  const [isBillExpanded, setIsBillExpanded] = useState(true);
 
   if (!items || items.length === 0) return null;
+
+  const subtotalValue =
+    typeof orderSummary?.itemSubtotal === "number" && Math.abs(orderSummary.itemSubtotal) > 0
+      ? orderSummary.itemSubtotal
+      : null;
+
+  const summaryRows = [
+    { key: "discountAmount", label: t("order_card_bill_discount"), value: orderSummary?.discountAmount },
+    { key: "taxAmount", label: t("order_card_bill_tax"), value: orderSummary?.taxAmount },
+    { key: "packingCharges", label: t("order_card_bill_packing"), value: orderSummary?.packingCharges },
+    { key: "deliveryFee", label: t("order_card_bill_delivery_fee"), value: orderSummary?.deliveryFee },
+    { key: "courierTip", label: t("order_card_bill_tip"), value: orderSummary?.courierTip },
+  ].filter((row) => typeof row.value === "number" && Math.abs(row.value ?? 0) > 0);
+
+  const resolvedTotal =
+    typeof orderSummary?.totalAmount === "number" ? orderSummary.totalAmount : totalAmount;
 
   return (
     <>
@@ -260,12 +278,62 @@ export default function OrderItems({ items, totalAmount, theme }: Props) {
         );
       })}
       <View style={[styles.divider, { backgroundColor: theme.colors.gray200 }]} />
+      {summaryRows.length > 0 || subtotalValue !== null ? (
+        <View style={styles.billDetailsWrap}>
+          <Pressable
+            style={styles.billHeaderRow}
+            onPress={() => setIsBillExpanded((prev) => !prev)}
+          >
+            <Text style={styles.billHeaderTitle} weight="semiBold" color={theme.colors.gray900}>
+              {t("order_card_bill_details")}
+            </Text>
+            <Feather
+              name={isBillExpanded ? "chevron-up" : "chevron-down"}
+              size={16}
+              color={theme.colors.gray600}
+            />
+          </Pressable>
+          {!isBillExpanded ? (
+            <View style={[styles.divider, { backgroundColor: theme.colors.gray200 }]} />
+          ) : null}
+          {subtotalValue !== null ? (
+            <View style={styles.billRow}>
+              <Text style={styles.billRowLabel} color={theme.colors.gray600}>
+                {t("order_card_bill_subtotal")}
+              </Text>
+              <Text style={styles.billRowValue} color={theme.colors.gray900}>
+                {formatAmount(subtotalValue, 2)}
+              </Text>
+            </View>
+          ) : null}
+          {isBillExpanded ? (
+            <>
+              {summaryRows.map((row) => (
+                <View key={row.key} style={styles.billRow}>
+                  <Text style={styles.billRowLabel} color={theme.colors.gray600}>
+                    {row.label}
+                  </Text>
+                  <Text style={styles.billRowValue} color={theme.colors.gray900}>
+                    {formatAmount(row.value ?? 0, 2)}
+                  </Text>
+                </View>
+              ))}
+              {orderSummary?.note ? (
+                <Text style={styles.billNoteText} color={theme.colors.gray500}>
+                  {orderSummary.note}
+                </Text>
+              ) : null}
+              <View style={[styles.divider, { backgroundColor: theme.colors.gray200 }]} />
+            </>
+          ) : null}
+        </View>
+      ) : null}
       <View style={styles.totalRow}>
         <Text style={styles.totalLabel} weight="semiBold">
           {t("order_card_total")}
         </Text>
         <Text style={styles.totalValue} weight="semiBold">
-          {formatAmount(totalAmount, 2)}
+          {formatAmount(resolvedTotal, 2)}
         </Text>
       </View>
     </>

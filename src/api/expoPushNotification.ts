@@ -19,6 +19,7 @@ async function ensureAndroidNotificationChannel() {
   await Notifications.setNotificationChannelAsync("default", {
     name: "default",
     importance: Notifications.AndroidImportance.MAX,
+    sound: "beep3.mp3",
   });
 }
 

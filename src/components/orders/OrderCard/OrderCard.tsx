@@ -16,6 +16,7 @@ import ReadyPickupSection from "./ReadyPickupSection";
 import CompletedSection from "./CompletedSection";
 import AcceptRejectButtons from "./AcceptRejectButtons";
 import { getReadableRiderStatus } from "./riderStatusLabel";
+import { resolveSupportChatBoxId } from "../../../api/supportChatSession";
 
 type Props = {
   order: Order;
@@ -73,8 +74,13 @@ export default function OrderCard({
   ]);
   const riderVehicleDisplay = resolveRiderVehicle(orderWithMeta);
   const handleOpenChat = () => {
+    const resolvedChatBoxId = chatBoxId ?? resolveSupportChatBoxId({
+      receiverId,
+      orderId: order.orderId,
+    });
+
     const params = {
-      chatBoxId: chatBoxId ?? null,
+      chatBoxId: resolvedChatBoxId ?? null,
       receiverId: receiverId ?? null,
       riderName: order.riderName ?? null,
       orderId: order.orderId,
@@ -103,7 +109,10 @@ export default function OrderCard({
 
   const isCompleted = order.status === OrderStatus.DELIVERED;
   const canMarkReady =
-    order.status === OrderStatus.RIDER_ASSIGNED || Boolean(order.riderName);
+    order.status === OrderStatus.ACCEPTED
+    || order.status === OrderStatus.PREPARING
+    || order.status === OrderStatus.RIDER_ASSIGNED
+    || Boolean(order.riderName);
   const headerStatusLabel =
     (order.status === OrderStatus.READY
       ? "Rider assigned"
@@ -129,11 +138,17 @@ export default function OrderCard({
       />
       <CustomerInfo
         customerName={order.customerName}
+        customerProfileImage={order.customerProfileImage}
         orderType={order.orderType}
         address={displayAddress}
         theme={theme}
       />
-      <OrderItems items={order.items} totalAmount={order.orderAmount} theme={theme} />
+      <OrderItems
+        items={order.items}
+        totalAmount={order.orderAmount}
+        orderSummary={order.orderSummary}
+        theme={theme}
+      />
       <CommentSection comment={order.customerComment} theme={theme} />
 
       {isInProgress && onMarkReady && onUpdatePreparingTime && (

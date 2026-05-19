@@ -3,6 +3,7 @@ import {
   ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
+  Linking,
   Platform,
   Pressable,
   StyleSheet,
@@ -10,10 +11,10 @@ import {
   View,
 } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { Feather } from "@expo/vector-icons";
 import { MainStackParamList } from "../navigation/types";
 import { useAppTheme } from "../theme/ThemeProvider";
 import { useTranslations } from "../localization/LocalizationProvider";
-import ScreenHeader from "../components/ScreenHeader";
 import Text from "../components/Text";
 import VerticalList from "../components/VerticalList";
 import { useAuth } from "../auth/AuthProvider";
@@ -21,6 +22,7 @@ import { useSendSupportChatMessageMutation, useSupportChatMessagesQuery } from "
 import { SupportChatMessage } from "../api/supportChatServiceTypes";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SocketReceivedMessage, storeOrdersSocketClient } from "../socket/storeOrdersSocket";
+import { cacheSupportChatBoxId, resolveSupportChatBoxId } from "../api/supportChatSession";
 
 type Props = NativeStackScreenProps<MainStackParamList, "StoreChat">;
 
@@ -29,23 +31,25 @@ export default function StoreChatScreen({ navigation, route }: Props) {
   const { t } = useTranslations("app");
   const insets = useSafeAreaInsets();
   const { session } = useAuth();
-  console.log("my session is :", session)
+
   const senderId = session.user?.id ?? "";
-  const [chatBoxId, setChatBoxId] = useState(route.params.chatBoxId ?? null);
+  const initialResolvedChatBoxId =
+    route.params.chatBoxId
+    ?? resolveSupportChatBoxId({
+      receiverId: route.params.receiverId ?? null,
+      orderId: route.params.orderId ?? null,
+    });
+  const [chatBoxId, setChatBoxId] = useState(initialResolvedChatBoxId ?? null);
   const [input, setInput] = useState("");
   const [socketMessages, setSocketMessages] = useState<SupportChatMessage[]>([]);
   const listRef = useRef<any>(null);
 
   const receiverId = route.params.receiverId ?? null;
   const riderName = route.params.riderName ?? t("chat_store");
-
-  useEffect(() => {
-    console.log("[StoreChatScreen] sender profile/session", {
-      senderId,
-      sessionUser: session.user,
-      profiles: session.profiles,
-    });
-  }, [senderId, session.profiles, session.user]);
+  const orderId = route.params.orderId ?? "";
+  const runtimeParams = route.params as MainStackParamList["StoreChat"] & Record<string, unknown>;
+  const orderAmount =
+    typeof runtimeParams.orderAmount === "number" ? runtimeParams.orderAmount : null;
 
   const {
     data: messages = [],
@@ -58,14 +62,33 @@ export default function StoreChatScreen({ navigation, route }: Props) {
   const sendMutation = useSendSupportChatMessageMutation();
 
   useEffect(() => {
+    const resolved =
+      route.params.chatBoxId
+      ?? resolveSupportChatBoxId({
+        receiverId,
+        orderId: orderId || null,
+      });
+
+    if (!resolved || resolved === chatBoxId) return;
+    setChatBoxId(resolved);
+  }, [chatBoxId, orderId, receiverId, route.params.chatBoxId]);
+
+  useEffect(() => {
+    if (!chatBoxId) return;
+    cacheSupportChatBoxId({
+      chatBoxId,
+      receiverId,
+      orderId: orderId || null,
+    });
+  }, [chatBoxId, orderId, receiverId]);
+
+  useEffect(() => {
     const unsubscribe = storeOrdersSocketClient.onReceiveMessage((message: SocketReceivedMessage) => {
       const isBetweenStoreAndRider =
-        (message.sender === senderId && message.receiver === receiverId) ||
-        (message.sender === receiverId && message.receiver === senderId);
+        (message.sender === senderId && message.receiver === receiverId)
+        || (message.sender === receiverId && message.receiver === senderId);
 
-      if (!isBetweenStoreAndRider) {
-        return;
-      }
+      if (!isBetweenStoreAndRider) return;
 
       const nextMessage: SupportChatMessage = {
         id: `${message.sender}-${message.receiver}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
@@ -76,7 +99,6 @@ export default function StoreChatScreen({ navigation, route }: Props) {
         createdAt: new Date().toISOString(),
       };
 
-      console.log("[StoreChatScreen] socket:receive-message", nextMessage);
       setSocketMessages((prev) => [...prev, nextMessage]);
       setTimeout(() => listRef.current?.scrollToEnd?.({ animated: true }), 50);
     });
@@ -84,22 +106,35 @@ export default function StoreChatScreen({ navigation, route }: Props) {
     return unsubscribe;
   }, [chatBoxId, receiverId, senderId]);
 
-  const mergedMessages = useMemo(
-    () => {
-      const byId = new Map<string, SupportChatMessage>();
-      for (const item of messages) {
-        byId.set(item.id, item);
-      }
-      for (const item of socketMessages) {
-        byId.set(item.id, item);
-      }
+  const mergedMessages = useMemo(() => {
+    const byId = new Map<string, SupportChatMessage>();
+    for (const item of messages) byId.set(item.id, item);
+    for (const item of socketMessages) byId.set(item.id, item);
 
-      return Array.from(byId.values()).sort(
-        (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
-      );
-    },
-    [messages, socketMessages],
-  );
+    return Array.from(byId.values()).sort(
+      (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+    );
+  }, [messages, socketMessages]);
+
+  const handleCall = async () => {
+    if (!receiverId) {
+      Alert.alert(t("chat_receiver_missing"));
+      return;
+    }
+
+    const fallbackNumber = String(runtimeParams.riderPhone ?? "").trim();
+    if (!fallbackNumber) {
+      Alert.alert(t("chat_receiver_missing"));
+      return;
+    }
+
+    const url = `tel:${fallbackNumber}`;
+    try {
+      await Linking.openURL(url);
+    } catch {
+      Alert.alert(t("chat_send_failed"));
+    }
+  };
 
   const handleSend = async () => {
     const text = input.trim();
@@ -115,19 +150,11 @@ export default function StoreChatScreen({ navigation, route }: Props) {
     }
 
     try {
-      console.log("[StoreChatScreen] send:start", {
-        senderId,
-        receiverId,
-        chatBoxId,
-        text,
-      });
-
-      const didEmit = storeOrdersSocketClient.sendMessage({
+      storeOrdersSocketClient.sendMessage({
         sender: senderId,
         receiver: receiverId,
         text,
       });
-      console.log("[StoreChatScreen] send:socketEmit", { didEmit });
 
       const response = await sendMutation.mutateAsync({
         senderId,
@@ -137,16 +164,26 @@ export default function StoreChatScreen({ navigation, route }: Props) {
 
       const nextChatBoxId =
         String(response.chatBoxId ?? (response.data as { chatBoxId?: string } | undefined)?.chatBoxId ?? "").trim() || null;
+      const effectiveChatBoxId = chatBoxId ?? nextChatBoxId;
 
       if (!chatBoxId && nextChatBoxId) {
         setChatBoxId(nextChatBoxId);
       }
 
+      cacheSupportChatBoxId({
+        chatBoxId: nextChatBoxId,
+        receiverId,
+        orderId: orderId || null,
+      });
+
       setInput("");
       setSocketMessages([]);
-      await refetch();
+      // Avoid refetching against a stale/null key. When a new chatBoxId is created,
+      // setting state above triggers the correct query automatically.
+      if (chatBoxId && effectiveChatBoxId) {
+        await refetch();
+      }
       setTimeout(() => listRef.current?.scrollToEnd?.({ animated: true }), 50);
-      listRef.current?.scrollToEnd?.({ animated: true });
     } catch (error) {
       console.log("[StoreChatScreen] send:error", error);
       Alert.alert(t("chat_send_failed"));
@@ -155,34 +192,78 @@ export default function StoreChatScreen({ navigation, route }: Props) {
 
   const renderBubble = ({ item }: { item: SupportChatMessage }) => {
     const isMine = item.senderId === senderId;
+    const time = formatTime(item.createdAt);
+
     return (
-      <View style={[styles.bubbleRow, isMine ? styles.bubbleRowMine : styles.bubbleRowOther]}>
+      <View style={[styles.messageGroup, isMine ? styles.messageGroupMine : styles.messageGroupOther]}>
+        {!isMine ? (
+          <Text style={styles.senderNameText} color={theme.colors.gray900}>
+            {riderName}
+          </Text>
+        ) : null}
+
         <View
           style={[
             styles.bubble,
             {
-              backgroundColor: isMine ? theme.colors.primary : "#F3F4F6",
+              backgroundColor: isMine ? "#F3F4F6" : "#E4FFD9",
             },
           ]}
         >
-          <Text style={styles.bubbleText} color={theme.colors.gray900}>
+          <Text style={styles.bubbleText} color="#1F2937">
             {item.text}
           </Text>
-          <Text style={styles.timeText} color={theme.colors.gray600}>
-            {formatTime(item.createdAt)}
+        </View>
+
+        <View style={[styles.metaRow, isMine ? styles.metaRowMine : styles.metaRowOther]}>
+          <Text style={styles.timeText} color={theme.colors.gray900}>
+            {time}
           </Text>
+          {isMine ? <Feather name="check" size={14} color={theme.colors.gray900} /> : null}
         </View>
       </View>
     );
   };
 
+  const formattedOrderId = orderId ? `#${orderId.slice(0, 6).toUpperCase()}` : "--";
+
   return (
     <KeyboardAvoidingView
-      style={[styles.flex, { backgroundColor: theme.colors.background }]}
+      style={[styles.flex, { backgroundColor: "#F3F4F6" }]}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 84 : 0}
     >
-      <ScreenHeader title={riderName} onBack={() => navigation.goBack()} />
+      <View style={[styles.headerWrap, { paddingTop: insets.top + 2, borderBottomColor: theme.colors.gray300 }]}> 
+        <View style={styles.headerRow}>
+          <Pressable onPress={() => navigation.goBack()} style={styles.headerIconBtn}>
+            <Feather name="x-circle" size={20} color={theme.colors.gray900} />
+          </Pressable>
+          <Text style={styles.headerTitle} weight="medium" color={theme.colors.gray900}>
+            {riderName}
+          </Text>
+          <Pressable onPress={handleCall} style={styles.headerIconBtn}>
+            <Feather name="phone" size={20} color={theme.colors.gray900} />
+          </Pressable>
+        </View>
+      </View>
+
+      <View style={styles.orderStripWrap}>
+        <View style={[styles.orderStrip, { borderTopColor: theme.colors.gray300, borderBottomColor: theme.colors.gray300 }]}> 
+          <View style={styles.orderLeftRow}>
+            <Text style={styles.orderLabel} weight="medium" color={theme.colors.gray900}>
+              {t("chat_order_number")}
+            </Text>
+            <View style={[styles.orderBadge, { backgroundColor: "#F3F4F6", borderColor: theme.colors.gray200 }]}> 
+              <Text style={styles.orderBadgeText} weight="medium" color={theme.colors.gray500}>
+                {formattedOrderId}
+              </Text>
+            </View>
+          </View>
+          <Text style={styles.orderAmountText} weight="medium" color={theme.colors.gray900}>
+            {orderAmount != null ? `$${orderAmount}` : ""}
+          </Text>
+        </View>
+      </View>
 
       {isLoading ? (
         <View style={styles.center}>
@@ -207,40 +288,39 @@ export default function StoreChatScreen({ navigation, route }: Props) {
 
       <View
         style={[
-          styles.inputBar,
+          styles.composerDock,
           {
-            borderTopColor: theme.colors.gray200,
-            backgroundColor: theme.colors.background,
-            paddingBottom: Math.max(insets.bottom + 5, 10),
+            backgroundColor: theme.colors.primary,
+            paddingBottom: Math.max(insets.bottom + 10, 16),
           },
         ]}
       >
-        <TextInput
-          value={input}
-          onChangeText={setInput}
-          placeholder={t("chat_enter_concern")}
-          placeholderTextColor={theme.colors.gray400}
-          style={[styles.input, { borderColor: theme.colors.gray200, color: theme.colors.text }]}
-          multiline
-          maxLength={500}
-        />
-        <Pressable
-          onPress={handleSend}
-          disabled={sendMutation.isPending || input.trim().length === 0}
-          style={[
-            styles.sendBtn,
-            { backgroundColor: theme.colors.primary },
-            (sendMutation.isPending || input.trim().length === 0) && styles.sendBtnDisabled,
-          ]}
-        >
-          {sendMutation.isPending ? (
-            <ActivityIndicator size="small" color={theme.colors.gray900} />
-          ) : (
-            <Text weight="semiBold" color={theme.colors.gray900}>
-              {t("chat_send")}
-            </Text>
-          )}
-        </Pressable>
+        <View style={[styles.composerInner, { backgroundColor: theme.colors.white }]}> 
+          <Feather name="plus-circle" size={22} color={theme.colors.gray500} />
+          <TextInput
+            value={input}
+            onChangeText={setInput}
+            placeholder={t("chat_reply_placeholder")}
+            placeholderTextColor={theme.colors.gray500}
+            style={[styles.input, { color: theme.colors.gray900 }]}
+            maxLength={500}
+          />
+          <Pressable
+            onPress={handleSend}
+            disabled={sendMutation.isPending || input.trim().length === 0}
+            style={styles.sendIconBtn}
+          >
+            {sendMutation.isPending ? (
+              <ActivityIndicator size="small" color={theme.colors.gray900} />
+            ) : (
+              <Feather
+                name="send"
+                size={20}
+                color={input.trim().length === 0 ? theme.colors.gray500 : theme.colors.gray900}
+              />
+            )}
+          </Pressable>
+        </View>
       </View>
     </KeyboardAvoidingView>
   );
@@ -249,73 +329,146 @@ export default function StoreChatScreen({ navigation, route }: Props) {
 function formatTime(value: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 }
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
+  headerWrap: {
+    backgroundColor: "#F3F4F6",
+    borderBottomWidth: 1,
+    paddingHorizontal: 16,
+    paddingBottom: 6,
+  },
+  headerRow: {
+    height: 34,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  headerIconBtn: {
+    width: 24,
+    height: 24,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  headerTitle: {
+    fontSize: 16,
+    lineHeight: 20,
+  },
+  orderStripWrap: {
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 8,
+    backgroundColor: "#F3F4F6",
+  },
+  orderStrip: {
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    paddingVertical: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  orderLeftRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  orderLabel: {
+    fontSize: 16,
+    lineHeight: 18,
+  },
+  orderBadge: {
+    borderWidth: 1,
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  orderBadgeText: {
+    fontSize: 12,
+    lineHeight: 18,
+  },
+  orderAmountText: {
+    fontSize: 16,
+    lineHeight: 18,
+  },
   messagesContent: {
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingTop: 8,
+    paddingBottom: 30,
     gap: 10,
-    paddingBottom: 24,
   },
   emptyWrap: {
     paddingTop: 80,
     alignItems: "center",
   },
-  bubbleRow: {
-    flexDirection: "row",
+  messageGroup: {
+    maxWidth: "80%",
+    gap: 4,
   },
-  bubbleRowMine: {
-    justifyContent: "flex-end",
+  messageGroupOther: {
+    alignSelf: "flex-start",
   },
-  bubbleRowOther: {
-    justifyContent: "flex-start",
+  messageGroupMine: {
+    alignSelf: "flex-end",
+  },
+  senderNameText: {
+    fontSize: 12,
+    lineHeight: 16,
   },
   bubble: {
-    maxWidth: "82%",
-    borderRadius: 14,
-    paddingHorizontal: 12,
+    borderRadius: 4,
+    paddingHorizontal: 10,
     paddingVertical: 10,
-    gap: 4,
   },
   bubbleText: {
     fontSize: 14,
     lineHeight: 20,
   },
-  timeText: {
-    fontSize: 11,
-    lineHeight: 14,
-    textAlign: "right",
-  },
-  inputBar: {
-    borderTopWidth: 1,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+  metaRow: {
     flexDirection: "row",
-    alignItems: "flex-end",
-    gap: 8,
+    alignItems: "center",
+    gap: 2,
+  },
+  metaRowOther: {
+    justifyContent: "flex-start",
+  },
+  metaRowMine: {
+    justifyContent: "flex-end",
+  },
+  timeText: {
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  composerDock: {
+    paddingHorizontal: 16,
+    paddingTop: 12,
+  },
+  composerInner: {
+    height: 56,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    shadowColor: "#000000",
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2,
   },
   input: {
     flex: 1,
-    minHeight: 44,
-    maxHeight: 120,
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
     fontSize: 14,
+    lineHeight: 20,
+    paddingVertical: 0,
   },
-  sendBtn: {
-    height: 44,
-    borderRadius: 12,
-    paddingHorizontal: 14,
+  sendIconBtn: {
+    width: 28,
+    height: 28,
     alignItems: "center",
     justifyContent: "center",
-  },
-  sendBtnDisabled: {
-    opacity: 0.6,
   },
 });

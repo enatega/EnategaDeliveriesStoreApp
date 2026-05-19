@@ -42,7 +42,19 @@ export interface OrderItem {
   quantity: number;
   unitPrice: number;
   totalPrice: number;
-  selectedOptions: string | null;
+  selectedOptions: unknown;
+}
+
+export interface OrderSummary {
+  orderNumber: string | null;
+  itemSubtotal: number | null;
+  discountAmount: number | null;
+  taxAmount: number | null;
+  packingCharges: number | null;
+  deliveryFee: number | null;
+  courierTip: number | null;
+  totalAmount: number | null;
+  note: string | null;
 }
 
 // ──────────────────────────────────────────────────────────────────
@@ -56,10 +68,12 @@ export interface Order {
   statusLabel: string; // e.g. "New Order", "In Progress", "Ready", "Pickup", "Completed"
   orderType: OrderType;
   customerName: string;
+  customerProfileImage: string | null;
   customerPhone: string | null;
   deliveryAddress: string | null;
   pickupAddress: string | null;
   orderAmount: number;
+  orderSummary?: OrderSummary | null;
   itemCount: number;
   items: OrderItem[];
   customerComment: string | null;

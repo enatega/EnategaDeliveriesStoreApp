@@ -22,6 +22,7 @@ import {
   type StoreOrderStatusUpdatedPayload,
   type StoreRiderStatusUpdatedPayload,
 } from "../socket/storeOrdersSocket";
+import { startOrderAlertLoop, stopOrderAlertLoop } from "./orderAlertSound";
 
 function matchesOrderTypeFilter(params: GetOrdersParams | undefined, nextType: Order["orderType"]) {
   const filter = params?.orderType;
@@ -60,7 +61,7 @@ function prependOrderToInfiniteData(
 export function useStoreOrderSocketSync() {
   const queryClient = useQueryClient();
   const { session, isAuthenticated } = useAuth();
-  const lastBeepAtRef = useRef(0);
+  const pendingAlertOrderIdsRef = useRef<Set<string>>(new Set());
 
   const token = session.token ?? null;
   const userId = session.user?.id ?? null;
@@ -70,6 +71,8 @@ export function useStoreOrderSocketSync() {
     storeOrdersSocketClient.updateSession({ token, userId });
 
     if (!isAuthenticated || !token) {
+      pendingAlertOrderIdsRef.current.clear();
+      void stopOrderAlertLoop();
       storeOrdersSocketClient.disconnect();
       return;
     }
@@ -77,6 +80,8 @@ export function useStoreOrderSocketSync() {
     storeOrdersSocketClient.connect();
 
     return () => {
+      pendingAlertOrderIdsRef.current.clear();
+      void stopOrderAlertLoop();
       storeOrdersSocketClient.disconnect();
     };
   }, [isAuthenticated, token, userId]);
@@ -94,11 +99,9 @@ export function useStoreOrderSocketSync() {
           orderId: payload?.order?.orderId,
         });
         if (payload.storeId !== currentStoreId) return;
-
-        const now = Date.now();
-        if (now - lastBeepAtRef.current > 1500) {
-          lastBeepAtRef.current = now;
-          void playNewOrderBeep();
+        if (payload?.order?.orderId) {
+          pendingAlertOrderIdsRef.current.add(payload.order.orderId);
+          void startOrderAlertLoop();
         }
 
         const incomingOrder = payload.order as Order;
@@ -127,6 +130,17 @@ export function useStoreOrderSocketSync() {
       (payload: StoreOrderStatusUpdatedPayload) => {
         console.log("[store][socket] order-status-updated received", payload);
         if (!payload?.orderId || !payload?.status) return;
+
+        if (
+          payload.status !== StoreOrderStatus.PENDING
+          && payload.status !== StoreOrderStatus.SCHEDULED
+        ) {
+          pendingAlertOrderIdsRef.current.delete(payload.orderId);
+          if (pendingAlertOrderIdsRef.current.size === 0) {
+            void stopOrderAlertLoop();
+          }
+        }
+
         invalidateStoreTabsForOrderStatus(queryClient, payload.status);
       },
     );
@@ -145,11 +159,15 @@ export function useStoreOrderSocketSync() {
       unsubscribeCreated();
       unsubscribeOrderStatus();
       unsubscribeRiderStatus();
+      pendingAlertOrderIdsRef.current.clear();
+      void stopOrderAlertLoop();
     };
   }, [currentStoreId, isAuthenticated, queryClient, token]);
 
   useEffect(() => {
     if (!isAuthenticated || !token) {
+      pendingAlertOrderIdsRef.current.clear();
+      void stopOrderAlertLoop();
       return undefined;
     }
 
@@ -159,7 +177,6 @@ export function useStoreOrderSocketSync() {
       appState = nextState;
 
       if (wasActive && nextState !== "active") {
-        storeOrdersSocketClient.disconnect();
         return;
       }
 
@@ -179,42 +196,6 @@ export function useStoreOrderSocketSync() {
       netInfoSubscription();
     };
   }, [isAuthenticated, token]);
-}
-
-async function playNewOrderBeep() {
-  try {
-    const expoAv = require("expo-av") as {
-      Audio?: {
-        Sound: {
-          createAsync: (
-            source: number,
-            initialStatus?: { shouldPlay?: boolean; volume?: number },
-          ) => Promise<{
-            sound: {
-              unloadAsync: () => Promise<void>;
-            };
-          }>;
-        };
-      };
-    };
-    const audio = expoAv?.Audio;
-    if (!audio?.Sound?.createAsync) {
-      console.log("[store][socket] beep skipped: expo-av is not available");
-      return;
-    }
-
-    const { sound } = await audio.Sound.createAsync(
-      require("../assets/sound/beep3.mp3"),
-      { shouldPlay: true, volume: 1 },
-    );
-
-    // Fire-and-forget cleanup to avoid leaking native sound instances.
-    setTimeout(() => {
-      void sound.unloadAsync().catch(() => undefined);
-    }, 3000);
-  } catch (error) {
-    console.log("[store][socket] beep failed", error);
-  }
 }
 
 function invalidateStoreTabsForOrderStatus(

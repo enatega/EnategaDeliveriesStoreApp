@@ -1,5 +1,5 @@
 import React from "react";
-import { Alert, Linking, Platform, Pressable, View } from "react-native";
+import { Alert, Image, Linking, Platform, Pressable, View } from "react-native";
 import { useTranslations } from "../../../localization/LocalizationProvider";
 import Text from "../../Text";
 import { styles } from "./styles";
@@ -7,12 +7,19 @@ import { Feather } from "@expo/vector-icons";
 
 type Props = {
     customerName: string;
+    customerProfileImage: string | null;
     orderType: "delivery" | "pickup";
     address: string | null;
     theme: any;
 };
 
-export default function CustomerInfo({ customerName, orderType, address, theme }: Props) {
+export default function CustomerInfo({
+    customerName,
+    customerProfileImage,
+    orderType,
+    address,
+    theme,
+}: Props) {
     const { t } = useTranslations("app");
     const mapQuery = address?.trim();
 
@@ -59,7 +66,11 @@ export default function CustomerInfo({ customerName, orderType, address, theme }
         <>
             <View style={[styles.divider, { backgroundColor: theme.colors.gray200 }]} />
             <View style={styles.customerRow}>
-                <View style={styles.customerAvatar} />
+                {customerProfileImage ? (
+                    <Image source={{ uri: customerProfileImage }} style={styles.customerAvatarImage} />
+                ) : (
+                    <View style={styles.customerAvatar} />
+                )}
                 <View style={styles.customerTextWrap}>
                     <Text style={styles.customerLabel}>{t("order_card_customer_name")}</Text>
                     <Text style={styles.customerName} weight="medium">

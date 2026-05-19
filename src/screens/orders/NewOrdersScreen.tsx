@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import GenericOrderList from "../../components/orders/GenericOrderList";
 import { useNewOrders } from "../../hooks/useOrderQueries";
 import {
@@ -7,7 +7,8 @@ import {
   useUpdatePreparingTime,
 } from "../../hooks/useOrderMutations";
 import SetPreparingTimeModal from "../../components/SetPreparingTimeModal";
-import { Order } from "../../api/orderServicesTypes";
+import { Order, OrderStatus } from "../../api/orderServicesTypes";
+import { startOrderAlertLoop, stopOrderAlertLoop } from "../../hooks/orderAlertSound";
 
 export default function NewOrdersScreen() {
   const [pendingOrderId, setPendingOrderId] = useState<string | null>(null);
@@ -59,14 +60,26 @@ export default function NewOrdersScreen() {
     isRejecting: rejectMutation.isPending,
   });
 
+  const handleOrdersDataChange = useCallback((orders: Order[]) => {
+    const hasPendingActionableOrder = orders.some((order) =>
+      (order.status === OrderStatus.PENDING || order.status === OrderStatus.SCHEDULED)
+      && order.canAccept,
+    );
+
+    if (hasPendingActionableOrder) {
+      void startOrderAlertLoop();
+      return;
+    }
+
+    void stopOrderAlertLoop();
+  }, []);
+
   return (
     <>
       <GenericOrderList
         useOrdersHook={useNewOrders}
         renderActions={renderActions}
-        onOrdersDataChange={(orders: Order[]) => {
-          console.log("New Delivery orders data:", orders);
-        }}
+        onOrdersDataChange={handleOrdersDataChange}
       />
       <SetPreparingTimeModal
         visible={modalVisible}

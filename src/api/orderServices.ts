@@ -102,10 +102,53 @@ function stripCourierComment(comment: string | null): string | null {
 }
 
 function normalizeOrder(order: Order): Order {
+  const runtimeOrder = order as unknown as Record<string, unknown>;
+  const customerProfileImageRaw =
+    (typeof runtimeOrder.customerProfileImage === "string" && runtimeOrder.customerProfileImage)
+    || (typeof runtimeOrder.customerProfilePicture === "string" && runtimeOrder.customerProfilePicture)
+    || (typeof runtimeOrder.customer_profile_image === "string" && runtimeOrder.customer_profile_image)
+    || (typeof runtimeOrder.customer_profile_picture === "string" && runtimeOrder.customer_profile_picture)
+    || null;
+
+  const summarySource =
+    (runtimeOrder.summary as Record<string, unknown> | undefined)
+    ?? (runtimeOrder.orderSummary as Record<string, unknown> | undefined)
+    ?? (runtimeOrder.order_summary as Record<string, unknown> | undefined);
+
+  const toNullableNumber = (value: unknown): number | null => {
+    if (typeof value === "number" && Number.isFinite(value)) return value;
+    if (typeof value === "string" && value.trim()) {
+      const parsed = Number(value);
+      if (Number.isFinite(parsed)) return parsed;
+    }
+    return null;
+  };
+
+  const orderSummary = summarySource
+    ? {
+      orderNumber:
+        typeof summarySource.orderNumber === "string"
+          ? summarySource.orderNumber
+          : typeof summarySource.order_number === "string"
+            ? summarySource.order_number
+            : null,
+      itemSubtotal: toNullableNumber(summarySource.itemSubtotal ?? summarySource.item_subtotal),
+      discountAmount: toNullableNumber(summarySource.discountAmount ?? summarySource.discount_amount),
+      taxAmount: toNullableNumber(summarySource.taxAmount ?? summarySource.tax_amount),
+      packingCharges: toNullableNumber(summarySource.packingCharges ?? summarySource.packing_charges),
+      deliveryFee: toNullableNumber(summarySource.deliveryFee ?? summarySource.delivery_fee),
+      courierTip: toNullableNumber(summarySource.courierTip ?? summarySource.courier_tip),
+      totalAmount: toNullableNumber(summarySource.totalAmount ?? summarySource.total_amount),
+      note: typeof summarySource.note === "string" ? summarySource.note : null,
+    }
+    : null;
+
   return {
     ...order,
+    customerProfileImage: normalizeImageUrl(customerProfileImageRaw),
     items: order.items.map(normalizeOrderItem),
     customerComment: stripCourierComment(order.customerComment),
+    orderSummary,
   };
 }
 

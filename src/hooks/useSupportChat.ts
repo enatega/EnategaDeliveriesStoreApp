@@ -16,10 +16,18 @@ export function useSupportChatMessagesQuery({
   chatBoxId,
   ...options
 }: UseSupportChatMessagesOptions) {
+  const normalizedChatBoxId = String(chatBoxId ?? "").trim();
+  const hasValidChatBoxId =
+    normalizedChatBoxId.length > 0
+    && normalizedChatBoxId.toLowerCase() !== "null";
+
   return useQuery<SupportChatMessage[], ApiError>({
-    queryKey: supportChatKeys.messagesByChatBox(chatBoxId ?? "unknown"),
-    queryFn: () => supportChatService.getMessages(chatBoxId as string),
-    enabled: Boolean(chatBoxId),
+    queryKey: supportChatKeys.messagesByChatBox(hasValidChatBoxId ? normalizedChatBoxId : "unknown"),
+    queryFn: () => {
+      if (!hasValidChatBoxId) return Promise.resolve([]);
+      return supportChatService.getMessages(normalizedChatBoxId);
+    },
+    enabled: hasValidChatBoxId,
     staleTime: 30 * 1000,
     ...options,
   });
