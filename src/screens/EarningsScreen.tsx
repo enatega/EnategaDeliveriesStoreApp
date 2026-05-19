@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useAppTheme } from '../theme/ThemeProvider';
 import { MainStackParamList } from '../navigation/types';
@@ -36,6 +36,7 @@ export default function EarningsScreen({ navigation }: any) {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    isLoading: isDailyLoading,
   } = useEarningsDailyQuery({
     params: { page: 1, limit: 10 },
   });
@@ -53,6 +54,14 @@ export default function EarningsScreen({ navigation }: any) {
   const handleSeeMore = () => navigation?.navigate?.('EarningsDetail');
   const handleRowPress = (item: { date: string }) =>
     navigation?.navigate?.('EarningsOrderDetail', { date: item.date });
+
+  if (isDailyLoading && !earningsDailyData) {
+    return (
+      <View style={[styles.loaderContainer, { backgroundColor: theme.colors.background }]}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+      </View>
+    );
+  }
 
   if (earningsItems.length === 0) {
     return (
@@ -118,6 +127,11 @@ export default function EarningsScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   content: {
     paddingBottom: 32,
   },

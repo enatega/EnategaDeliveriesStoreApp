@@ -8,6 +8,7 @@ import BankManagementScreen from '../screens/BankManagementScreen';
 import WorkScheduleScreen from '../screens/WorkScheduleScreen';
 import EarningsDetailScreen from '../screens/EarningsDetailScreen';
 import EarningsOrderDetailScreen from '../screens/EarningsOrderDetailScreen';
+import StoreChatScreen from '../screens/StoreChatScreen';
 import { MainStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
@@ -23,6 +24,7 @@ export default function MainNavigator() {
       <Stack.Screen name="WorkSchedule" component={WorkScheduleScreen} options={{ headerShown: false }} />
       <Stack.Screen name="EarningsDetail" component={EarningsDetailScreen} options={{ headerShown: false }} />
       <Stack.Screen name="EarningsOrderDetail" component={EarningsOrderDetailScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="StoreChat" component={StoreChatScreen} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 }

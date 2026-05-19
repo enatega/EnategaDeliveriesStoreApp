@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useAppTheme } from '../theme/ThemeProvider';
 import { MainStackParamList } from '../navigation/types';
@@ -7,6 +7,7 @@ import EarningsActivityRow from '../components/EarningsActivityRow';
 import EarningsEmptyState from '../components/EarningsEmptyState';
 import CalendarRangePicker from '../components/CalendarRangePicker';
 import Text from '../components/Text';
+import { useTranslations } from '../localization/LocalizationProvider';
 import {
   useEarningsDailyQuery,
   useEarningsSummaryQuery,
@@ -28,10 +29,12 @@ const toApiDate = (d: Date) =>
 
 export default function EarningsDetailScreen({ navigation }: Props) {
   const { theme } = useAppTheme();
+  const { t } = useTranslations("app");
   const { formatAmount } = useCurrencyFormatter();
 
-  const defaultStart = new Date(2023, 0, 21); // 01/21/2023
-  const defaultEnd = new Date(2023, 1, 20);   // 02/20/2023
+  const defaultEnd = new Date();
+  const defaultStart = new Date(defaultEnd);
+  defaultStart.setDate(defaultEnd.getDate() - 27);
 
   const [range, setRange] = useState({ start: defaultStart, end: defaultEnd });
   const [calendarOpen, setCalendarOpen] = useState(false);
@@ -52,6 +55,7 @@ export default function EarningsDetailScreen({ navigation }: Props) {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    isLoading: isDailyLoading,
   } = useEarningsDailyQuery({
     params: dateRangeParams,
     staleTime: Infinity,
@@ -64,11 +68,25 @@ export default function EarningsDetailScreen({ navigation }: Props) {
     params: dateRangeParams,
     staleTime: Infinity,
   });
+
+  const applyRange = (nextRange: { start: Date; end: Date }) => {
+    setRange(nextRange);
+    setHasReachedListEnd(false);
+  };
+
   useEffect(() => {
     if (hasNextPage) {
       setHasReachedListEnd(false);
     }
   }, [hasNextPage]);
+
+  if (isDailyLoading && !earningsDailyData) {
+    return (
+      <View style={[styles.loaderContainer, { backgroundColor: theme.colors.background }]}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+      </View>
+    );
+  }
 
   if (earningsItems.length === 0) {
     return (
@@ -77,9 +95,14 @@ export default function EarningsDetailScreen({ navigation }: Props) {
           <Pressable onPress={() => navigation.goBack()} hitSlop={8} accessibilityLabel="Go back">
             <View style={[styles.backChevron, { borderColor: theme.colors.text }]} />
           </Pressable>
-          <Text variant="body" weight="bold" color={theme.colors.text} style={styles.headerTitle}>
-            {dateRangeLabel}
-          </Text>
+          <View style={styles.headerTitleWrap}>
+            <Text variant="body" weight="bold" color={theme.colors.text} style={styles.headerTitle}>
+              {t("nav_earnings")}
+            </Text>
+            <Text variant="caption" color={theme.colors.gray500} style={styles.headerSubtitle}>
+              {dateRangeLabel}
+            </Text>
+          </View>
           <Pressable onPress={() => setCalendarOpen(true)} hitSlop={8} accessibilityLabel="Filter by date">
             <FilterIcon color={theme.colors.text} />
           </Pressable>
@@ -90,7 +113,7 @@ export default function EarningsDetailScreen({ navigation }: Props) {
         <CalendarRangePicker
           visible={calendarOpen}
           onClose={() => setCalendarOpen(false)}
-          onApply={(r) => setRange(r)}
+          onApply={applyRange}
           initialRange={range}
         />
       </View>
@@ -105,9 +128,14 @@ export default function EarningsDetailScreen({ navigation }: Props) {
           <View style={[styles.backChevron, { borderColor: theme.colors.text }]} />
         </Pressable>
 
-        <Text variant="body" weight="bold" color={theme.colors.text} style={styles.headerTitle}>
-          {dateRangeLabel}
-        </Text>
+        <View style={styles.headerTitleWrap}>
+          <Text variant="body" weight="bold" color={theme.colors.text} style={styles.headerTitle}>
+            {t("nav_earnings")}
+          </Text>
+          <Text variant="caption" color={theme.colors.gray500} style={styles.headerSubtitle}>
+            {dateRangeLabel}
+          </Text>
+        </View>
 
         <Pressable
           onPress={() => setCalendarOpen(true)}
@@ -175,7 +203,7 @@ export default function EarningsDetailScreen({ navigation }: Props) {
       <CalendarRangePicker
         visible={calendarOpen}
         onClose={() => setCalendarOpen(false)}
-        onApply={(r) => setRange(r)}
+        onApply={applyRange}
         initialRange={range}
       />
     </View>
@@ -205,12 +233,21 @@ const filterStyles = StyleSheet.create({
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
     gap: 8,
+  },
+  headerTitleWrap: {
+    flex: 1,
+    alignItems: 'center',
   },
   backChevron: {
     width: 10,
@@ -220,9 +257,10 @@ const styles = StyleSheet.create({
     transform: [{ rotate: '45deg' }],
   },
   headerTitle: {
-    flex: 1,
-    textAlign: 'center',
     fontSize: 15,
+  },
+  headerSubtitle: {
+    marginTop: 2,
   },
   summaryCard: {
     margin: 16,

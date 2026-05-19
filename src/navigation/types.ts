@@ -17,4 +17,10 @@ export type MainStackParamList = {
   WorkSchedule: undefined;
   EarningsDetail: undefined;
   EarningsOrderDetail: { date: string };
+  StoreChat: {
+    chatBoxId?: string | null;
+    receiverId?: string | null;
+    riderName?: string | null;
+    orderId?: string;
+  };
 };

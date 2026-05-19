@@ -67,8 +67,17 @@ export interface Order {
   preparationStartedAt: string | null;
   remainingSeconds?: number;
   riderName: string | null;
+  riderId?: string | null;
   riderPhone: string | null;
   riderVehicle: string | null;
+  riderVehicleDetails?: {
+    name?: string | null;
+    colour?: string | null;
+    vehicleNo?: string | null;
+    vehicle_name?: string | null;
+    vehicle_colour?: string | null;
+    vehicle_no?: string | null;
+  } | null;
   riderArrived: boolean;
   riderStatus: string | null;
   riderStatusLabel: string | null;

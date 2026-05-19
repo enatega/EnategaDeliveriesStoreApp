@@ -3,6 +3,7 @@ import { Alert } from "react-native";
 import GenericOrderList from "../../components/orders/GenericOrderList";
 import { useInProgressOrders } from "../../hooks/useOrderQueries";
 import {
+  useRejectOrder,
   useUpdateOrderStatus,
   useUpdatePreparingTime,
 } from "../../hooks/useOrderMutations";
@@ -10,6 +11,7 @@ import { OrderStatus } from "../../api/orderServicesTypes";
 
 export default function InProgressScreen() {
   const updateStatus = useUpdateOrderStatus();
+  const rejectMutation = useRejectOrder();
   const updateTime = useUpdatePreparingTime({
     onMutate: (variables) => {
       console.log("[InProgressScreen] updatePreparingTime onMutate", variables);
@@ -42,10 +44,15 @@ export default function InProgressScreen() {
     });
     updateTime.mutate({ orderId, data: { preparingTimeInMinutes: minutes } });
   };
+  const handleReject = (orderId: string) => {
+    rejectMutation.mutate(orderId);
+  };
 
   const renderActions = () => ({
+    onReject: handleReject,
     onMarkReady: handleMarkReady,
     onUpdatePreparingTime: handleUpdatePreparingTime,
+    isRejecting: rejectMutation.isPending,
     isMarkingReady: updateStatus.isPending,
     isUpdatingTime: updateTime.isPending,
   });

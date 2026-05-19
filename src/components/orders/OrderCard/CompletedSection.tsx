@@ -1,17 +1,25 @@
 import React from "react";
 import { View, Pressable } from "react-native";
 import Text from "../../Text";
-import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 import { styles } from "./styles";
 import { useTranslations } from "../../../localization/LocalizationProvider";
 
 type Props = {
     riderName: string | null;
     createdAt: string;
+    unreadMessagesCount?: number;
+    onOpenChat?: () => void;
     theme: any;
 };
 
-export default function CompletedSection({ riderName, createdAt, theme }: Props) {
+export default function CompletedSection({
+    riderName,
+    createdAt,
+    unreadMessagesCount = 0,
+    onOpenChat,
+    theme,
+}: Props) {
     const dateStr = new Date(createdAt).toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
@@ -38,11 +46,13 @@ export default function CompletedSection({ riderName, createdAt, theme }: Props)
                     <Pressable style={styles.iconBtn}>
                         <Feather name="phone" size={20} color="#374151" />
                     </Pressable>
-                    <Pressable style={styles.iconBtn}>
-                        <MaterialCommunityIcons name="message-outline" size={20} color="#374151" />
-                        <View style={styles.badge}>
-                            <Text style={styles.badgeText}>1</Text>
-                        </View>
+                    <Pressable style={styles.iconBtn} onPress={onOpenChat}>
+                        <Feather name="message-circle" size={20} color="#374151" />
+                        {unreadMessagesCount > 0 ? (
+                            <View style={styles.badge}>
+                                <Text style={styles.badgeText}>{unreadMessagesCount}</Text>
+                            </View>
+                        ) : null}
                     </Pressable>
                 </View>
             </View>
