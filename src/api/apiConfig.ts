@@ -1,6 +1,9 @@
+const baseUrl = process.env.EXPO_PUBLIC_API_BASE_URL;
+if (!baseUrl) {
+  throw new Error('Missing EXPO_PUBLIC_API_BASE_URL environment variable');
+}
+
 export const apiConfig = {
-  baseUrl:
-    process.env.EXPO_PUBLIC_API_BASE_URL ??
-    'https://enatega-super-app-production.up.railway.app/api/v1',
+  baseUrl,
   timeoutMs: 15_000,
 };
