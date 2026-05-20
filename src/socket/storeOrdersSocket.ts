@@ -20,19 +20,19 @@ type StoreHomeOrderCardDto = {
   orderId: string;
   orderCode: string;
   status:
-    | "scheduled"
-    | "pending"
-    | "accepted"
-    | "preparing"
-    | "ready"
-    | "rider_assigned"
-    | "picked_up"
-    | "out_for_delivery"
-    | "arrived"
-    | "delivered"
-    | "cancelled"
-    | "rejected"
-    | "failed";
+  | "scheduled"
+  | "pending"
+  | "accepted"
+  | "preparing"
+  | "ready"
+  | "rider_assigned"
+  | "picked_up"
+  | "out_for_delivery"
+  | "arrived"
+  | "delivered"
+  | "cancelled"
+  | "rejected"
+  | "failed";
   statusLabel: string;
   orderType: "delivery" | "pickup";
   customerName: string;
@@ -51,6 +51,7 @@ type StoreHomeOrderCardDto = {
     selectedOptions: string | null;
   }>;
   customerComment: string | null;
+  restaurantNote: string | null;
   preparingTimeInMinutes: number | null;
   preparationStartedAt: string | null;
   remainingSeconds: number | null;
@@ -73,19 +74,19 @@ export type StoreHomeOrderCreatedPayload = {
 export type StoreOrderStatusUpdatedPayload = {
   orderId: string;
   status:
-    | "scheduled"
-    | "pending"
-    | "accepted"
-    | "preparing"
-    | "ready"
-    | "rider_assigned"
-    | "picked_up"
-    | "out_for_delivery"
-    | "arrived"
-    | "delivered"
-    | "cancelled"
-    | "rejected"
-    | "failed";
+  | "scheduled"
+  | "pending"
+  | "accepted"
+  | "preparing"
+  | "ready"
+  | "rider_assigned"
+  | "picked_up"
+  | "out_for_delivery"
+  | "arrived"
+  | "delivered"
+  | "cancelled"
+  | "rejected"
+  | "failed";
   riderStatus: string | null;
   riderId: string | null;
   updatedAt: string;
@@ -108,8 +109,18 @@ function normalizeUrl(url: string) {
   return url.endsWith("/") ? url.slice(0, -1) : url;
 }
 
+function getApiOrigin() {
+  try {
+    return new URL(apiConfig.baseUrl).origin;
+  } catch {
+    return "";
+  }
+}
+
 function buildSocketUrl() {
-  const baseUrl = normalizeUrl(process.env.EXPO_PUBLIC_SOCKET_URL ?? apiConfig.baseUrl);
+  const configuredSocketUrl = process.env.EXPO_PUBLIC_SOCKET_URL;
+  const fallbackBaseUrl = getApiOrigin() || apiConfig.baseUrl;
+  const baseUrl = normalizeUrl(configuredSocketUrl ?? fallbackBaseUrl);
   return `${baseUrl}/deliveries`;
 }
 
@@ -148,7 +159,26 @@ class StoreOrdersSocketClient {
     });
 
     this.socket.on("connect", () => {
+      console.log("[Socket] Connected", {
+        id: this.socket?.id,
+        url: buildSocketUrl(),
+      });
       this.emitAddUser(this.socket as Socket);
+    });
+    this.socket.on("connect_error", (error) => {
+      console.log("[Socket] Connection error", {
+        message: error?.message,
+        url: buildSocketUrl(),
+        path: process.env.EXPO_PUBLIC_SOCKET_PATH ?? "/socket.io",
+        hasToken: Boolean(this.token),
+        userId: this.userId,
+      });
+    });
+    this.socket.on("disconnect", (reason) => {
+      console.log("[Socket] Disconnected", { reason });
+    });
+    this.socket.on("reconnect_attempt", (attemptNumber) => {
+      console.log("[Socket] Reconnect attempt", { attemptNumber });
     });
 
     return this.socket;
@@ -170,9 +200,18 @@ class StoreOrdersSocketClient {
   connect(options?: SocketOptionsInput) {
     const socket = this.ensureSocket(options);
 
-    if (!this.token) return socket;
+    if (!this.token) {
+      console.log("[Socket] Connect skipped: missing token");
+      return socket;
+    }
 
     if (!socket.connected) {
+      console.log("[Socket] Connecting", {
+        url: buildSocketUrl(),
+        path: process.env.EXPO_PUBLIC_SOCKET_PATH ?? "/socket.io",
+        hasToken: Boolean(this.token),
+        userId: this.userId,
+      });
       socket.connect();
     }
 
@@ -192,6 +231,12 @@ class StoreOrdersSocketClient {
     if (!this.socket) return;
 
     this.socket.auth = this.buildAuth(this.token);
+    console.log("[Socket] Session updated", {
+      tokenChanged,
+      hasToken: Boolean(this.token),
+      userId: this.userId,
+      connected: this.socket.connected,
+    });
 
     if (!this.token) {
       this.disconnect();
@@ -231,7 +276,6 @@ class StoreOrdersSocketClient {
 
   sendMessage(message: SocketSentMessage) {
     const socket = this.socket;
-
     if (!socket?.connected) {
       console.log("[Socket] Send message skipped because socket is not connected", {
         receiver: message.receiver,
@@ -240,12 +284,40 @@ class StoreOrdersSocketClient {
       return false;
     }
 
-    console.log("[Socket] Sending socket message", {
+    const payload = {
       receiver: message.receiver,
       sender: message.sender,
+      textLength: message.text?.length ?? 0,
+      socketId: socket.id,
+    };
+
+    console.log("[Socket] Emitting send-message", payload);
+    socket.timeout(5000).emit("send-message", message, (err: unknown, response: unknown) => {
+      if (err) {
+        console.log("[Socket] send-message ack timeout/error", {
+          ...payload,
+          error: err,
+        });
+        return;
+      }
+
+      console.log("[Socket] send-message ack received", {
+        ...payload,
+        response,
+      });
     });
-    socket.emit("send-message", message);
     return true;
+  }
+
+  getConnectionState() {
+    return {
+      connected: Boolean(this.socket?.connected),
+      id: this.socket?.id ?? null,
+      url: buildSocketUrl(),
+      path: process.env.EXPO_PUBLIC_SOCKET_PATH ?? "/socket.io",
+      hasToken: Boolean(this.token),
+      userId: this.userId,
+    };
   }
 }
 

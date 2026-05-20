@@ -85,26 +85,20 @@ export default function OrderHeader({
                         </Text>
                     </View>
                 </View>
-                {status === OrderStatus.DELIVERED ? (
-                    <View style={styles.deliveredBadge}>
-                        <Text style={styles.deliveredBadgeText}>{deliveredBadgeLabel || t("order_card_delivered")}</Text>
+                <View style={styles.headerInfoItem}>
+                    <View style={styles.headerIconWrap}>
+                        <Feather name="calendar" size={16} color="#111827" />
                     </View>
-                ) : (
-                    <View style={styles.headerInfoItem}>
-                        <View style={styles.headerIconWrap}>
-                            <Feather name="calendar" size={16} color="#111827" />
-                        </View>
-                        <View style={styles.headerInfoTextWrap}>
-                            <Text style={styles.headerLabel}>{t("order_card_placed_on")}</Text>
-                            <Text style={styles.headerValue} weight="medium">
-                                {formattedDate}
-                            </Text>
-                            <Text style={styles.headerValue} weight="medium">
-                                {formattedTime}
-                            </Text>
-                        </View>
+                    <View style={styles.headerInfoTextWrap}>
+                        <Text style={styles.headerLabel}>{t("order_card_placed_on")}</Text>
+                        <Text style={styles.headerValue} weight="medium">
+                            {formattedDate}
+                        </Text>
+                        <Text style={styles.headerValue} weight="medium">
+                            {formattedTime}
+                        </Text>
                     </View>
-                )}
+                </View>
             </View>
 
         </>

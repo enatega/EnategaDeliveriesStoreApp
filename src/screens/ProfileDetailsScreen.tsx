@@ -5,6 +5,7 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useTranslations } from "../localization/LocalizationProvider";
 import { useProfileQuery } from "../hooks/useProfileQueries";
+import { useWalletBalance } from "../hooks/useWalletQueries";
 import { useCurrencyFormatter } from "../hooks/useCurrency";
 import Text from "../components/Text";
 import ScreenHeader from "../components/ScreenHeader";
@@ -16,6 +17,7 @@ export default function ProfileDetailsScreen() {
   const { t } = useTranslations("app");
   const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const { data: profileData } = useProfileQuery();
+  const { data: walletBalanceData } = useWalletBalance();
   const { formatAmount } = useCurrencyFormatter();
   const { session } = useAuth();
 
@@ -36,6 +38,7 @@ export default function ProfileDetailsScreen() {
   const profileImage = profileData?.profile.image?.trim() || "";
   const isApproved = profileData?.profile.approvalStatus === "approved";
   const coverSource = profileImage ? { uri: profileImage } : profileBackground;
+  const walletBalance = walletBalanceData?.current_balance ?? 0;
 
   return (
     <View style={[styles.container, { backgroundColor: "#F3F4F6" }]}>
@@ -85,7 +88,7 @@ export default function ProfileDetailsScreen() {
           <DetailRow
             icon="credit-card"
             label={t("profile_wallet_balance")}
-            value={formatAmount(0, 2)}
+            value={formatAmount(walletBalance, 2)}
             valueHighlight
             showDivider
           />

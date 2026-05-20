@@ -23,6 +23,8 @@ import { SupportChatMessage } from "../api/supportChatServiceTypes";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SocketReceivedMessage, storeOrdersSocketClient } from "../socket/storeOrdersSocket";
 import { cacheSupportChatBoxId, resolveSupportChatBoxId } from "../api/supportChatSession";
+import { useQueryClient } from "@tanstack/react-query";
+import { supportChatKeys } from "../api/queryKeys";
 
 type Props = NativeStackScreenProps<MainStackParamList, "StoreChat">;
 
@@ -31,6 +33,7 @@ export default function StoreChatScreen({ navigation, route }: Props) {
   const { t } = useTranslations("app");
   const insets = useSafeAreaInsets();
   const { session } = useAuth();
+  const queryClient = useQueryClient();
 
   const senderId = session.user?.id ?? "";
   const initialResolvedChatBoxId =
@@ -84,27 +87,46 @@ export default function StoreChatScreen({ navigation, route }: Props) {
 
   useEffect(() => {
     const unsubscribe = storeOrdersSocketClient.onReceiveMessage((message: SocketReceivedMessage) => {
+      const normalizedSenderId = String(senderId ?? "").trim();
+      const normalizedReceiverId = String(receiverId ?? "").trim();
+      const messageSender = String(message.sender ?? "").trim();
+      const messageReceiver = String(message.receiver ?? "").trim();
       const isBetweenStoreAndRider =
-        (message.sender === senderId && message.receiver === receiverId)
-        || (message.sender === receiverId && message.receiver === senderId);
+        (messageSender === normalizedSenderId && messageReceiver === normalizedReceiverId)
+        || (messageSender === normalizedReceiverId && messageReceiver === normalizedSenderId);
 
-      if (!isBetweenStoreAndRider) return;
+      if (!isBetweenStoreAndRider) {
+        console.log("[StoreChatScreen] receive-message ignored", {
+          messageSender,
+          messageReceiver,
+          senderId: normalizedSenderId,
+          receiverId: normalizedReceiverId,
+        });
+        return;
+      }
 
       const nextMessage: SupportChatMessage = {
-        id: `${message.sender}-${message.receiver}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        id: `${messageSender}-${messageReceiver}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
         chatBoxId: chatBoxId ?? "",
-        senderId: message.sender,
-        receiverId: message.receiver,
+        senderId: messageSender,
+        receiverId: messageReceiver,
         text: message.text,
         createdAt: new Date().toISOString(),
       };
 
       setSocketMessages((prev) => [...prev, nextMessage]);
+      if (chatBoxId) {
+        const queryKey = supportChatKeys.messagesByChatBox(chatBoxId);
+        queryClient.setQueryData<SupportChatMessage[]>(queryKey, (prev = []) => {
+          if (prev.some((item) => item.id === nextMessage.id)) return prev;
+          return [...prev, nextMessage];
+        });
+      }
       setTimeout(() => listRef.current?.scrollToEnd?.({ animated: true }), 50);
     });
 
     return unsubscribe;
-  }, [chatBoxId, receiverId, senderId]);
+  }, [chatBoxId, queryClient, receiverId, senderId]);
 
   const mergedMessages = useMemo(() => {
     const byId = new Map<string, SupportChatMessage>();

@@ -108,13 +108,19 @@ export default function OrderCard({
     order.status === OrderStatus.ARRIVED;
 
   const isCompleted = order.status === OrderStatus.DELIVERED;
-  const canMarkReady =
-    order.status === OrderStatus.ACCEPTED
-    || order.status === OrderStatus.PREPARING
-    || order.status === OrderStatus.RIDER_ASSIGNED
-    || Boolean(order.riderName);
+  const canRejectOrder = order.canReject && !isInProgress;
+  const hasAssignedRider = Boolean(
+    order.riderId
+    || order.riderName
+    || order.riderPhone
+    || order.riderVehicle
+    || order.status === OrderStatus.RIDER_ASSIGNED,
+  );
+  const canMarkReady = hasAssignedRider;
   const headerStatusLabel =
-    (order.status === OrderStatus.READY
+    (order.status === OrderStatus.DELIVERED
+      ? t("order_card_delivered")
+      : order.status === OrderStatus.READY
       ? "Rider assigned"
       : getReadableRiderStatus(order.status, order.riderStatus, order.riderStatusLabel)) ||
     (order.riderArrived ? t("order_card_rider_arrived") : null);
@@ -133,7 +139,7 @@ export default function OrderCard({
         orderCode={order.orderCode}
         status={order.status}
         createdAt={order.createdAt}
-        headerStatusLabel={isInProgress || isReadyOrPickup ? headerStatusLabel : null}
+        headerStatusLabel={isInProgress || isReadyOrPickup || isCompleted ? headerStatusLabel : null}
         headerStatusTone={headerStatusTone}
       />
       <CustomerInfo
@@ -149,7 +155,7 @@ export default function OrderCard({
         orderSummary={order.orderSummary}
         theme={theme}
       />
-      <CommentSection comment={order.customerComment} theme={theme} />
+      <CommentSection comment={order.restaurantNote} theme={theme} />
 
       {isInProgress && onMarkReady && onUpdatePreparingTime && (
         <InProgressSection
@@ -196,6 +202,8 @@ export default function OrderCard({
       {isCompleted && (
         <CompletedSection
           riderName={order.riderName}
+          riderPhone={order.riderPhone}
+          riderVehicle={riderVehicleDisplay}
           createdAt={order.createdAt}
           unreadMessagesCount={unreadMessagesCount}
           onOpenChat={handleOpenChat}
@@ -205,7 +213,7 @@ export default function OrderCard({
 
       <AcceptRejectButtons
         canAccept={order.canAccept}
-        canReject={order.canReject}
+        canReject={canRejectOrder}
         orderId={order.orderId}
         onAccept={onAccept || (() => { })}
         onReject={onReject || (() => { })}
