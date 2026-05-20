@@ -152,6 +152,21 @@ const en = {
   no_orders_here: "No orders here yet",
   set_preparing_time: "Set preparing time",
   done: "Done",
+  cancel: "Cancel",
+  reject_modal_title: "Decline Order",
+  reject_modal_order_prefix: "Order",
+  reject_modal_description:
+    "Please let the customer know why you're declining this order. This will be shared with them.",
+  reject_modal_suggested_reasons: "Suggested reasons",
+  reject_modal_reason_placeholder: "Write your reason here...",
+  reject_modal_confirm: "Reject Order",
+  reject_reason_item_out_of_stock: "Item out of stock",
+  reject_reason_kitchen_busy: "Kitchen too busy",
+  reject_reason_cannot_deliver: "Cannot deliver to location",
+  reject_reason_ingredient_unavailable: "Ingredient unavailable",
+  reject_reason_closing_soon: "Closing soon",
+  reject_reason_order_too_large: "Order is too large",
+  reject_reason_other: "Other",
 
   // Wallet
   wallet_current_balance: "Current Balance",

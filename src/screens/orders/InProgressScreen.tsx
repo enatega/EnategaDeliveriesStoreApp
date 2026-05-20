@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Alert } from "react-native";
 import GenericOrderList from "../../components/orders/GenericOrderList";
 import { useInProgressOrders } from "../../hooks/useOrderQueries";
@@ -8,8 +8,12 @@ import {
   useUpdatePreparingTime,
 } from "../../hooks/useOrderMutations";
 import { OrderStatus } from "../../api/orderServicesTypes";
+import { Order } from "../../api/orderServicesTypes";
+import RejectOrderModal from "../../components/RejectOrderModal";
 
 export default function InProgressScreen() {
+  const [rejectingOrderId, setRejectingOrderId] = useState<string | null>(null);
+  const [rejectingOrderCode, setRejectingOrderCode] = useState<string | null>(null);
   const updateStatus = useUpdateOrderStatus();
   const rejectMutation = useRejectOrder();
   const updateTime = useUpdatePreparingTime({
@@ -44,12 +48,32 @@ export default function InProgressScreen() {
     });
     updateTime.mutate({ orderId, data: { preparingTimeInMinutes: minutes } });
   };
-  const handleReject = (orderId: string) => {
-    rejectMutation.mutate(orderId);
+  const handleReject = (orderId: string, orderCode?: string) => {
+    setRejectingOrderId(orderId);
+    setRejectingOrderCode(orderCode ?? null);
   };
 
-  const renderActions = () => ({
-    onReject: handleReject,
+  const handleRejectConfirm = (reason: string) => {
+    if (!rejectingOrderId) return;
+    rejectMutation.mutate(
+      { orderId: rejectingOrderId, data: { reason } },
+      {
+        onSettled: () => {
+          setRejectingOrderId(null);
+          setRejectingOrderCode(null);
+        },
+      },
+    );
+  };
+
+  const closeRejectModal = () => {
+    if (rejectMutation.isPending) return;
+    setRejectingOrderId(null);
+    setRejectingOrderCode(null);
+  };
+
+  const renderActions = (order: Order) => ({
+    onReject: () => handleReject(order.orderId, order.orderCode),
     onMarkReady: handleMarkReady,
     onUpdatePreparingTime: handleUpdatePreparingTime,
     isRejecting: rejectMutation.isPending,
@@ -58,9 +82,18 @@ export default function InProgressScreen() {
   });
 
   return (
-    <GenericOrderList
-      useOrdersHook={useInProgressOrders}
-      renderActions={renderActions}
-    />
+    <>
+      <GenericOrderList
+        useOrdersHook={useInProgressOrders}
+        renderActions={renderActions}
+      />
+      <RejectOrderModal
+        visible={Boolean(rejectingOrderId)}
+        orderCode={rejectingOrderCode}
+        isSubmitting={rejectMutation.isPending}
+        onClose={closeRejectModal}
+        onConfirm={handleRejectConfirm}
+      />
+    </>
   );
 }

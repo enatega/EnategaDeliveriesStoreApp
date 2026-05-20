@@ -585,23 +585,39 @@ export const styles = StyleSheet.create({
     backgroundColor: "transparent",
   },
   // Completed specific styles
-  deliveredBadge: {
-    backgroundColor: "#DBEAFE",
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 16,
-  },
-  deliveredBadgeText: {
-    color: "#1D4ED8",
-    fontSize: 13,
-    fontWeight: "500",
-  },
   completedRiderRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginTop: 6,
     marginBottom: 10,
+  },
+  completedWrap: {
+    gap: 10,
+  },
+  completedTopMetaBox: {
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 12,
+    marginTop: 6,
+  },
+  completedTopMetaCol: {
+    flex: 1,
+    gap: 8,
+  },
+  completedStatusRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 2,
+  },
+  completedStatusLabel: {
+    fontSize: 14,
+    lineHeight: 18,
+    color: "#4B5563",
   },
   completedRiderInfo: {
     gap: 4,
@@ -611,19 +627,6 @@ export const styles = StyleSheet.create({
   },
   completedRiderName: {
     fontSize: 15,
-  },
-  completedFooterBox: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    backgroundColor: "#F9FAFB",
-    marginHorizontal: -12,
-    marginBottom: -12,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderBottomLeftRadius: 8,
-    borderBottomRightRadius: 8,
-    borderTopWidth: 1,
-    borderColor: "#F3F4F6",
   },
   completedFooterCol: {
     gap: 4,

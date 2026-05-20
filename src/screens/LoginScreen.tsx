@@ -2,11 +2,14 @@ import React, { useState } from 'react';
 import {
   Image,
   ImageBackground,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   TextInput as RNTextInput,
+  TouchableWithoutFeedback,
   useWindowDimensions,
   View,
 } from 'react-native';
@@ -67,165 +70,170 @@ export default function LoginScreen() {
   const apiError = loginMutation.error?.message ?? null;
 
   return (
-    <View style={styles.background}>
-      <View style={styles.topBackgroundWrap}>
-        <ImageBackground
-          source={require('../assets/images/loginBackground.png')}
-          style={styles.topBackground}
-          resizeMode="cover"
-        />
-      </View>
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
-        <View style={[styles.screenContent, isSmallPhone ? styles.screenContentCompact : null]}>
-          <View style={styles.topSection}>
-            <View style={styles.logoBox}>
-              <Image
-                source={require('../assets/images/loginLogo.png')}
-                style={styles.logo}
-                resizeMode="contain"
-              />
-            </View>
-
-            <View style={[styles.titleBlock, isSmallPhone ? styles.titleBlockCompact : null]}>
-              <View style={styles.welcomeRow}>
-                <View style={[styles.welcomeLine, { backgroundColor: '#B7D7A8' }]} />
-                <Text style={styles.welcomeText} weight="bold" color="#3E8D36">
-                  {t('auth_welcome_back')}
-                </Text>
-                <View style={[styles.welcomeLine, { backgroundColor: '#B7D7A8' }]} />
-              </View>
-
-              <Text style={styles.mainTitle} weight="bold" color="#0F172A">
-                {t('auth_access_store')}
-              </Text>
-
-              <Text style={styles.subtitle} color="#6B7280">
-                {t('auth_login_subtitle')}
-              </Text>
-            </View>
-          </View>
-
-          <View
-            style={[
-              styles.formCard,
-              isSmallPhone ? styles.formCardCompact : null,
-              { backgroundColor: theme.colors.surface },
-            ]}
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <View style={styles.background}>
+        <View style={styles.topBackgroundWrap}>
+          <ImageBackground
+            source={require('../assets/images/loginBackground.png')}
+            style={styles.topBackground}
+            resizeMode="cover"
+          />
+        </View>
+        <KeyboardAvoidingView
+          style={styles.flex}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 24 : 0}
+        >
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+            bounces={false}
+            showsVerticalScrollIndicator={false}
           >
-            <View style={styles.fieldBlock}>
-              <Text style={styles.fieldLabel} weight="bold" color="#0F172A">
-                {t('auth_email_placeholder')}
-              </Text>
-              <View style={[styles.inputRow, { borderColor: theme.colors.gray200 }]}>
-                <View style={styles.inputIconCell}>
-                  <Feather name="mail" size={18} color="#5FA24E" />
+            <View style={[styles.screenContent, isSmallPhone ? styles.screenContentCompact : null]}>
+              <View style={styles.topSection}>
+                <View style={styles.logoBox}>
+                  <Image
+                    source={require('../assets/images/loginLogo.png')}
+                    style={styles.logo}
+                    resizeMode="contain"
+                  />
                 </View>
-                <RNTextInput
-                  placeholder={t('auth_email_placeholder')}
-                  placeholderTextColor="#6B7280"
-                  value={email}
-                  onChangeText={(v) => {
-                    setEmail(v);
-                    if (emailError) setEmailError('');
-                  }}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  returnKeyType="next"
-                  style={styles.input}
-                />
-              </View>
-              {emailError ? (
-                <Text variant="caption" color="#EF4444" style={styles.errorText}>
-                  {emailError}
-                </Text>
-              ) : null}
-            </View>
 
-            <View style={styles.fieldBlock}>
-              <Text style={styles.fieldLabel} weight="bold" color="#0F172A">
-                {t('auth_password_placeholder')}
-              </Text>
-              <View style={[styles.inputRow, { borderColor: theme.colors.gray200 }]}>
-                <View style={styles.inputIconCell}>
-                  <Feather name="lock" size={18} color="#5FA24E" />
+                <View style={[styles.titleBlock, isSmallPhone ? styles.titleBlockCompact : null]}>
+                  <View style={styles.welcomeRow}>
+                    <View style={[styles.welcomeLine, { backgroundColor: '#B7D7A8' }]} />
+                    <Text style={styles.welcomeText} weight="bold" color="#3E8D36">
+                      {t('auth_welcome_back')}
+                    </Text>
+                    <View style={[styles.welcomeLine, { backgroundColor: '#B7D7A8' }]} />
+                  </View>
+
+                  <Text style={styles.mainTitle} weight="bold" color="#0F172A">
+                    {t('auth_access_store')}
+                  </Text>
+
+                  <Text style={styles.subtitle} color="#6B7280">
+                    {t('auth_login_subtitle')}
+                  </Text>
                 </View>
-                <RNTextInput
-                  placeholder={t('auth_password_placeholder')}
-                  placeholderTextColor="#6B7280"
-                  value={password}
-                  onChangeText={(v) => {
-                    setPassword(v);
-                    if (passwordError) setPasswordError('');
-                  }}
-                  secureTextEntry={!passwordVisible}
-                  returnKeyType="done"
-                  onSubmitEditing={handleLogin}
-                  style={styles.input}
-                />
+              </View>
+
+              <View
+                style={[
+                  styles.formCard,
+                  isSmallPhone ? styles.formCardCompact : null,
+                  { backgroundColor: theme.colors.surface },
+                ]}
+              >
+                <View style={styles.fieldBlock}>
+                  <Text style={styles.fieldLabel} weight="bold" color="#0F172A">
+                    {t('auth_email_placeholder')}
+                  </Text>
+                  <View style={[styles.inputRow, { borderColor: theme.colors.gray200 }]}>
+                    <View style={styles.inputIconCell}>
+                      <Feather name="mail" size={18} color="#5FA24E" />
+                    </View>
+                    <RNTextInput
+                      placeholder={t('auth_email_placeholder')}
+                      placeholderTextColor="#6B7280"
+                      value={email}
+                      onChangeText={(v) => {
+                        setEmail(v);
+                        if (emailError) setEmailError('');
+                      }}
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      returnKeyType="next"
+                      style={styles.input}
+                    />
+                  </View>
+                  {emailError ? (
+                    <Text variant="caption" color="#EF4444" style={styles.errorText}>
+                      {emailError}
+                    </Text>
+                  ) : null}
+                </View>
+
+                <View style={styles.fieldBlock}>
+                  <Text style={styles.fieldLabel} weight="bold" color="#0F172A">
+                    {t('auth_password_placeholder')}
+                  </Text>
+                  <View style={[styles.inputRow, { borderColor: theme.colors.gray200 }]}>
+                    <View style={styles.inputIconCell}>
+                      <Feather name="lock" size={18} color="#5FA24E" />
+                    </View>
+                    <RNTextInput
+                      placeholder={t('auth_password_placeholder')}
+                      placeholderTextColor="#6B7280"
+                      value={password}
+                      onChangeText={(v) => {
+                        setPassword(v);
+                        if (passwordError) setPasswordError('');
+                      }}
+                      secureTextEntry={!passwordVisible}
+                      returnKeyType="done"
+                      onSubmitEditing={handleLogin}
+                      style={styles.input}
+                    />
+                    <Pressable
+                      onPress={() => setPasswordVisible((prev) => !prev)}
+                      style={styles.trailingIconBtn}
+                      hitSlop={8}
+                    >
+                      <Feather name={passwordVisible ? 'eye-off' : 'eye'} size={18} color="#6B7280" />
+                    </Pressable>
+                  </View>
+                  {passwordError ? (
+                    <Text variant="caption" color="#EF4444" style={styles.errorText}>
+                      {passwordError}
+                    </Text>
+                  ) : null}
+                </View>
+
+                {apiError ? (
+                  <Text variant="caption" color="#EF4444" style={styles.apiError}>
+                    {apiError}
+                  </Text>
+                ) : null}
+
                 <Pressable
-                  onPress={() => setPasswordVisible((prev) => !prev)}
-                  style={styles.trailingIconBtn}
-                  hitSlop={8}
+                  onPress={handleLogin}
+                  disabled={loginMutation.isPending}
+                  style={({ pressed }) => [
+                    styles.loginBtn,
+                    isSmallPhone ? styles.loginBtnCompact : null,
+                    { backgroundColor: '#3E8D36' },
+                    pressed && styles.pressed,
+                    loginMutation.isPending && styles.disabled,
+                  ]}
                 >
-                  <Feather name={passwordVisible ? 'eye-off' : 'eye'} size={18} color="#6B7280" />
+                  <Text style={styles.loginBtnText} weight="semiBold" color="#FFFFFF">
+                    {t('auth_login')}
+                  </Text>
+                  <View style={styles.loginArrowWrap}>
+                    <Feather name="arrow-right" size={20} color="#FFFFFF" />
+                  </View>
                 </Pressable>
               </View>
-              {passwordError ? (
-                <Text variant="caption" color="#EF4444" style={styles.errorText}>
-                  {passwordError}
+
+              <View style={styles.securityFooterRow}>
+                <Image
+                  source={require('../assets/images/privacy.png')}
+                  style={styles.securityIcon}
+                  resizeMode="contain"
+                />
+                <Text style={styles.securityNoteText} color="#6B7280">
+                  {t('auth_data_protected')}
                 </Text>
-              ) : null}
-            </View>
-
-            <Pressable style={styles.forgotWrap}>
-              <Text style={styles.forgotText} weight="medium" color="#3E8D36">
-                {t('auth_forgot_password')}
-              </Text>
-            </Pressable>
-
-            {apiError ? (
-              <Text variant="caption" color="#EF4444" style={styles.apiError}>
-                {apiError}
-              </Text>
-            ) : null}
-
-            <Pressable
-              onPress={handleLogin}
-              disabled={loginMutation.isPending}
-              style={({ pressed }) => [
-                styles.loginBtn,
-                isSmallPhone ? styles.loginBtnCompact : null,
-                { backgroundColor: '#3E8D36' },
-                pressed && styles.pressed,
-                loginMutation.isPending && styles.disabled,
-              ]}
-            >
-              <Text style={styles.loginBtnText} weight="semiBold" color="#FFFFFF">
-                {t('auth_login')}
-              </Text>
-              <View style={styles.loginArrowWrap}>
-                <Feather name="arrow-right" size={20} color="#FFFFFF" />
               </View>
-            </Pressable>
-          </View>
-
-          <View style={styles.securityFooterRow}>
-            <Image
-              source={require('../assets/images/privacy.png')}
-              style={styles.securityIcon}
-              resizeMode="contain"
-            />
-            <Text style={styles.securityNoteText} color="#6B7280">
-              {t('auth_data_protected')}
-            </Text>
-          </View>
-        </View>
-      </KeyboardAvoidingView>
-    </View>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 
@@ -248,12 +256,15 @@ const styles = StyleSheet.create({
   flex: {
     flex: 1,
   },
+  scrollContent: {
+    flexGrow: 1,
+  },
   screenContent: {
-    flex: 1,
     paddingHorizontal: 20,
     paddingTop: 82,
     paddingBottom: 48,
     justifyContent: 'flex-start',
+    minHeight: '100%',
   },
   screenContentCompact: {
     paddingTop: 70,
@@ -402,10 +413,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   securityFooterRow: {
-    position: 'absolute',
-    left: 20,
-    right: 20,
-    bottom: 10,
+    marginTop: 'auto',
+    paddingTop: 24,
     justifyContent: 'center',
     flexDirection: 'row',
     alignItems: 'center',
