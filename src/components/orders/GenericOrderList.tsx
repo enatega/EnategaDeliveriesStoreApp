@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  InteractionManager,
   StyleSheet,
   View,
 } from "react-native";
@@ -44,14 +45,19 @@ type Props = {
   useOrdersHook: UseOrdersHook;
   renderActions: (order: Order) => RenderActionsReturn;
   onOrdersDataChange?: (orders: Order[]) => void;
+  autoScrollToTopOnNewItem?: boolean;
 };
 
 export default function GenericOrderList({
   useOrdersHook,
   renderActions,
   onOrdersDataChange,
+  autoScrollToTopOnNewItem = false,
 }: Props) {
   const [filterType, setFilterType] = useState<OrderTypeFilter>("delivery");
+  const listRef = useRef<any>(null);
+  const previousTopOrderIdRef = useRef<string | null>(null);
+  const hasMountedRef = useRef(false);
   const { t } = useTranslations("app");
   const { theme } = useAppTheme();
 
@@ -71,6 +77,32 @@ export default function GenericOrderList({
   useEffect(() => {
     onOrdersDataChange?.(orders);
   }, [onOrdersDataChange, orders]);
+
+  useEffect(() => {
+    const currentTopOrderId = orders[0]?.orderId ?? null;
+    const previousTopOrderId = previousTopOrderIdRef.current;
+
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      previousTopOrderIdRef.current = currentTopOrderId;
+      return;
+    }
+
+    if (
+      autoScrollToTopOnNewItem
+      && currentTopOrderId
+      && previousTopOrderId !== currentTopOrderId
+    ) {
+      // Defer until list commit completes so FlashList can scroll reliably.
+      InteractionManager.runAfterInteractions(() => {
+        requestAnimationFrame(() => {
+          listRef.current?.scrollToOffset?.({ offset: 0, animated: true });
+        });
+      });
+    }
+
+    previousTopOrderIdRef.current = currentTopOrderId;
+  }, [autoScrollToTopOnNewItem, orders]);
 
   const isLoadingAny = isLoading || isRefetching || isFetchingNextPage;
 
@@ -120,6 +152,7 @@ export default function GenericOrderList({
         </View>
       ) : (
         <VerticalList
+          ref={listRef}
           key={filterType}
           data={orders}
           extraData={orders}

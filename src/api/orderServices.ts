@@ -6,6 +6,7 @@ import {
   PaginatedOrdersResponse,
   AcceptOrderResponse,
   RejectOrderResponse,
+  RejectOrderRequest,
   UpdateOrderStatusRequest,
   UpdateOrderStatusResponse,
   UpdatePreparingTimeRequest,
@@ -148,6 +149,12 @@ function normalizeOrder(order: Order): Order {
     customerProfileImage: normalizeImageUrl(customerProfileImageRaw),
     items: order.items.map(normalizeOrderItem),
     customerComment: stripCourierComment(order.customerComment),
+    restaurantNote:
+      typeof runtimeOrder.restaurantNote === "string"
+        ? runtimeOrder.restaurantNote
+        : typeof runtimeOrder.restaurant_note === "string"
+          ? runtimeOrder.restaurant_note
+          : null,
     orderSummary,
   };
 }
@@ -217,8 +224,8 @@ export const orderServices = {
   acceptOrder: (orderId: string) =>
     apiClient.patch<AcceptOrderResponse>(`${BASE_PATH}/${orderId}/accept`),
 
-  rejectOrder: (orderId: string) =>
-    apiClient.patch<RejectOrderResponse>(`${BASE_PATH}/${orderId}/reject`),
+  rejectOrder: (orderId: string, data: RejectOrderRequest) =>
+    apiClient.patch<RejectOrderResponse>(`${BASE_PATH}/${orderId}/reject`, data),
 
   updateOrderStatus: (orderId: string, data: UpdateOrderStatusRequest) =>
     apiClient.patch<UpdateOrderStatusResponse>(

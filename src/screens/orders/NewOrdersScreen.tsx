@@ -7,11 +7,14 @@ import {
   useUpdatePreparingTime,
 } from "../../hooks/useOrderMutations";
 import SetPreparingTimeModal from "../../components/SetPreparingTimeModal";
+import RejectOrderModal from "../../components/RejectOrderModal";
 import { Order, OrderStatus } from "../../api/orderServicesTypes";
 import { startOrderAlertLoop, stopOrderAlertLoop } from "../../hooks/orderAlertSound";
 
 export default function NewOrdersScreen() {
   const [pendingOrderId, setPendingOrderId] = useState<string | null>(null);
+  const [rejectingOrderId, setRejectingOrderId] = useState<string | null>(null);
+  const [rejectingOrderCode, setRejectingOrderCode] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
 
   const acceptMutation = useAcceptOrder();
@@ -23,8 +26,28 @@ export default function NewOrdersScreen() {
     setModalVisible(true);
   };
 
-  const handleReject = (orderId: string) => {
-    rejectMutation.mutate(orderId);
+  const handleReject = (orderId: string, orderCode?: string) => {
+    setRejectingOrderId(orderId);
+    setRejectingOrderCode(orderCode ?? null);
+  };
+
+  const handleRejectConfirm = (reason: string) => {
+    if (!rejectingOrderId) return;
+    rejectMutation.mutate(
+      { orderId: rejectingOrderId, data: { reason } },
+      {
+        onSettled: () => {
+          setRejectingOrderId(null);
+          setRejectingOrderCode(null);
+        },
+      },
+    );
+  };
+
+  const closeRejectModal = () => {
+    if (rejectMutation.isPending) return;
+    setRejectingOrderId(null);
+    setRejectingOrderCode(null);
   };
 
   const handleSetPreparingTime = async (minutes: number) => {
@@ -53,9 +76,9 @@ export default function NewOrdersScreen() {
     setPendingOrderId(null);
   };
 
-  const renderActions = () => ({
+  const renderActions = (order: Order) => ({
     onAccept: handleAccept,
-    onReject: handleReject,
+    onReject: () => handleReject(order.orderId, order.orderCode),
     isAccepting: acceptMutation.isPending || updateTimeMutation.isPending,
     isRejecting: rejectMutation.isPending,
   });
@@ -80,11 +103,19 @@ export default function NewOrdersScreen() {
         useOrdersHook={useNewOrders}
         renderActions={renderActions}
         onOrdersDataChange={handleOrdersDataChange}
+        autoScrollToTopOnNewItem
       />
       <SetPreparingTimeModal
         visible={modalVisible}
         onClose={closeModal}
         onDone={handleSetPreparingTime}
+      />
+      <RejectOrderModal
+        visible={Boolean(rejectingOrderId)}
+        orderCode={rejectingOrderCode}
+        isSubmitting={rejectMutation.isPending}
+        onClose={closeRejectModal}
+        onConfirm={handleRejectConfirm}
       />
     </>
   );

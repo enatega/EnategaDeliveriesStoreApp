@@ -11,6 +11,7 @@ import { ApiError } from "../api/apiClient";
 import {
   AcceptOrderResponse,
   RejectOrderResponse,
+  RejectOrderRequest,
   UpdateOrderStatusRequest,
   UpdateOrderStatusResponse,
   UpdatePreparingTimeRequest,
@@ -48,19 +49,23 @@ export function useAcceptOrder(
 
 // ─── Reject Order ─────────────────────────────────────────────────
 export function useRejectOrder(
-  options?: UseMutationOptions<RejectOrderResponse, ApiError, string>,
+  options?: UseMutationOptions<
+    RejectOrderResponse,
+    ApiError,
+    { orderId: string; data: RejectOrderRequest }
+  >,
 ) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (orderId: string) => orderServices.rejectOrder(orderId),
-    onSuccess: (data, orderId, onMutateResult, context) => {
+    mutationFn: ({ orderId, data }) => orderServices.rejectOrder(orderId, data),
+    onSuccess: (data, variables, onMutateResult, context) => {
       // Invalidate all lists because rejected order disappears from active tabs
       queryClient.invalidateQueries({ queryKey: newOrdersKeys.lists() });
       queryClient.invalidateQueries({ queryKey: inProgressOrdersKeys.lists() });
       queryClient.invalidateQueries({ queryKey: readyOrdersKeys.lists() });
       queryClient.invalidateQueries({ queryKey: pickupOrdersKeys.lists() });
       queryClient.invalidateQueries({ queryKey: completedOrdersKeys.lists() });
-      options?.onSuccess?.(data, orderId, onMutateResult, context);
+      options?.onSuccess?.(data, variables, onMutateResult, context);
     },
     ...options,
   });

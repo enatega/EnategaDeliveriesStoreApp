@@ -77,6 +77,7 @@ export interface Order {
   itemCount: number;
   items: OrderItem[];
   customerComment: string | null;
+  restaurantNote: string | null;
   preparingTimeInMinutes: number | null;
   preparationStartedAt: string | null;
   remainingSeconds?: number;
@@ -127,6 +128,10 @@ export type RejectOrderResponse = {
   message: string;
   orderId: string;
   status: OrderStatus.REJECTED;
+};
+
+export type RejectOrderRequest = {
+  reason: string;
 };
 
 export type UpdateOrderStatusRequest = {

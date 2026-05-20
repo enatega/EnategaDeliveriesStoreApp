@@ -58,6 +58,24 @@ function prependOrderToInfiniteData(
   };
 }
 
+function prependOrderToPaginatedData(
+  previous: PaginatedOrdersResponse | undefined,
+  incomingOrder: Order,
+): PaginatedOrdersResponse | undefined {
+  if (!previous) return previous;
+
+  const alreadyExists = previous.items.some((item) => item.orderId === incomingOrder.orderId);
+  if (alreadyExists) return previous;
+
+  const nextItems = [incomingOrder, ...previous.items].slice(0, previous.limit);
+
+  return {
+    ...previous,
+    items: nextItems,
+    total: previous.total + 1,
+  };
+}
+
 export function useStoreOrderSocketSync() {
   const queryClient = useQueryClient();
   const { session, isAuthenticated } = useAuth();
@@ -78,6 +96,10 @@ export function useStoreOrderSocketSync() {
     }
 
     storeOrdersSocketClient.connect();
+    console.log("[store][socket] connect requested", {
+      currentStoreId,
+      ...storeOrdersSocketClient.getConnectionState(),
+    });
 
     return () => {
       pendingAlertOrderIdsRef.current.clear();
@@ -98,7 +120,13 @@ export function useStoreOrderSocketSync() {
           payloadStoreId: payload?.storeId,
           orderId: payload?.order?.orderId,
         });
-        if (payload.storeId !== currentStoreId) return;
+        if (String(payload.storeId) !== String(currentStoreId)) {
+          console.log("[store][socket] store-home-order-created ignored: store mismatch", {
+            currentStoreId,
+            payloadStoreId: payload?.storeId,
+          });
+          return;
+        }
         if (payload?.order?.orderId) {
           pendingAlertOrderIdsRef.current.add(payload.order.orderId);
           void startOrderAlertLoop();
@@ -106,7 +134,7 @@ export function useStoreOrderSocketSync() {
 
         const incomingOrder = payload.order as Order;
 
-        const matchingQueries = queryClient.getQueriesData<InfiniteData<PaginatedOrdersResponse>>({
+        const matchingQueries = queryClient.getQueriesData({
           queryKey: newOrdersKeys.lists(),
         });
 
@@ -118,10 +146,21 @@ export function useStoreOrderSocketSync() {
             return;
           }
 
-          queryClient.setQueryData<InfiniteData<PaginatedOrdersResponse>>(
-            queryKey,
-            prependOrderToInfiniteData(previous, incomingOrder),
-          );
+          queryClient.setQueryData(queryKey, (current) => {
+            const queryData = (current ?? previous) as
+              | InfiniteData<PaginatedOrdersResponse>
+              | PaginatedOrdersResponse
+              | undefined;
+
+            if (queryData && typeof queryData === "object" && "pages" in queryData) {
+              return prependOrderToInfiniteData(queryData, incomingOrder);
+            }
+
+            return prependOrderToPaginatedData(
+              queryData as PaginatedOrdersResponse | undefined,
+              incomingOrder,
+            );
+          });
         });
       },
     );
