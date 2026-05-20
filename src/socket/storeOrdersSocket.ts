@@ -2,6 +2,19 @@ import { io, type ManagerOptions, type Socket, type SocketOptions } from "socket
 import { apiConfig } from "../api/apiConfig";
 
 type SocketOptionsInput = Partial<ManagerOptions & SocketOptions>;
+export type SocketSubscriptionCleanup = () => void;
+export type SocketEventHandler<TArgs extends unknown[] = unknown[]> = (...args: TArgs) => void;
+
+export type SocketReceivedMessage = {
+  sender: string;
+  receiver: string;
+  text: string;
+};
+export type SocketSentMessage = {
+  sender: string;
+  receiver: string;
+  text: string;
+};
 
 type StoreHomeOrderCardDto = {
   orderId: string;
@@ -141,6 +154,19 @@ class StoreOrdersSocketClient {
     return this.socket;
   }
 
+  private subscribe<TArgs extends unknown[] = unknown[]>(
+    event: string,
+    handler: SocketEventHandler<TArgs>,
+  ): SocketSubscriptionCleanup {
+    const socket = this.ensureSocket();
+    const wrapped = (...args: TArgs) => handler(...args);
+    socket.on(event, wrapped);
+
+    return () => {
+      socket.off(event, wrapped);
+    };
+  }
+
   connect(options?: SocketOptionsInput) {
     const socket = this.ensureSocket(options);
 
@@ -183,30 +209,43 @@ class StoreOrdersSocketClient {
   }
 
   subscribeStoreHomeOrderCreated(handler: (payload: StoreHomeOrderCreatedPayload) => void) {
-    const socket = this.ensureSocket();
-    socket.on("store-home-order-created", handler);
-
-    return () => {
-      socket.off("store-home-order-created", handler);
-    };
+    return this.subscribe<[StoreHomeOrderCreatedPayload]>("store-home-order-created", handler);
   }
 
   subscribeOrderStatusUpdated(handler: (payload: StoreOrderStatusUpdatedPayload) => void) {
-    const socket = this.ensureSocket();
-    socket.on("order-status-updated", handler);
-
-    return () => {
-      socket.off("order-status-updated", handler);
-    };
+    return this.subscribe<[StoreOrderStatusUpdatedPayload]>("order-status-updated", handler);
   }
 
   subscribeRiderStatusUpdated(handler: (payload: StoreRiderStatusUpdatedPayload) => void) {
-    const socket = this.ensureSocket();
-    socket.on("rider-status-updated", handler);
+    return this.subscribe<[StoreRiderStatusUpdatedPayload]>("rider-status-updated", handler);
+  }
 
-    return () => {
-      socket.off("rider-status-updated", handler);
-    };
+  onReceiveMessage(
+    handler: (message: SocketReceivedMessage) => void,
+  ): SocketSubscriptionCleanup {
+    return this.subscribe<[SocketReceivedMessage]>("receive-message", (message) => {
+      console.log("Received socket message:", message);
+      handler(message);
+    });
+  }
+
+  sendMessage(message: SocketSentMessage) {
+    const socket = this.socket;
+
+    if (!socket?.connected) {
+      console.log("[Socket] Send message skipped because socket is not connected", {
+        receiver: message.receiver,
+        sender: message.sender,
+      });
+      return false;
+    }
+
+    console.log("[Socket] Sending socket message", {
+      receiver: message.receiver,
+      sender: message.sender,
+    });
+    socket.emit("send-message", message);
+    return true;
   }
 }
 

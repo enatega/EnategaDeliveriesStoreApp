@@ -1,12 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useAppTheme } from '../theme/ThemeProvider';
 import { MainStackParamList } from '../navigation/types';
 import BarChart, { BarChartDataPoint } from '../components/BarChart';
 import EarningsActivityRow from '../components/EarningsActivityRow';
+import EarningsEmptyState from '../components/EarningsEmptyState';
 import Text from '../components/Text';
 import { useEarningsDailyQuery, useEarningsGraphQuery } from '../hooks/useEarningsQueries';
+import { useCurrencyFormatter } from '../hooks/useCurrency';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'EarningsDetail'> | { navigation?: any };
 
@@ -14,6 +16,7 @@ type Props = NativeStackScreenProps<MainStackParamList, 'EarningsDetail'> | { na
 
 export default function EarningsScreen({ navigation }: any) {
   const { theme } = useAppTheme();
+  const { formatAmount } = useCurrencyFormatter();
   const [hasReachedListEnd, setHasReachedListEnd] = useState(false);
   const { data: earningsGraphData } = useEarningsGraphQuery({
     params: { page: 1, limit: 10 },
@@ -24,15 +27,16 @@ export default function EarningsScreen({ navigation }: any) {
       earningsGraphData?.graph.map((item) => ({
         label: item.label.replace(' - ', '-\n'),
         value: item.total_amount,
-        displayValue: `$${item.total_amount}`,
+        displayValue: formatAmount(item.total_amount, 2),
       })) ?? [],
-    [earningsGraphData],
+    [earningsGraphData, formatAmount],
   );
   const {
     data: earningsDailyData,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    isLoading: isDailyLoading,
   } = useEarningsDailyQuery({
     params: { page: 1, limit: 10 },
   });
@@ -50,6 +54,26 @@ export default function EarningsScreen({ navigation }: any) {
   const handleSeeMore = () => navigation?.navigate?.('EarningsDetail');
   const handleRowPress = (item: { date: string }) =>
     navigation?.navigate?.('EarningsOrderDetail', { date: item.date });
+
+  if (isDailyLoading && !earningsDailyData) {
+    return (
+      <View style={[styles.loaderContainer, { backgroundColor: theme.colors.background }]}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+      </View>
+    );
+  }
+
+  if (earningsItems.length === 0) {
+    return (
+      <ScrollView
+        style={{ backgroundColor: theme.colors.background }}
+        contentContainerStyle={styles.emptyContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <EarningsEmptyState />
+      </ScrollView>
+    );
+  }
 
   return (
     <ScrollView
@@ -103,8 +127,17 @@ export default function EarningsScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   content: {
     paddingBottom: 32,
+  },
+  emptyContent: {
+    paddingBottom: 32,
+    minHeight: 700,
   },
   chartSection: {
     paddingHorizontal: 16,

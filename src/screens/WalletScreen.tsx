@@ -17,10 +17,12 @@ import { useWithdraw } from "../hooks/useWalletMutations";
 import { WithdrawSuccessResponse } from "../api/walletServicesTypes";
 import { ApiError } from "../api/apiClient";
 import { useTranslations } from "../localization/LocalizationProvider";
+import { useCurrencyFormatter } from "../hooks/useCurrency";
 
 export default function WalletScreen() {
   const { theme } = useAppTheme();
   const { t } = useTranslations("app");
+  const { formatAmount } = useCurrencyFormatter();
   const [withdrawOpen, setWithdrawOpen] = useState(false);
   const [successData, setSuccessData] =
     useState<WithdrawSuccessResponse | null>(null);
@@ -78,7 +80,6 @@ export default function WalletScreen() {
     refetchHistory();
   };
 
-  const formatCurrency = (amount: number) => `$${amount.toLocaleString()}`;
   const formatDate = (isoString: string) =>
     new Date(isoString).toLocaleDateString("en-US", {
       day: "numeric",
@@ -139,7 +140,7 @@ export default function WalletScreen() {
               iconType="pending"
               label="Requested"
               date={formatDate(pendingRequest.requested_at)}
-              amount={formatCurrency(pendingRequest.amount)}
+              amount={formatAmount(pendingRequest.amount, 2)}
               amountColor="#EF4444"
             />
           </View>
@@ -169,7 +170,7 @@ export default function WalletScreen() {
                 iconType={item.type === "debit" ? "cashout" : "pending"}
                 label={item.label}
                 date={formatDate(item.created_at)}
-                amount={formatCurrency(item.amount)}
+                amount={formatAmount(item.amount, 2)}
                 amountColor={item.type === "debit" ? undefined : "#10B981"}
               />
             ))
@@ -179,7 +180,7 @@ export default function WalletScreen() {
 
       <WithdrawBottomSheet
         visible={withdrawOpen}
-        availableAmount={formatCurrency(availableAmount)}
+        availableAmount={formatAmount(availableAmount, 2)}
         onClose={() => setWithdrawOpen(false)}
         onConfirm={handleWithdrawConfirm}
         isSubmitting={withdrawMutation.isPending}

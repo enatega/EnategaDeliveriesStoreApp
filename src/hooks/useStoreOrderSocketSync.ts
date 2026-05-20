@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { InfiniteData, useQueryClient } from "@tanstack/react-query";
 import { AppState, type AppStateStatus } from "react-native";
 import NetInfo from "@react-native-community/netinfo";
@@ -22,6 +22,7 @@ import {
   type StoreOrderStatusUpdatedPayload,
   type StoreRiderStatusUpdatedPayload,
 } from "../socket/storeOrdersSocket";
+import { startOrderAlertLoop, stopOrderAlertLoop } from "./orderAlertSound";
 
 function matchesOrderTypeFilter(params: GetOrdersParams | undefined, nextType: Order["orderType"]) {
   const filter = params?.orderType;
@@ -60,6 +61,7 @@ function prependOrderToInfiniteData(
 export function useStoreOrderSocketSync() {
   const queryClient = useQueryClient();
   const { session, isAuthenticated } = useAuth();
+  const pendingAlertOrderIdsRef = useRef<Set<string>>(new Set());
 
   const token = session.token ?? null;
   const userId = session.user?.id ?? null;
@@ -69,6 +71,8 @@ export function useStoreOrderSocketSync() {
     storeOrdersSocketClient.updateSession({ token, userId });
 
     if (!isAuthenticated || !token) {
+      pendingAlertOrderIdsRef.current.clear();
+      void stopOrderAlertLoop();
       storeOrdersSocketClient.disconnect();
       return;
     }
@@ -76,6 +80,8 @@ export function useStoreOrderSocketSync() {
     storeOrdersSocketClient.connect();
 
     return () => {
+      pendingAlertOrderIdsRef.current.clear();
+      void stopOrderAlertLoop();
       storeOrdersSocketClient.disconnect();
     };
   }, [isAuthenticated, token, userId]);
@@ -93,6 +99,10 @@ export function useStoreOrderSocketSync() {
           orderId: payload?.order?.orderId,
         });
         if (payload.storeId !== currentStoreId) return;
+        if (payload?.order?.orderId) {
+          pendingAlertOrderIdsRef.current.add(payload.order.orderId);
+          void startOrderAlertLoop();
+        }
 
         const incomingOrder = payload.order as Order;
 
@@ -120,6 +130,17 @@ export function useStoreOrderSocketSync() {
       (payload: StoreOrderStatusUpdatedPayload) => {
         console.log("[store][socket] order-status-updated received", payload);
         if (!payload?.orderId || !payload?.status) return;
+
+        if (
+          payload.status !== StoreOrderStatus.PENDING
+          && payload.status !== StoreOrderStatus.SCHEDULED
+        ) {
+          pendingAlertOrderIdsRef.current.delete(payload.orderId);
+          if (pendingAlertOrderIdsRef.current.size === 0) {
+            void stopOrderAlertLoop();
+          }
+        }
+
         invalidateStoreTabsForOrderStatus(queryClient, payload.status);
       },
     );
@@ -138,11 +159,15 @@ export function useStoreOrderSocketSync() {
       unsubscribeCreated();
       unsubscribeOrderStatus();
       unsubscribeRiderStatus();
+      pendingAlertOrderIdsRef.current.clear();
+      void stopOrderAlertLoop();
     };
   }, [currentStoreId, isAuthenticated, queryClient, token]);
 
   useEffect(() => {
     if (!isAuthenticated || !token) {
+      pendingAlertOrderIdsRef.current.clear();
+      void stopOrderAlertLoop();
       return undefined;
     }
 
@@ -152,7 +177,6 @@ export function useStoreOrderSocketSync() {
       appState = nextState;
 
       if (wasActive && nextState !== "active") {
-        storeOrdersSocketClient.disconnect();
         return;
       }
 

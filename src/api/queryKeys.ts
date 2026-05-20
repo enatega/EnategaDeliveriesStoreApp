@@ -84,6 +84,18 @@ export const walletKeys = {
     [...walletKeys.history(), params] as const,
 };
 
+export const currencyKeys = {
+  all: ["currency"] as const,
+  config: () => [...currencyKeys.all, "config"] as const,
+};
+
+export const supportChatKeys = {
+  all: ["support-chat"] as const,
+  messages: () => [...supportChatKeys.all, "messages"] as const,
+  messagesByChatBox: (chatBoxId: string) =>
+    [...supportChatKeys.messages(), chatBoxId] as const,
+};
+
 export const profileKeys = {
   all: ['profile'] as const,
   profile: () => [...profileKeys.all, 'me'] as const,

@@ -1,8 +1,7 @@
 import ProfileScreen from './ProfileScreen';
-export type { ProfileScreenProps } from './ProfileScreen';
 
 /**
  * Profile tab — delegates to ProfileScreen content.
- * Shell (header, bottom nav, sidebar) is provided by MainLayout.
+ * Bottom navigation shell is provided by tabs navigator.
  */
 export default ProfileScreen;

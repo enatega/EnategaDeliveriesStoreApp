@@ -7,11 +7,9 @@ import { MainStackParamList } from '../navigation/types';
 
 export default function EarningsTabScreen() {
   const stackNavigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
-  const onNavigate = (screen: 'Language' | 'BankManagement' | 'WorkSchedule') =>
-    stackNavigation.navigate(screen);
 
   return (
-    <TabShell titleKey="nav_earnings" onNavigate={onNavigate}>
+    <TabShell titleKey="nav_earnings">
       <EarningsScreen navigation={stackNavigation} />
     </TabShell>
   );

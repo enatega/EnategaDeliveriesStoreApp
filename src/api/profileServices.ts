@@ -13,6 +13,8 @@ import {
     BankManagementResponse,
     UpdateBankManagementRequest,
     UpdateBankManagementResponse,
+    UpdateProfileInfoRequest,
+    UpdateProfileInfoResponse,
 } from './profileServicesTypes';
 
 const BASE_PATH = '/apps/deliveries/store-app/profile/me';
@@ -24,7 +26,10 @@ export const profileService = {
     // Availability
     getAvailability: () => apiClient.get<AvailabilityResponse>(`${BASE_PATH}/availability`),
     updateAvailability: (data: UpdateAvailabilityRequest) =>
-        apiClient.patch<UpdateAvailabilityResponse>(`${BASE_PATH}/availability`, data),
+        apiClient.patch<UpdateAvailabilityResponse>(`${BASE_PATH}/availability`, {
+            storeAvailable: data.storeAvailable,
+            store_available: data.storeAvailable,
+        }),
 
     // Work schedule
     getWorkSchedule: () => apiClient.get<WorkScheduleResponse>(`${BASE_PATH}/work-schedule`),
@@ -40,4 +45,22 @@ export const profileService = {
     getBankManagement: () => apiClient.get<BankManagementResponse>(`${BASE_PATH}/bank-management`),
     updateBankManagement: (data: UpdateBankManagementRequest) =>
         apiClient.patch<UpdateBankManagementResponse>(`${BASE_PATH}/bank-management`, data),
+
+    // Profile details (address/phone)
+    updateProfileInfo: (data: UpdateProfileInfoRequest) =>
+        apiClient.patch<UpdateProfileInfoResponse>(`${BASE_PATH}`, {
+            ...(data.city !== undefined
+                ? {
+                    city: data.city,
+                    basicInformation: { city: data.city },
+                }
+                : {}),
+            ...(data.phoneNumber !== undefined
+                ? {
+                    phoneNumber: data.phoneNumber,
+                    phone_number: data.phoneNumber,
+                    contactInformation: { phoneNumber: data.phoneNumber },
+                }
+                : {}),
+        }),
 };

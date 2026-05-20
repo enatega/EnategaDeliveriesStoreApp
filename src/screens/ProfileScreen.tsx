@@ -1,260 +1,418 @@
 import React from "react";
 import {
   ActivityIndicator,
+  Alert,
+  Image,
   ImageBackground,
+  Linking,
+  Pressable,
   ScrollView,
   StyleSheet,
   View,
 } from "react-native";
+import { Feather } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useAppTheme } from "../theme/ThemeProvider";
 import { useTranslations } from "../localization/LocalizationProvider";
 import Text from "../components/Text";
 import ToggleSwitch from "../components/ToggleSwitch";
-import {
-  useProfileQuery,
-  useAvailabilityQuery,
-} from "../hooks/useProfileQueries";
+import { useProfileQuery, useAvailabilityQuery } from "../hooks/useProfileQueries";
 import { useUpdateAvailability } from "../hooks/useProfileMutations";
+import { useLogoutMutation } from "../hooks/useAuthMutations";
+import { MainStackParamList } from "../navigation/types";
+const profileBackground = require("../assets/images/profileBackground.png");
 
 export default function ProfileScreen() {
-  const { theme, themeMode, setThemeMode } = useAppTheme();
+  const { theme } = useAppTheme();
   const { t } = useTranslations("app");
+  const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
 
   const { data: profileData, isLoading: profileLoading } = useProfileQuery();
-
-  // ─── Availability (same pattern as sidebar) ────────────────────────────────
-  const { data: availabilityData, isLoading: availabilityLoading } =
-    useAvailabilityQuery();
+  const { data: availabilityData, isLoading: availabilityLoading } = useAvailabilityQuery();
   const updateAvailability = useUpdateAvailability();
+  const logoutMutation = useLogoutMutation();
 
-  // Derive current availability
-  const currentAvailability = availabilityData?.store_available ?? true;
-
-  const handleAvailabilityToggle = (newValue: boolean) => {
-    updateAvailability.mutate({ storeAvailable: newValue });
-  };
-
-  const isAvailabilityBusy =
-    availabilityLoading || updateAvailability.isPending;
-
-  // Loading state for profile data
   if (profileLoading || !profileData) {
     return (
-      <View
-        style={[
-          styles.flex,
-          styles.center,
-          { backgroundColor: theme.colors.background },
-        ]}
-      >
+      <View style={[styles.flex, styles.center, { backgroundColor: "#F3F4F6" }]}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
       </View>
     );
   }
 
-  const { profile, basicInformation, contactInformation } = profileData;
-
-  // Compute initials from the profile name
+  const { profile, basicInformation } = profileData;
   const initials = profile.name
     ? profile.name
-        .split(" ")
-        .slice(0, 2)
-        .map((w) => w[0])
-        .join("")
-        .toUpperCase()
+      .split(" ")
+      .slice(0, 2)
+      .map((w) => w[0])
+      .join("")
+      .toUpperCase()
     : "JS";
 
-  const coverImage = profile.image || null;
-  const storeId = basicInformation.storeId
-    ? basicInformation.storeId.length > 10
-      ? basicInformation.storeId.substring(0, 10) + "..."
-      : basicInformation.storeId
-    : "";
+  const currentAvailability = availabilityData?.store_available ?? true;
+  const isAvailabilityBusy = availabilityLoading || updateAvailability.isPending;
+  const openExternalUrl = async (url: string) => {
+    try {
+      const supported = await Linking.canOpenURL(url);
+      if (!supported) {
+        Alert.alert("Unable to open link", url);
+        return;
+      }
+      await Linking.openURL(url);
+    } catch {
+      Alert.alert("Unable to open link", url);
+    }
+  };
 
-  const isDark = themeMode === "dark";
-  const toggleTheme = async () => setThemeMode(isDark ? "light" : "dark");
+  const menuPrimary = [
+    {
+      key: "language",
+      icon: "globe",
+      title: t("profile_language"),
+      subtitle: t("profile_language_subtitle"),
+      onPress: () => navigation.navigate("Language"),
+    },
+    {
+      key: "bank",
+      icon: "credit-card",
+      title: t("profile_bank_management"),
+      subtitle: t("profile_bank_management_subtitle"),
+      onPress: () => navigation.navigate("BankManagement"),
+    },
+    {
+      key: "schedule",
+      icon: "clock",
+      title: t("profile_work_schedule"),
+      subtitle: t("profile_work_schedule_subtitle"),
+      onPress: () => navigation.navigate("WorkSchedule"),
+    },
+    {
+      key: "scheduled-orders",
+      icon: "list",
+      title: t("profile_scheduled_orders"),
+      subtitle: t("profile_scheduled_orders_subtitle"),
+      onPress: undefined,
+    },
+  ] as const;
 
-  const infoRows = [
-    { label: t("profile_vehicle_plate"), value: "—" },
-    { label: t("profile_address"), value: basicInformation.city ?? "—" },
-    { label: t("profile_phone"), value: contactInformation.phoneNumber ?? "—" },
-    { label: t("profile_username"), value: profile.email ?? "—" },
-    { label: t("profile_wallet_balance"), value: "—" },
-  ];
+  const menuSecondary = [
+    {
+      key: "privacy",
+      icon: "shield",
+      title: t("profile_privacy_policy"),
+      subtitle: t("profile_privacy_policy_subtitle"),
+      onPress: () => openExternalUrl("https://multivendor.enatega.com/terms"),
+    },
+    {
+      key: "about",
+      icon: "info",
+      title: t("profile_about_us"),
+      subtitle: t("profile_about_us_subtitle"),
+      onPress: () => openExternalUrl("https://multivendor.enatega.com/about"),
+    },
+    {
+      key: "help",
+      icon: "help-circle",
+      title: t("profile_help"),
+      subtitle: t("profile_help_subtitle"),
+      onPress: () => openExternalUrl("https://ninjascode.com/"),
+    },
+  ] as const;
 
   return (
-    <View style={[styles.flex, { backgroundColor: theme.colors.background }]}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* ── Hero banner with avatar + availability ── */}
-        <ImageBackground
-          source={coverImage ? { uri: coverImage } : undefined}
-          style={styles.heroBanner}
-          imageStyle={styles.heroBannerImage}
-        >
-          <View style={styles.heroBannerOverlay} />
-
-          <View style={styles.heroBottom}>
-            {/* Avatar + name */}
-            <View style={styles.heroLeft}>
-              <View
-                style={[
-                  styles.avatarCircle,
-                  { backgroundColor: theme.colors.background },
-                ]}
-              >
-                <Text
-                  variant="body"
-                  weight="semiBold"
-                  color={theme.colors.primary}
-                >
+    <View style={[styles.flex, { backgroundColor: "#F3F4F6" }]}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.contentContainer}>
+        <ImageBackground source={profileBackground} style={styles.hero} imageStyle={styles.heroImage}>
+          <View style={styles.profileRow}>
+            {profile.image?.trim() ? (
+              <Image source={{ uri: profile.image }} style={styles.avatarImage} />
+            ) : (
+              <View style={styles.avatarCircle}>
+                <Text weight="semiBold" color={theme.colors.primary} style={styles.avatarText}>
                   {initials}
                 </Text>
               </View>
-              <View style={styles.nameBlock}>
-                <Text variant="body" weight="semiBold" color="#FFFFFF">
-                  {profile.name}
-                </Text>
-                <Text variant="caption" color="rgba(255,255,255,0.8)">
-                  {storeId ?? ""}
-                </Text>
-              </View>
-            </View>
-
-            {/* Availability toggle (fully self‑contained) */}
-            <View style={styles.availabilityBlock}>
-              <Text
-                variant="caption"
-                color="#FFFFFF"
-                style={styles.availabilityLabel}
-              >
-                {t("profile_availability")}
+            )}
+            <View style={styles.profileTextWrap}>
+              <Text weight="semiBold" style={styles.profileName}>
+                {profile.name}
               </Text>
-              <ToggleSwitch
-                value={currentAvailability}
-                onValueChange={
-                  isAvailabilityBusy ? undefined : handleAvailabilityToggle
-                }
-                disabled={isAvailabilityBusy}
-              />
-              <Text variant="caption" color="rgba(255,255,255,0.8)">
-                {availabilityLoading
-                  ? t("loading")
-                  : updateAvailability.isPending
-                    ? t("updating")
-                    : currentAvailability
-                      ? t("available")
-                      : t("unavailable")}
-              </Text>
+              <Text style={styles.profileId}>ID-{(basicInformation.storeId ?? "7853").toString().slice(0, 4)}</Text>
             </View>
           </View>
         </ImageBackground>
 
-        {/* ── Info rows ── */}
-        <View style={styles.section}>
-          {/* Bank details header */}
-          <View
-            style={[styles.row, { borderBottomColor: theme.colors.gray300 }]}
-          >
-            <Text
-              variant="caption"
-              weight="semiBold"
-              color={theme.colors.text}
-              style={styles.rowLabel}
-            >
-              {t("profile_bank_details")}
-            </Text>
-            <Text variant="caption" color="#0EA5E9">
-              {t("profile_updated")}
-            </Text>
-          </View>
-
-          {infoRows.map((row) => (
-            <View
-              key={row.label}
-              style={[styles.row, { borderBottomColor: theme.colors.gray300 }]}
-            >
-              <Text
-                variant="caption"
-                color={theme.colors.gray900}
-                style={styles.rowLabel}
-              >
-                {row.label}
-              </Text>
-              <Text variant="caption" color="#868686">
-                {row.value}
-              </Text>
+        <View style={styles.availabilityCard}>
+          <View style={styles.availabilityLeft}>
+            <View style={styles.iconCircle}>
+              <Feather name="clock" size={18} color={theme.colors.primary} />
             </View>
-          ))}
-
-          {/* Theme toggle */}
-          <View
-            style={[styles.row, { borderBottomColor: theme.colors.gray300 }]}
-          >
-            <Text
-              variant="caption"
-              weight="semiBold"
-              color={theme.colors.text}
-              style={styles.rowLabel}
-            >
-              {t("profile_theme")}
-            </Text>
-            <ToggleSwitch value={isDark} onValueChange={toggleTheme} />
+            <View style={styles.menuTextWrap}>
+              <Text weight="semiBold" style={styles.menuTitle}>
+                {t("profile_availability")}
+              </Text>
+              <Text style={styles.menuSubtitle}>{t("profile_availability_subtitle")}</Text>
+            </View>
+          </View>
+          <View style={styles.availabilityRight}>
+            <ToggleSwitch
+              value={currentAvailability}
+              onValueChange={(newValue) => updateAvailability.mutate({ storeAvailable: newValue })}
+              disabled={isAvailabilityBusy}
+            />
+            <Text style={styles.availableText}>{currentAvailability ? t("Available") : t("Unavailable")}</Text>
           </View>
         </View>
+
+        <Text weight="medium" style={styles.sectionTitle}>
+          {t("profile_account_settings")}
+        </Text>
+
+        <View style={styles.cardGroup}>
+          <Pressable
+            style={[styles.menuRow, styles.menuRowDivider]}
+            onPress={() => navigation.navigate("ProfileDetails")}
+          >
+            <View style={styles.iconCircle}>
+              <Feather name="user" size={18} color="#55C171" />
+            </View>
+            <View style={styles.menuTextWrap}>
+              <Text weight="semiBold" style={styles.menuTitle}>
+                {t("profile_user_profile")}
+              </Text>
+              <Text style={styles.menuSubtitle}>{t("profile_user_profile_subtitle")}</Text>
+            </View>
+            <Feather name="chevron-right" size={20} color="#111827" />
+          </Pressable>
+
+          {menuPrimary.map((item, index) => (
+            <MenuRow
+              key={item.key}
+              icon={item.icon}
+              title={item.title}
+              subtitle={item.subtitle}
+              onPress={item.onPress}
+              showDivider={index < menuPrimary.length - 1}
+            />
+          ))}
+        </View>
+
+        <View style={styles.cardGroup}>
+          {menuSecondary.map((item, index) => (
+            <MenuRow
+              key={item.key}
+              icon={item.icon}
+              title={item.title}
+              subtitle={item.subtitle}
+              onPress={item.onPress}
+              showDivider={index < menuSecondary.length - 1}
+            />
+          ))}
+        </View>
+
+        <Pressable
+          style={styles.logoutCard}
+          onPress={() => logoutMutation.mutate()}
+          disabled={logoutMutation.isPending}
+        >
+          <View style={styles.iconCircleDanger}>
+            <Feather name="log-out" size={18} color="#EF4444" />
+          </View>
+          <View style={styles.menuTextWrap}>
+            <Text weight="semiBold" style={styles.logoutTitle}>
+              {t("auth_logout")}
+            </Text>
+            <Text style={styles.menuSubtitle}>{t("profile_logout_subtitle")}</Text>
+          </View>
+          <Feather name="chevron-right" size={20} color="#111827" />
+        </Pressable>
       </ScrollView>
     </View>
+  );
+}
+
+type MenuRowProps = {
+  icon: React.ComponentProps<typeof Feather>["name"];
+  title: string;
+  subtitle: string;
+  onPress?: (() => void) | undefined;
+  showDivider?: boolean;
+};
+
+function MenuRow({ icon, title, subtitle, onPress, showDivider = false }: MenuRowProps) {
+  return (
+    <Pressable onPress={onPress} style={[styles.menuRow, showDivider ? styles.menuRowDivider : null]}>
+      <View style={styles.iconCircle}>
+        <Feather name={icon} size={18} color="#55C171" />
+      </View>
+      <View style={styles.menuTextWrap}>
+        <Text weight="semiBold" style={styles.menuTitle}>
+          {title}
+        </Text>
+        <Text style={styles.menuSubtitle}>{subtitle}</Text>
+      </View>
+      <Feather name="chevron-right" size={20} color="#111827" />
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   center: { justifyContent: "center", alignItems: "center" },
-  heroBanner: {
-    height: 160,
-    backgroundColor: "#374151",
-    justifyContent: "flex-end",
+  contentContainer: {
+    paddingBottom: 120,
+    gap: 12,
+  },
+  hero: {
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+    height: 150,
+    justifyContent: "center",
     paddingHorizontal: 16,
-    paddingBottom: 16,
+    overflow: "hidden",
+    marginTop: 6,
   },
-  heroBannerImage: { resizeMode: "cover" },
-  heroBannerOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.45)",
+  heroImage: {
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
   },
-  heroBottom: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    justifyContent: "space-between",
-  },
-  heroLeft: {
+  profileRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    gap: 16,
   },
   avatarCircle: {
     width: 54,
     height: 54,
     borderRadius: 27,
+    backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
   },
-  nameBlock: { gap: 4 },
-  availabilityBlock: {
-    alignItems: "flex-end",
+  avatarImage: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    backgroundColor: "#FFFFFF",
+  },
+  avatarText: {
+    fontSize: 16,
+    lineHeight: 24,
+  },
+  profileTextWrap: {
     gap: 4,
   },
-  availabilityLabel: { fontSize: 12 },
-  section: {
-    paddingHorizontal: 15,
-    paddingTop: 8,
+  profileName: {
+    fontSize: 16,
+    lineHeight: 24,
+    color: "#111827",
   },
-  row: {
+  profileId: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: "#4B5563",
+    fontWeight: "500",
+  },
+  availabilityCard: {
+    marginHorizontal: 16,
+    marginTop: -34,
+    borderWidth: 1,
+    borderColor: "#D1D5DB",
+    borderRadius: 8,
+    backgroundColor: "#FFFFFF",
+    padding: 16,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    minHeight: 51,
+    gap: 12,
   },
-  rowLabel: { flex: 1 },
+  availabilityLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    flex: 1,
+  },
+  availabilityRight: {
+    alignItems: "center",
+    gap: 6,
+  },
+  availableText: {
+    fontSize: 12,
+    lineHeight: 16,
+    color: "#4B5563",
+  },
+  sectionTitle: {
+    marginHorizontal: 16,
+    marginTop: 4,
+    fontSize: 14,
+    lineHeight: 20,
+    color: "#4B5563",
+  },
+  cardGroup: {
+    marginHorizontal: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#D1D5DB",
+    backgroundColor: "#FFFFFF",
+    overflow: "hidden",
+    paddingHorizontal: 16,
+  },
+  menuRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+    paddingVertical: 16,
+  },
+  menuRowDivider: {
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E7EB",
+  },
+  iconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(144,227,109,0.1)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  iconCircleDanger: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(239,68,68,0.1)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  menuTextWrap: {
+    flex: 1,
+    gap: 4,
+  },
+  menuTitle: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: "#111827",
+  },
+  menuSubtitle: {
+    fontSize: 12,
+    lineHeight: 16,
+    color: "#6B7280",
+  },
+  logoutCard: {
+    marginHorizontal: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#D1D5DB",
+    backgroundColor: "#FEF2F2",
+    padding: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+  },
+  logoutTitle: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: "#EF4444",
+  },
 });

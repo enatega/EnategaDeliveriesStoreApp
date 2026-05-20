@@ -1,10 +1,21 @@
 import React, { useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
-import { Button, Text, TextInput } from '../components';
-import EmailIcon from '../components/icons/EmailIcon';
+import {
+  Image,
+  ImageBackground,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  StyleSheet,
+  TextInput as RNTextInput,
+  useWindowDimensions,
+  View,
+} from 'react-native';
+import { Feather } from '@expo/vector-icons';
+import { Text } from '../components';
 import { useTranslations } from '../localization/LocalizationProvider';
 import { useAppTheme } from '../theme/ThemeProvider';
 import { useLoginMutation } from '../hooks/useAuthMutations';
+import { getExpoPushTokenForAuth } from '../api/expoPushNotification';
 
 export default function LoginScreen() {
   const { t } = useTranslations('app');
@@ -15,6 +26,9 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const { height } = useWindowDimensions();
+  const isSmallPhone = height < 760;
 
   const validate = (): boolean => {
     let valid = true;
@@ -39,129 +53,379 @@ export default function LoginScreen() {
     return valid;
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!validate()) return;
+
+    const expoPushToken = await getExpoPushTokenForAuth();
     loginMutation.mutate({
       email: email.trim(),
       password,
-      device_push_token: 'fcm-token-optional',
+      device_push_token: expoPushToken ?? null,
     });
   };
 
   const apiError = loginMutation.error?.message ?? null;
 
   return (
-    <KeyboardAvoidingView
-      style={[styles.flex, { backgroundColor: theme.colors.background }]}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
+    <View style={styles.background}>
+      <View style={styles.topBackgroundWrap}>
+        <ImageBackground
+          source={require('../assets/images/loginBackground.png')}
+          style={styles.topBackground}
+          resizeMode="cover"
+        />
+      </View>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        {/* Centered card */}
-        <View style={styles.card}>
-          {/* Email icon */}
-          <View style={styles.iconWrapper}>
-            <EmailIcon size={56} color={theme.colors.primary} />
+        <View style={[styles.screenContent, isSmallPhone ? styles.screenContentCompact : null]}>
+          <View style={styles.topSection}>
+            <View style={styles.logoBox}>
+              <Image
+                source={require('../assets/images/loginLogo.png')}
+                style={styles.logo}
+                resizeMode="contain"
+              />
+            </View>
+
+            <View style={[styles.titleBlock, isSmallPhone ? styles.titleBlockCompact : null]}>
+              <View style={styles.welcomeRow}>
+                <View style={[styles.welcomeLine, { backgroundColor: '#B7D7A8' }]} />
+                <Text style={styles.welcomeText} weight="bold" color="#3E8D36">
+                  {t('auth_welcome_back')}
+                </Text>
+                <View style={[styles.welcomeLine, { backgroundColor: '#B7D7A8' }]} />
+              </View>
+
+              <Text style={styles.mainTitle} weight="bold" color="#0F172A">
+                {t('auth_access_store')}
+              </Text>
+
+              <Text style={styles.subtitle} color="#6B7280">
+                {t('auth_login_subtitle')}
+              </Text>
+            </View>
           </View>
 
-          {/* Title + subtitle */}
-          <Text
-            variant="subtitle"
-            weight="bold"
-            color={theme.colors.gray900}
-            style={styles.title}
+          <View
+            style={[
+              styles.formCard,
+              isSmallPhone ? styles.formCardCompact : null,
+              { backgroundColor: theme.colors.surface },
+            ]}
           >
-            {t('auth_title')}
-          </Text>
-          <Text variant="body" color={theme.colors.gray500} style={styles.subtitle}>
-            {t('auth_subtitle')}
-          </Text>
+            <View style={styles.fieldBlock}>
+              <Text style={styles.fieldLabel} weight="bold" color="#0F172A">
+                {t('auth_email_placeholder')}
+              </Text>
+              <View style={[styles.inputRow, { borderColor: theme.colors.gray200 }]}>
+                <View style={styles.inputIconCell}>
+                  <Feather name="mail" size={18} color="#5FA24E" />
+                </View>
+                <RNTextInput
+                  placeholder={t('auth_email_placeholder')}
+                  placeholderTextColor="#6B7280"
+                  value={email}
+                  onChangeText={(v) => {
+                    setEmail(v);
+                    if (emailError) setEmailError('');
+                  }}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  returnKeyType="next"
+                  style={styles.input}
+                />
+              </View>
+              {emailError ? (
+                <Text variant="caption" color="#EF4444" style={styles.errorText}>
+                  {emailError}
+                </Text>
+              ) : null}
+            </View>
 
-          {/* Form */}
-          <View style={styles.form}>
-            <TextInput
-              placeholder={t('auth_email_placeholder')}
-              value={email}
-              onChangeText={(v) => {
-                setEmail(v);
-                if (emailError) setEmailError('');
-              }}
-              error={emailError}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-              returnKeyType="next"
-              accessibilityLabel={t('auth_email_placeholder')}
-            />
+            <View style={styles.fieldBlock}>
+              <Text style={styles.fieldLabel} weight="bold" color="#0F172A">
+                {t('auth_password_placeholder')}
+              </Text>
+              <View style={[styles.inputRow, { borderColor: theme.colors.gray200 }]}>
+                <View style={styles.inputIconCell}>
+                  <Feather name="lock" size={18} color="#5FA24E" />
+                </View>
+                <RNTextInput
+                  placeholder={t('auth_password_placeholder')}
+                  placeholderTextColor="#6B7280"
+                  value={password}
+                  onChangeText={(v) => {
+                    setPassword(v);
+                    if (passwordError) setPasswordError('');
+                  }}
+                  secureTextEntry={!passwordVisible}
+                  returnKeyType="done"
+                  onSubmitEditing={handleLogin}
+                  style={styles.input}
+                />
+                <Pressable
+                  onPress={() => setPasswordVisible((prev) => !prev)}
+                  style={styles.trailingIconBtn}
+                  hitSlop={8}
+                >
+                  <Feather name={passwordVisible ? 'eye-off' : 'eye'} size={18} color="#6B7280" />
+                </Pressable>
+              </View>
+              {passwordError ? (
+                <Text variant="caption" color="#EF4444" style={styles.errorText}>
+                  {passwordError}
+                </Text>
+              ) : null}
+            </View>
 
-            <TextInput
-              placeholder={t('auth_password_placeholder')}
-              value={password}
-              onChangeText={(v) => {
-                setPassword(v);
-                if (passwordError) setPasswordError('');
-              }}
-              error={passwordError}
-              isPassword
-              returnKeyType="done"
-              onSubmitEditing={handleLogin}
-              accessibilityLabel={t('auth_password_placeholder')}
-            />
+            <Pressable style={styles.forgotWrap}>
+              <Text style={styles.forgotText} weight="medium" color="#3E8D36">
+                {t('auth_forgot_password')}
+              </Text>
+            </Pressable>
 
             {apiError ? (
-              <Text variant="caption" color="#EF4444">
+              <Text variant="caption" color="#EF4444" style={styles.apiError}>
                 {apiError}
               </Text>
             ) : null}
+
+            <Pressable
+              onPress={handleLogin}
+              disabled={loginMutation.isPending}
+              style={({ pressed }) => [
+                styles.loginBtn,
+                isSmallPhone ? styles.loginBtnCompact : null,
+                { backgroundColor: '#3E8D36' },
+                pressed && styles.pressed,
+                loginMutation.isPending && styles.disabled,
+              ]}
+            >
+              <Text style={styles.loginBtnText} weight="semiBold" color="#FFFFFF">
+                {t('auth_login')}
+              </Text>
+              <View style={styles.loginArrowWrap}>
+                <Feather name="arrow-right" size={20} color="#FFFFFF" />
+              </View>
+            </Pressable>
           </View>
 
-          {/* Login button */}
-          <Button
-            label={t('auth_login')}
-            onPress={handleLogin}
-            loading={loginMutation.isPending}
-            disabled={loginMutation.isPending}
-          />
+          <View style={styles.securityFooterRow}>
+            <Image
+              source={require('../assets/images/privacy.png')}
+              style={styles.securityIcon}
+              resizeMode="contain"
+            />
+            <Text style={styles.securityNoteText} color="#6B7280">
+              {t('auth_data_protected')}
+            </Text>
+          </View>
         </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+    backgroundColor: '#F9FAFB',
+  },
+  topBackgroundWrap: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    width: '58%',
+    height: '32%',
+    overflow: 'hidden',
+  },
+  topBackground: {
+    flex: 1,
+  },
   flex: {
     flex: 1,
   },
-  scrollContent: {
-    flexGrow: 1,
-    justifyContent: 'center',   // vertically center when content is shorter than screen
-    paddingHorizontal: 24,
-    paddingVertical: 40,
+  screenContent: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingTop: 82,
+    paddingBottom: 48,
+    justifyContent: 'flex-start',
   },
-  card: {
-    gap: 0,
+  screenContentCompact: {
+    paddingTop: 70,
+    paddingHorizontal: 16,
   },
-  iconWrapper: {
+  topSection: {
     alignItems: 'center',
-    marginBottom: 24,
   },
-  title: {
-    fontSize: 18,
-    lineHeight: 28,
+  logoBox: {
+    width: 96,
+    height: 96,
+    borderRadius: 28,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 16,
+    elevation: 5,
+  },
+  logo: {
+    width: 72,
+    height: 72,
+  },
+  titleBlock: {
+    marginTop: 14,
+    alignItems: 'center',
+    gap: 8,
+  },
+  titleBlockCompact: {
+    marginTop: 10,
+    gap: 4,
+  },
+  welcomeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  welcomeLine: {
+    width: 54,
+    height: 2,
+    borderRadius: 2,
+  },
+  welcomeText: {
+    fontSize: 15,
+    lineHeight: 20,
+  },
+  mainTitle: {
+    fontSize: 16,
+    lineHeight: 21,
     textAlign: 'center',
-    marginBottom: 8,
   },
   subtitle: {
     fontSize: 14,
+    lineHeight: 18,
+    textAlign: 'center',
+  },
+  formCard: {
+    marginTop: 28,
+    borderRadius: 26,
+    padding: 18,
+    gap: 14,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  formCardCompact: {
+    marginTop: 18,
+    padding: 14,
+    gap: 10,
+  },
+  fieldBlock: {
+    gap: 8,
+  },
+  fieldLabel: {
+    fontSize: 14,
+    lineHeight: 22,
+  },
+  inputRow: {
+    minHeight: 52,
+    borderWidth: 1,
+    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    overflow: 'hidden',
+    backgroundColor: '#FFFFFF',
+  },
+  inputIconCell: {
+    width: 52,
+    height: 52,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#EEF7E9',
+  },
+  input: {
+    flex: 1,
+    paddingHorizontal: 12,
+    fontSize: 14,
+    lineHeight: 20,
+    color: '#111827',
+  },
+  trailingIconBtn: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 6,
+  },
+  forgotWrap: {
+    alignSelf: 'flex-end',
+    marginTop: 2,
+    marginBottom: 2,
+  },
+  forgotText: {
+    fontSize: 16,
+    lineHeight: 22,
+  },
+  apiError: {
+    marginTop: -2,
+  },
+  loginBtn: {
+    height: 52,
+    borderRadius: 14,
+    paddingHorizontal: 18,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  loginBtnCompact: {
+    height: 50,
+  },
+  loginBtnText: {
+    fontSize: 16,
     lineHeight: 22,
     textAlign: 'center',
-    marginBottom: 32,
   },
-  form: {
-    gap: 16,
-    marginBottom: 32,
+  loginArrowWrap: {
+    position: 'absolute',
+    right: 18,
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center',
+  },
+  securityFooterRow: {
+    position: 'absolute',
+    left: 20,
+    right: 20,
+    bottom: 10,
+    justifyContent: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  securityIcon: {
+    width: 14,
+    height: 14,
+  },
+  securityNoteText: {
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  errorText: {
+    marginTop: 1,
+  },
+  pressed: {
+    opacity: 0.9,
+  },
+  disabled: {
+    opacity: 0.6,
   },
 });

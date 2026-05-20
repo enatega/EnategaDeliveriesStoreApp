@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import GenericOrderList from "../../components/orders/GenericOrderList";
 import { useNewOrders } from "../../hooks/useOrderQueries";
 import {
@@ -7,6 +7,8 @@ import {
   useUpdatePreparingTime,
 } from "../../hooks/useOrderMutations";
 import SetPreparingTimeModal from "../../components/SetPreparingTimeModal";
+import { Order, OrderStatus } from "../../api/orderServicesTypes";
+import { startOrderAlertLoop, stopOrderAlertLoop } from "../../hooks/orderAlertSound";
 
 export default function NewOrdersScreen() {
   const [pendingOrderId, setPendingOrderId] = useState<string | null>(null);
@@ -29,6 +31,8 @@ export default function NewOrdersScreen() {
     if (!pendingOrderId) return;
 
     const orderId = pendingOrderId;
+    setModalVisible(false);
+    setPendingOrderId(null);
 
     try {
       await acceptMutation.mutateAsync(orderId);
@@ -36,10 +40,11 @@ export default function NewOrdersScreen() {
         orderId,
         data: { preparingTimeInMinutes: minutes },
       });
-      setModalVisible(false);
-      setPendingOrderId(null);
-    } catch {
-      // Keep modal open so user can retry if needed.
+    } catch (error) {
+      console.log("[NewOrdersScreen] failed to accept order / set preparing time", {
+        orderId,
+        error,
+      });
     }
   };
 
@@ -55,11 +60,26 @@ export default function NewOrdersScreen() {
     isRejecting: rejectMutation.isPending,
   });
 
+  const handleOrdersDataChange = useCallback((orders: Order[]) => {
+    const hasPendingActionableOrder = orders.some((order) =>
+      (order.status === OrderStatus.PENDING || order.status === OrderStatus.SCHEDULED)
+      && order.canAccept,
+    );
+
+    if (hasPendingActionableOrder) {
+      void startOrderAlertLoop();
+      return;
+    }
+
+    void stopOrderAlertLoop();
+  }, []);
+
   return (
     <>
       <GenericOrderList
         useOrdersHook={useNewOrders}
         renderActions={renderActions}
+        onOrdersDataChange={handleOrdersDataChange}
       />
       <SetPreparingTimeModal
         visible={modalVisible}

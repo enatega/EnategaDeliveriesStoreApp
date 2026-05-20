@@ -4,6 +4,7 @@ import Text from "./Text";
 import Button from "./Button";
 import { useAppTheme } from "../theme/ThemeProvider";
 import { useTranslations } from "../localization/LocalizationProvider";
+import { useCurrencyFormatter } from "../hooks/useCurrency";
 
 type Props = {
   currentBalance: number;
@@ -18,10 +19,7 @@ export default function WalletBalanceCard({
 }: Props) {
   const { theme } = useAppTheme();
   const { t } = useTranslations("app");
-
-  const formatCurrency = (amount: number) => {
-    return `$${amount.toLocaleString()}`;
-  };
+  const { formatAmount } = useCurrencyFormatter();
 
   return (
     <View
@@ -37,14 +35,14 @@ export default function WalletBalanceCard({
         {t("wallet_current_balance")}
       </Text>
       <Text weight="bold" color={theme.colors.text} style={styles.amount}>
-        {formatCurrency(currentBalance)}
+        {formatAmount(currentBalance, 2)}
       </Text>
       <View style={styles.availableRow}>
         <Text variant="caption" color={theme.colors.mutedText}>
           {t("wallet_available_for_withdrawal")}
         </Text>
         <Text variant="caption" weight="bold" color={theme.colors.text}>
-          {formatCurrency(availableAmount)}
+          {formatAmount(availableAmount, 2)}
         </Text>
       </View>
       <Button label={t("wallet_withdraw_now")} onPress={onWithdraw} />

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Animated } from "react-native";
+import { Alert, Animated, Linking } from "react-native";
 import { useAuth } from "../auth/AuthProvider";
 import { useLogoutMutation } from "../hooks/useAuthMutations";
 import { useAvailabilityQuery } from "../hooks/useProfileQueries";
@@ -92,6 +92,23 @@ export function useSidebar({
     updateAvailability.mutate({ storeAvailable: newValue });
   };
 
+  const openExternalUrl = useCallback(
+    async (url: string) => {
+      onClose();
+      try {
+        const supported = await Linking.canOpenURL(url);
+        if (!supported) {
+          Alert.alert("Unable to open link", url);
+          return;
+        }
+        await Linking.openURL(url);
+      } catch {
+        Alert.alert("Unable to open link", url);
+      }
+    },
+    [onClose],
+  );
+
   const user = session.user;
   const initials = user?.name
     ? user.name
@@ -172,21 +189,21 @@ export function useSidebar({
       type: "nav",
       label: "Privacy Policy",
       icon: "shield",
-      onPress: onClose,
+      onPress: () => openExternalUrl("https://multivendor.enatega.com/terms"),
     },
     {
       key: "about",
       type: "nav",
       label: "About Us",
       icon: "info",
-      onPress: onClose,
+      onPress: () => openExternalUrl("https://multivendor.enatega.com/about"),
     },
     {
       key: "help",
       type: "nav",
       label: "Help",
       icon: "help",
-      onPress: onClose,
+      onPress: () => openExternalUrl("https://ninjascode.com/"),
     },
     {
       key: "logout",

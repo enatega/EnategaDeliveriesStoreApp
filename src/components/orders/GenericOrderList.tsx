@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   StyleSheet,
@@ -43,11 +43,13 @@ type RenderActionsReturn = {
 type Props = {
   useOrdersHook: UseOrdersHook;
   renderActions: (order: Order) => RenderActionsReturn;
+  onOrdersDataChange?: (orders: Order[]) => void;
 };
 
 export default function GenericOrderList({
   useOrdersHook,
   renderActions,
+  onOrdersDataChange,
 }: Props) {
   const [filterType, setFilterType] = useState<OrderTypeFilter>("delivery");
   const { t } = useTranslations("app");
@@ -66,6 +68,9 @@ export default function GenericOrderList({
   });
 
   const orders = data?.pages.flatMap((page) => page?.items) ?? [];
+  useEffect(() => {
+    onOrdersDataChange?.(orders);
+  }, [onOrdersDataChange, orders]);
 
   const isLoadingAny = isLoading || isRefetching || isFetchingNextPage;
 
@@ -115,7 +120,9 @@ export default function GenericOrderList({
         </View>
       ) : (
         <VerticalList
+          key={filterType}
           data={orders}
+          extraData={orders}
           keyExtractor={(item) => item.orderId}
           renderItem={({ item }) => {
             const actions = renderActions(item);
@@ -158,7 +165,7 @@ export default function GenericOrderList({
 const styles = StyleSheet.create({
   container: { flex: 1 },
   centered: { flex: 1, justifyContent: "center", alignItems: "center" },
-  listContent: { paddingHorizontal: 16 },
+  listContent: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 16 },
   footerLoader: { paddingVertical: 20, alignItems: "center" },
   footerMessage: { paddingVertical: 10, alignItems: "center" },
 });

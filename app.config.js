@@ -21,6 +21,7 @@ module.exports = {
         foregroundImage: "./assets/adaptive-icon.png",
         backgroundColor: "#ffffff",
       },
+      googleServicesFile: "./google-services.json",
       package: "com.shaaneiol.store",
       edgeToEdgeEnabled: true,
     },
@@ -33,7 +34,16 @@ module.exports = {
     runtimeVersion: {
       policy: "appVersion",
     },
-    plugins: ["expo-secure-store", "expo-font"],
+    plugins: [
+      "expo-secure-store",
+      "expo-font",
+      [
+        "expo-notifications",
+        {
+          sounds: ["./src/assets/sound/beep3.mp3"],
+        },
+      ],
+    ],
     extra: {
       eas: {
         projectId: "bcc60324-a0f4-4a82-8440-7235083d272c"

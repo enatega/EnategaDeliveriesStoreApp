@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import Text from './Text';
 import { useAppTheme } from '../theme/ThemeProvider';
 import { EarningsHistoryItem } from '../api/earningsServiceTypes';
+import { useCurrencyFormatter } from '../hooks/useCurrency';
 
 type Props = {
   item: EarningsHistoryItem;
@@ -14,6 +15,7 @@ type Props = {
  */
 export default function EarningsOrderCard({ item }: Props) {
   const { theme } = useAppTheme();
+  const { formatAmount } = useCurrencyFormatter();
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -42,7 +44,7 @@ export default function EarningsOrderCard({ item }: Props) {
           Payment
         </Text>
         <Text variant="body" weight="bold" color={theme.colors.text}>
-          ${item.payment_amount}
+          {formatAmount(item.payment_amount, 2)}
         </Text>
       </View>
 

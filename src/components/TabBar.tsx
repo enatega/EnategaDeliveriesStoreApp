@@ -6,6 +6,7 @@ import { useAppTheme } from '../theme/ThemeProvider';
 export type TabItem<T extends string> = {
   key: T;
   label: string;
+  badgeCount?: number;
 };
 
 type Props<T extends string> = {
@@ -46,6 +47,24 @@ export default function TabBar<T extends string>({ tabs, activeTab, onTabPress }
             >
               {tab.label}
             </Text>
+            {typeof tab.badgeCount === 'number' ? (
+              <View
+                style={[
+                  styles.badge,
+                  {
+                    backgroundColor: isActive ? theme.colors.primary : theme.colors.gray200,
+                  },
+                ]}
+              >
+                <Text
+                  variant="caption"
+                  color={isActive ? theme.colors.gray900 : theme.colors.gray600}
+                  style={styles.badgeText}
+                >
+                  {tab.badgeCount}
+                </Text>
+              </View>
+            ) : null}
 
             {/* Green indicator — absolutely positioned at the very bottom, overlapping the gray border */}
             {isActive && (
@@ -76,6 +95,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 10,
     paddingHorizontal: 16,
+    flexDirection: 'row',
+    gap: 8,
     // relative so the absolute indicator is anchored to this tab
     position: 'relative',
   },
@@ -93,5 +114,18 @@ const styles = StyleSheet.create({
     right: 0,
     height: 4,
     borderRadius: 2,
+  },
+  badge: {
+    minWidth: 22,
+    height: 22,
+    borderRadius: 11,
+    paddingHorizontal: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  badgeText: {
+    fontSize: 12,
+    lineHeight: 16,
+    textAlign: 'center',
   },
 });

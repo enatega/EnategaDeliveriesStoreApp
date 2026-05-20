@@ -15,10 +15,10 @@ export function getReadableRiderStatus(
   riderStatusLabel: string | null,
 ) {
   if (orderStatus === OrderStatus.PICKED_UP) {
-    return "Picked Up";
+    return "Heading to Customer";
   }
   if (orderStatus === OrderStatus.OUT_FOR_DELIVERY) {
-    return "Out for Delivery";
+    return "Heading to Customer";
   }
   if (orderStatus === OrderStatus.ARRIVED) {
     return "Arrived at Customer";
