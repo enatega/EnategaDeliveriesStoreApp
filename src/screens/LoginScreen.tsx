@@ -421,8 +421,8 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   securityIcon: {
-    width: 14,
-    height: 14,
+    width: 34,
+    height: 34,
   },
   securityNoteText: {
     fontSize: 12,

@@ -1,8 +1,8 @@
 module.exports = {
   expo: {
-    name: "EnategaDeliveriesStoreApp",
-    slug: "enatega-deliveries-store-app",
-    owner: "ninjas_code",
+    name: "Cylia Merchant",
+    slug: "cylia-merchant",
+    owner: "cylia-platform",
     version: "1.0.0",
     orientation: "portrait",
     icon: "./assets/icon.png",
@@ -14,7 +14,7 @@ module.exports = {
     },
     ios: {
       supportsTablet: true,
-      bundleIdentifier: "com.enatega.deliveries.store",
+      bundleIdentifier: "com.cyliaplatform.merchant",
       infoPlist: {
         UIBackgroundModes: ["audio"],
       },
@@ -25,14 +25,14 @@ module.exports = {
         backgroundColor: "#ffffff",
       },
       googleServicesFile: "./google-services.json",
-      package: "com.enatega.deliveries.store",
+      package: "com.cyliaplatform.merchant",
       edgeToEdgeEnabled: true,
     },
     web: {
       favicon: "./assets/favicon.png",
     },
     updates: {
-      url: "https://u.expo.dev/5cf97681-9db5-457b-bf07-07c5ff3f3a9d",
+      url: "https://u.expo.dev/b07f9587-5655-42f0-bfdb-e6245945d94e",
     },
     runtimeVersion: {
       policy: "appVersion",
@@ -49,7 +49,7 @@ module.exports = {
     ],
     extra: {
       eas: {
-        projectId: "5cf97681-9db5-457b-bf07-07c5ff3f3a9d",
+        projectId: "b07f9587-5655-42f0-bfdb-e6245945d94e",
       },
     },
   },
