@@ -93,7 +93,7 @@ export default function ProfileScreen() {
       icon: "list",
       title: t("profile_scheduled_orders"),
       subtitle: t("profile_scheduled_orders_subtitle"),
-      onPress: undefined,
+      onPress: () => navigation.navigate("ScheduledOrders"),
     },
   ] as const;
 

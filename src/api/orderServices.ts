@@ -144,6 +144,15 @@ function normalizeOrder(order: Order): Order {
     }
     : null;
 
+  const etaSource =
+    (runtimeOrder.eta as Record<string, unknown> | undefined) ?? null;
+  const topLevelRemainingSeconds = toNullableNumber(runtimeOrder.remainingSeconds);
+  const etaRemainingSeconds = etaSource
+    ? toNullableNumber(etaSource.remainingSeconds)
+    : null;
+  const normalizedRemainingSeconds =
+    topLevelRemainingSeconds ?? etaRemainingSeconds ?? undefined;
+
   return {
     ...order,
     customerProfileImage: normalizeImageUrl(customerProfileImageRaw),
@@ -156,6 +165,7 @@ function normalizeOrder(order: Order): Order {
           ? runtimeOrder.restaurant_note
           : null,
     orderSummary,
+    remainingSeconds: normalizedRemainingSeconds,
   };
 }
 
@@ -219,6 +229,10 @@ export const orderServices = {
   // ─── Completed / Cancelled / Failed Orders ─────────────────────
   getCompletedOrders: (params: GetOrdersParams = {}) =>
     getOrdersWithDebug("completed", `${BASE_PATH}/completed`, params),
+
+  // ─── Scheduled Orders ──────────────────────────────────────────
+  getScheduledOrders: (params: GetOrdersParams = {}) =>
+    getOrdersWithDebug("scheduled", `${BASE_PATH}/scheduled`, params),
 
   // ─── Mutations ──────────────────────────────────────────────────
   acceptOrder: (orderId: string) =>
