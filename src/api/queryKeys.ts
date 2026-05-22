@@ -21,6 +21,7 @@ export const ordersKeys = {
   ready: () => [...ordersKeys.all, "ready"] as const,
   pickup: () => [...ordersKeys.all, "pickup"] as const,
   completed: () => [...ordersKeys.all, "completed"] as const,
+  scheduled: () => [...ordersKeys.all, "scheduled"] as const,
 };
 
 // For infinite lists with params
@@ -57,6 +58,13 @@ export const completedOrdersKeys = {
   lists: () => [...ordersKeys.completed(), "list"] as const,
   list: (params: GetOrdersParams) =>
     [...completedOrdersKeys.lists(), params] as const,
+};
+
+export const scheduledOrdersKeys = {
+  all: ordersKeys.scheduled,
+  lists: () => [...ordersKeys.scheduled(), "list"] as const,
+  list: (params: Pick<GetOrdersParams, "limit">) =>
+    [...scheduledOrdersKeys.lists(), params] as const,
 };
 
 export const earningsKeys = {

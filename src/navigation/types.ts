@@ -15,6 +15,7 @@ export type MainStackParamList = {
   };
   BankManagement: undefined;
   WorkSchedule: undefined;
+  ScheduledOrders: undefined;
   EarningsDetail: undefined;
   EarningsOrderDetail: { date: string };
   StoreChat: {
