@@ -54,19 +54,38 @@ export default function NewOrdersScreen() {
     if (!pendingOrderId) return;
 
     const orderId = pendingOrderId;
+    console.log("[NewOrdersScreen] Preparing time confirmed", {
+      orderId,
+      preparingTimeInMinutes: minutes,
+    });
     setModalVisible(false);
     setPendingOrderId(null);
 
     try {
+      console.log("[NewOrdersScreen] Accepting order", { orderId });
       await acceptMutation.mutateAsync(orderId);
+      console.log("[NewOrdersScreen] Accept order success", { orderId });
+
+      console.log("[NewOrdersScreen] Setting preparing time", {
+        orderId,
+        preparingTimeInMinutes: minutes,
+      });
       await updateTimeMutation.mutateAsync({
         orderId,
         data: { preparingTimeInMinutes: minutes },
       });
+      console.log("[NewOrdersScreen] Preparing time success", {
+        orderId,
+        preparingTimeInMinutes: minutes,
+      });
     } catch (error) {
+      const runtimeError = error as { message?: string; stack?: string; name?: string };
       console.log("[NewOrdersScreen] failed to accept order / set preparing time", {
         orderId,
         error,
+        errorName: runtimeError?.name,
+        errorMessage: runtimeError?.message,
+        errorStack: runtimeError?.stack,
       });
     }
   };

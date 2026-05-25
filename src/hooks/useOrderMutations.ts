@@ -108,6 +108,10 @@ export function useUpdatePreparingTime(
     mutationFn: ({ orderId, data }) =>
       orderServices.updatePreparingTime(orderId, data),
     onMutate: async (variables) => {
+      console.log("[useUpdatePreparingTime] onMutate:start", {
+        orderId: variables.orderId,
+        preparingTimeInMinutes: variables.data.preparingTimeInMinutes,
+      });
       await queryClient.cancelQueries({ queryKey: inProgressOrdersKeys.lists() });
 
       const previousInProgress = queryClient.getQueriesData<
@@ -117,13 +121,33 @@ export function useUpdatePreparingTime(
       queryClient.setQueriesData<InfiniteData<PaginatedOrdersResponse>>(
         { queryKey: inProgressOrdersKeys.lists() },
         (previous) => {
-          if (!previous) return previous;
+          if (!previous) {
+            console.log("[useUpdatePreparingTime] onMutate:missing previous cache", {
+              orderId: variables.orderId,
+            });
+            return previous;
+          }
+          if (!Array.isArray(previous.pages)) {
+            console.log("[useUpdatePreparingTime] onMutate:invalid pages", {
+              orderId: variables.orderId,
+              previousType: typeof previous,
+              hasPages: Object.prototype.hasOwnProperty.call(previous, "pages"),
+            });
+            return previous;
+          }
 
           return {
             ...previous,
-            pages: previous.pages.map((page) => ({
+            pages: previous.pages.map((page, pageIndex) => ({
               ...page,
-              items: page.items.map((item) => {
+              items: (Array.isArray(page.items) ? page.items : (() => {
+                console.log("[useUpdatePreparingTime] onMutate:page items undefined", {
+                  orderId: variables.orderId,
+                  pageIndex,
+                  pageKeys: Object.keys(page ?? {}),
+                });
+                return [];
+              })()).map((item) => {
                 if (item.orderId !== variables.orderId) return item;
 
                 const currentRemaining = item.remainingSeconds ?? 0;
@@ -143,23 +167,53 @@ export function useUpdatePreparingTime(
       return { previousInProgress };
     },
     onError: (error, variables, context) => {
+      console.log("[useUpdatePreparingTime] onError", {
+        orderId: variables.orderId,
+        preparingTimeInMinutes: variables.data.preparingTimeInMinutes,
+        errorName: error?.name,
+        errorMessage: error?.message,
+      });
       context?.previousInProgress?.forEach(([queryKey, data]) => {
         queryClient.setQueryData(queryKey, data);
       });
       options?.onError?.(error, variables, context);
     },
     onSuccess: (response, variables, onMutateResult, context) => {
+      console.log("[useUpdatePreparingTime] onSuccess", {
+        orderId: variables.orderId,
+        response,
+      });
       // Keep UI responsive by updating the local in-progress cache immediately.
       queryClient.setQueriesData<InfiniteData<PaginatedOrdersResponse>>(
         { queryKey: inProgressOrdersKeys.lists() },
         (previous) => {
-          if (!previous) return previous;
+          if (!previous) {
+            console.log("[useUpdatePreparingTime] onSuccess:missing previous cache", {
+              orderId: variables.orderId,
+            });
+            return previous;
+          }
+          if (!Array.isArray(previous.pages)) {
+            console.log("[useUpdatePreparingTime] onSuccess:invalid pages", {
+              orderId: variables.orderId,
+              previousType: typeof previous,
+              hasPages: Object.prototype.hasOwnProperty.call(previous, "pages"),
+            });
+            return previous;
+          }
 
           return {
             ...previous,
-            pages: previous.pages.map((page) => ({
+            pages: previous.pages.map((page, pageIndex) => ({
               ...page,
-              items: page.items.map((item) => {
+              items: (Array.isArray(page.items) ? page.items : (() => {
+                console.log("[useUpdatePreparingTime] onSuccess:page items undefined", {
+                  orderId: variables.orderId,
+                  pageIndex,
+                  pageKeys: Object.keys(page ?? {}),
+                });
+                return [];
+              })()).map((item) => {
                 if (item.orderId !== variables.orderId) return item;
 
                 const currentRemaining = item.remainingSeconds ?? 0;

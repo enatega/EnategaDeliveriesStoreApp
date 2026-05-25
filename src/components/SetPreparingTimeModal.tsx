@@ -34,6 +34,9 @@ export default function SetPreparingTimeModal({
 
   const handleDone = () => {
     if (selectedTime !== null) {
+      console.log("[SetPreparingTimeModal] Done clicked", {
+        selectedTimeInMinutes: selectedTime,
+      });
       onDone(selectedTime);
       setSelectedTime(null);
     }
@@ -86,7 +89,12 @@ export default function SetPreparingTimeModal({
                       backgroundColor: isSelected ? "#111827" : theme.colors.gray200,
                     },
                   ]}
-                  onPress={() => setSelectedTime(min)}
+                  onPress={() => {
+                    console.log("[SetPreparingTimeModal] Time selected", {
+                      selectedTimeInMinutes: min,
+                    });
+                    setSelectedTime(min);
+                  }}
                 >
                   <Text
                     style={[
