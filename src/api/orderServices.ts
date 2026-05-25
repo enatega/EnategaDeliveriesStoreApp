@@ -153,10 +153,19 @@ function normalizeOrder(order: Order): Order {
   const normalizedRemainingSeconds =
     topLevelRemainingSeconds ?? etaRemainingSeconds ?? undefined;
 
+  if (!Array.isArray(order.items)) {
+    console.log("[orderServices] normalizeOrder: items is not array", {
+      orderId: order?.orderId,
+      status: order?.status,
+      itemsType: typeof (order as unknown as Record<string, unknown>)?.items,
+      rawItems: (order as unknown as Record<string, unknown>)?.items,
+    });
+  }
+
   return {
     ...order,
     customerProfileImage: normalizeImageUrl(customerProfileImageRaw),
-    items: order.items.map(normalizeOrderItem),
+    items: (Array.isArray(order.items) ? order.items : []).map(normalizeOrderItem),
     customerComment: stripCourierComment(order.customerComment),
     restaurantNote:
       typeof runtimeOrder.restaurantNote === "string"
@@ -170,15 +179,36 @@ function normalizeOrder(order: Order): Order {
 }
 
 function normalizeOrdersResponse(response: PaginatedOrdersResponse): PaginatedOrdersResponse {
+  if (!Array.isArray(response.items)) {
+    console.log("[orderServices] normalizeOrdersResponse: response.items is not array", {
+      offset: response?.offset,
+      limit: response?.limit,
+      total: response?.total,
+      itemsType: typeof (response as unknown as Record<string, unknown>)?.items,
+      rawItems: (response as unknown as Record<string, unknown>)?.items,
+    });
+  }
+
   return {
     ...response,
-    items: response.items.map(normalizeOrder),
+    items: (Array.isArray(response.items) ? response.items : []).map(normalizeOrder),
   };
 }
 
 function logOrdersAddonDebug(source: string, response: PaginatedOrdersResponse) {
   response.items.forEach((order) => {
-    const addonSnapshot = order.items.map((item) => ({
+    const safeItems = Array.isArray(order.items) ? order.items : [];
+    if (!Array.isArray(order.items)) {
+      console.log("[orderServices] logOrdersAddonDebug: order.items is not array", {
+        source,
+        orderId: order?.orderId,
+        status: order?.status,
+        itemsType: typeof (order as unknown as Record<string, unknown>)?.items,
+        rawItems: (order as unknown as Record<string, unknown>)?.items,
+      });
+    }
+
+    const addonSnapshot = safeItems.map((item) => ({
       productId: item.productId,
       name: item.name,
       image: item.image,
