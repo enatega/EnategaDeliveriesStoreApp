@@ -16,6 +16,7 @@ import {
   readyOrdersKeys,
   pickupOrdersKeys,
   completedOrdersKeys,
+  scheduledOrdersKeys,
 } from "../api/queryKeys";
 
 type UseOrdersOptions = {
@@ -111,6 +112,32 @@ export function useCompletedOrders({
     queryFn: ({ pageParam }) =>
       orderServices.getCompletedOrders({
         ...params,
+        offset: (pageParam as number) ?? 0,
+      }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage) => lastPage.nextOffset ?? undefined,
+    staleTime: 60 * 1000,
+    ...options,
+  });
+}
+
+type UseScheduledOrdersOptions = {
+  params?: Pick<GetOrdersParams, "limit">;
+} & Omit<
+  UseInfiniteQueryOptions<PaginatedOrdersResponse, ApiError>,
+  "queryKey" | "queryFn" | "initialPageParam" | "getNextPageParam" | "select"
+>;
+
+// ─── Scheduled Orders ────────────────────────────────────────────
+export function useScheduledOrders({
+  params = {},
+  ...options
+}: UseScheduledOrdersOptions = {}) {
+  return useInfiniteQuery({
+    queryKey: scheduledOrdersKeys.list(params),
+    queryFn: ({ pageParam }) =>
+      orderServices.getScheduledOrders({
+        limit: params.limit,
         offset: (pageParam as number) ?? 0,
       }),
     initialPageParam: 0,

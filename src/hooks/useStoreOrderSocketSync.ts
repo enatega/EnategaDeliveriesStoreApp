@@ -37,12 +37,13 @@ function prependOrderToInfiniteData(
   if (!previous?.pages?.length) return previous;
 
   const alreadyExists = previous.pages.some((page) =>
-    page.items.some((item) => item.orderId === incomingOrder.orderId),
+    (Array.isArray(page.items) ? page.items : []).some((item) => item.orderId === incomingOrder.orderId),
   );
   if (alreadyExists) return previous;
 
   const firstPage = previous.pages[0];
-  const nextFirstItems = [incomingOrder, ...firstPage.items];
+  const safeFirstPageItems = Array.isArray(firstPage.items) ? firstPage.items : [];
+  const nextFirstItems = [incomingOrder, ...safeFirstPageItems];
   const cappedFirstItems = nextFirstItems.slice(0, firstPage.limit);
 
   return {
@@ -64,10 +65,11 @@ function prependOrderToPaginatedData(
 ): PaginatedOrdersResponse | undefined {
   if (!previous) return previous;
 
-  const alreadyExists = previous.items.some((item) => item.orderId === incomingOrder.orderId);
+  const safeItems = Array.isArray(previous.items) ? previous.items : [];
+  const alreadyExists = safeItems.some((item) => item.orderId === incomingOrder.orderId);
   if (alreadyExists) return previous;
 
-  const nextItems = [incomingOrder, ...previous.items].slice(0, previous.limit);
+  const nextItems = [incomingOrder, ...safeItems].slice(0, previous.limit);
 
   return {
     ...previous,
