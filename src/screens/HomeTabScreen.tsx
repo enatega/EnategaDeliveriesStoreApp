@@ -32,7 +32,7 @@ const ORDER_TAB_SCREENS: Record<OrderTab, React.ReactElement> = {
 export default function HomeTabScreen() {
   const [activeOrderTab, setActiveOrderTab] = useState<OrderTab>('new');
   const { t } = useTranslations("app");
-  const countParams = { offset: 0, limit: 1, orderType: "delivery" } as const;
+  const countParams = { offset: 0, limit: 1, orderType: "all" } as const;
 
   const countQueries = useQueries({
     queries: [
