@@ -18,12 +18,13 @@ import { Text } from '../components';
 import { useTranslations } from '../localization/LocalizationProvider';
 import { useAppTheme } from '../theme/ThemeProvider';
 import { useLoginMutation } from '../hooks/useAuthMutations';
-import { getExpoPushTokenForAuth } from '../api/expoPushNotification';
+import { useExpoPushToken } from '../hooks/useExpoPushToken';
 
 export default function LoginScreen() {
   const { t } = useTranslations('app');
   const { theme } = useAppTheme();
   const loginMutation = useLoginMutation();
+  const { getExpoPushToken, isLoading: isFetchingExpoPushToken } = useExpoPushToken();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -59,7 +60,7 @@ export default function LoginScreen() {
   const handleLogin = async () => {
     if (!validate()) return;
 
-    const expoPushToken = await getExpoPushTokenForAuth();
+    const expoPushToken = await getExpoPushToken();
     loginMutation.mutate({
       email: email.trim(),
       password,
@@ -201,13 +202,13 @@ export default function LoginScreen() {
 
                 <Pressable
                   onPress={handleLogin}
-                  disabled={loginMutation.isPending}
+                  disabled={loginMutation.isPending || isFetchingExpoPushToken}
                   style={({ pressed }) => [
                     styles.loginBtn,
                     isSmallPhone ? styles.loginBtnCompact : null,
                     { backgroundColor: '#3E8D36' },
                     pressed && styles.pressed,
-                    loginMutation.isPending && styles.disabled,
+                    (loginMutation.isPending || isFetchingExpoPushToken) && styles.disabled,
                   ]}
                 >
                   <Text style={styles.loginBtnText} weight="semiBold" color="#FFFFFF">
