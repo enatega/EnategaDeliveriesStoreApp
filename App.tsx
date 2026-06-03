@@ -1,6 +1,7 @@
 import React from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
+import * as NavigationBar from 'expo-navigation-bar';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import RootNavigator from './src/navigation/RootNavigator';
 import { ThemeProvider, useAppTheme } from './src/theme/ThemeProvider';
@@ -11,6 +12,18 @@ import './src/localization/i18n';
 
 function ThemedApp() {
   const { theme } = useAppTheme();
+
+  React.useEffect(() => {
+    if (Platform.OS !== 'android') {
+      return;
+    }
+
+    const syncNavigationBar = async () => {
+      await NavigationBar.setButtonStyleAsync(theme.isDark ? 'light' : 'dark');
+    };
+
+    void syncNavigationBar();
+  }, [theme.isDark]);
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>

@@ -25,8 +25,13 @@ module.exports = {
         backgroundColor: "#ffffff",
       },
       googleServicesFile: "./google-services.json",
-      package: "com.enatega.deliveries.store",
-      edgeToEdgeEnabled: true,
+      package: "com.cyliaplatform.merchant",
+      edgeToEdgeEnabled: false,
+    },
+    androidNavigationBar: {
+      backgroundColor: "#E5E7EB",
+      barStyle: "dark-content",
+      visible: "visible",
     },
     web: {
       favicon: "./assets/favicon.png",
@@ -40,6 +45,17 @@ module.exports = {
     plugins: [
       "expo-secure-store",
       "expo-font",
+      [
+        "expo-navigation-bar",
+        {
+          backgroundColor: "#E5E7EB",
+          barStyle: "dark",
+          borderColor: "#E5E7EB",
+          visibility: "visible",
+          behavior: "inset-swipe",
+          position: "relative",
+        },
+      ],
       [
         "expo-notifications",
         {
