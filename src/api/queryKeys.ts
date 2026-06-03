@@ -97,6 +97,11 @@ export const currencyKeys = {
   config: () => [...currencyKeys.all, "config"] as const,
 };
 
+export const appSettingsKeys = {
+  all: ['app-settings'] as const,
+  store: () => [...appSettingsKeys.all, 'store'] as const,
+};
+
 export const supportChatKeys = {
   all: ["support-chat"] as const,
   messages: () => [...supportChatKeys.all, "messages"] as const,
