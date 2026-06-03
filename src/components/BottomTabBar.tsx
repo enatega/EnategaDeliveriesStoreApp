@@ -19,13 +19,17 @@ const ROUTE_META = {
 export default function BottomTabBar({ state, navigation, insets }: BottomTabBarProps) {
   const { t } = useTranslations('app');
   const { theme } = useAppTheme();
+  const bottomInset = Math.max(insets.bottom + 6, 16);
+  const containerHeight = 62 + bottomInset;
 
   return (
     <View
       style={[
         styles.container,
         {
-          paddingBottom: Math.max(10, insets.bottom),
+          paddingTop: 12,
+          paddingBottom: bottomInset,
+          minHeight: containerHeight,
           backgroundColor: theme.colors.gray200,
         },
       ]}
@@ -75,15 +79,17 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    alignItems: 'flex-start',
+    paddingHorizontal: 18,
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,
   },
   tab: {
     alignItems: 'center',
-    gap: 7,
+    justifyContent: 'flex-start',
+    gap: 8,
     minWidth: 70,
+    flex: 1,
   },
   iconWrapper: {
     width: 24,
@@ -94,5 +100,6 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 12,
     lineHeight: 16,
+    textAlign: 'center',
   },
 });
