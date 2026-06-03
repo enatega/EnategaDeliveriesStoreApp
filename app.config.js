@@ -1,7 +1,7 @@
 module.exports = {
   expo: {
-    name: "EnategaDeliveriesStoreApp",
-    slug: "enatega-deliveries-store-app",
+    name: "EatMile Store",
+    slug: "eatmile-store",
     owner: "ninjas_code",
     version: "1.0.0",
     orientation: "portrait",
@@ -14,7 +14,8 @@ module.exports = {
     },
     ios: {
       supportsTablet: true,
-      bundleIdentifier: "com.enatega.deliveries.store",
+      bundleIdentifier: "com.eatmile.store",
+      googleServicesFile: "./GoogleService-Info.plist",
       infoPlist: {
         UIBackgroundModes: ["audio"],
       },
@@ -25,14 +26,14 @@ module.exports = {
         backgroundColor: "#ffffff",
       },
       googleServicesFile: "./google-services.json",
-      package: "com.enatega.deliveries.store",
+      package: "com.eatmile.store",
       edgeToEdgeEnabled: true,
     },
     web: {
       favicon: "./assets/favicon.png",
     },
     updates: {
-      url: "https://u.expo.dev/5cf97681-9db5-457b-bf07-07c5ff3f3a9d",
+      url: "https://u.expo.dev/b5571cc2-e82c-4d16-903f-a966fdd922fc",
     },
     runtimeVersion: {
       policy: "appVersion",
@@ -49,7 +50,7 @@ module.exports = {
     ],
     extra: {
       eas: {
-        projectId: "5cf97681-9db5-457b-bf07-07c5ff3f3a9d",
+        projectId: "b5571cc2-e82c-4d16-903f-a966fdd922fc",
       },
     },
   },

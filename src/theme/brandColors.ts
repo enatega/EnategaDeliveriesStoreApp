@@ -9,9 +9,9 @@ export type BrandColors = {
 };
 
 export const defaultBrandColors: BrandColors = {
-  primary: '#90E36D',
-  secondary: '#6B5BFF',
-  tertiary: '#ECFDF5',
+  primary: '#020201',
+  secondary: '#FEDB03',
+  tertiary: '#FFF8CB',
   updatedAt: null,
 };
 

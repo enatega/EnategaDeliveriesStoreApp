@@ -12,6 +12,7 @@ import {
 import { Feather } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { publicLinks } from "../config/publicLinks";
 import { useAppTheme } from "../theme/ThemeProvider";
 import { useTranslations } from "../localization/LocalizationProvider";
 import Text from "../components/Text";
@@ -109,21 +110,21 @@ export default function ProfileScreen() {
       icon: "shield",
       title: t("profile_privacy_policy"),
       subtitle: t("profile_privacy_policy_subtitle"),
-      onPress: () => openExternalUrl("https://multivendor.enatega.com/terms"),
+      onPress: () => openExternalUrl(publicLinks.privacyPolicy),
     },
     {
       key: "about",
       icon: "info",
       title: t("profile_about_us"),
       subtitle: t("profile_about_us_subtitle"),
-      onPress: () => openExternalUrl("https://multivendor.enatega.com/about"),
+      onPress: () => openExternalUrl(publicLinks.aboutUs),
     },
     {
       key: "help",
       icon: "help-circle",
       title: t("profile_help"),
       subtitle: t("profile_help_subtitle"),
-      onPress: () => openExternalUrl("https://ninjascode.com/"),
+      onPress: () => openExternalUrl(publicLinks.help),
     },
   ] as const;
 

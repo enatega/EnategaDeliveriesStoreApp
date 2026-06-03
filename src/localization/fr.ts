@@ -1,5 +1,5 @@
 const fr = {
-  app_name: "Enatega Deliveries Store App",
+  app_name: "EatMile Store",
   welcome_title: "Espace partenaire magasin",
   welcome_subtitle:
     "Theme, localisation et composants de base reutilisables sont prets.",

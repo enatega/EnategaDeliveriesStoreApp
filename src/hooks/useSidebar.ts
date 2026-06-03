@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Alert, Animated, Linking } from "react-native";
 import { useAuth } from "../auth/AuthProvider";
+import { publicLinks } from "../config/publicLinks";
 import { useLogoutMutation } from "../hooks/useAuthMutations";
 import { useAvailabilityQuery } from "../hooks/useProfileQueries";
 import { useUpdateAvailability } from "../hooks/useProfileMutations";
@@ -189,21 +190,21 @@ export function useSidebar({
       type: "nav",
       label: "Privacy Policy",
       icon: "shield",
-      onPress: () => openExternalUrl("https://multivendor.enatega.com/terms"),
+      onPress: () => openExternalUrl(publicLinks.privacyPolicy),
     },
     {
       key: "about",
       type: "nav",
       label: "About Us",
       icon: "info",
-      onPress: () => openExternalUrl("https://multivendor.enatega.com/about"),
+      onPress: () => openExternalUrl(publicLinks.aboutUs),
     },
     {
       key: "help",
       type: "nav",
       label: "Help",
       icon: "help",
-      onPress: () => openExternalUrl("https://ninjascode.com/"),
+      onPress: () => openExternalUrl(publicLinks.help),
     },
     {
       key: "logout",
