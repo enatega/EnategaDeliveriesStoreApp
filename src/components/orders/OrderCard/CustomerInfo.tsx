@@ -82,8 +82,8 @@ export default function CustomerInfo({
                 <>
                     <View style={[styles.divider, { backgroundColor: theme.colors.gray200 }]} />
                     <View style={styles.addressRow}>
-                        <View style={styles.rowIconWrap}>
-                            <Feather name="map-pin" size={16} color="#111827" />
+                        <View style={[styles.rowIconWrap, { backgroundColor: theme.colors.tertiary }]}>
+                            <Feather name="map-pin" size={16} color={theme.colors.primary} />
                         </View>
                         <View style={styles.addressTextWrap}>
                             <Text style={styles.addressLabel}>{t("order_card_address")}</Text>

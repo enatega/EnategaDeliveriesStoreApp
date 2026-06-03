@@ -1,10 +1,12 @@
 import React from 'react';
 import Svg, { Path } from 'react-native-svg';
+import { useAppTheme } from '../../theme/ThemeProvider';
 
 type Props = { active?: boolean };
 
 export default function HomeIcon({ active = false }: Props) {
-  const color = active ? '#90E36D' : '#9CA3AF';
+  const { theme } = useAppTheme();
+  const color = active ? theme.colors.primary : theme.colors.gray400;
   return (
     <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
       <Path

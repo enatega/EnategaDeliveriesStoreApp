@@ -1,8 +1,11 @@
-export const lightColors = {
+import { BrandColors, defaultBrandColors } from './brandColors';
+
+export const buildLightColors = (brandColors: BrandColors = defaultBrandColors) => ({
   background: '#FFFFFF',
   surface: '#FFFFFF',
-  primary: '#90E36D',
-  secondary: '#6B5BFF',
+  primary: brandColors.primary,
+  secondary: brandColors.secondary,
+  tertiary: brandColors.tertiary,
   text: '#111827',
   mutedText: '#6B7280',
   border: '#D1D5DB',
@@ -16,13 +19,14 @@ export const lightColors = {
   gray200: '#E5E7EB',
   gray50: '#f5f5f5ff',
   green50: '#ECFDF5',
-};
+});
 
-export const darkColors: typeof lightColors = {
+export const buildDarkColors = (brandColors: BrandColors = defaultBrandColors): ThemeColors => ({
   background: '#0F1117',
   surface: '#161A23',
-  primary: '#90E36D',
-  secondary: '#8B7BFF',
+  primary: brandColors.primary,
+  secondary: brandColors.secondary,
+  tertiary: brandColors.tertiary,
   text: '#F9FAFB',
   mutedText: '#9CA3AF',
   border: '#374151',
@@ -35,6 +39,9 @@ export const darkColors: typeof lightColors = {
   gray200: '#1F2937',
   gray50: '#090909ff',
   green50: '#ECFDF5',
-};
+});
+
+export const lightColors = buildLightColors();
+export const darkColors = buildDarkColors();
 
 export type ThemeColors = typeof lightColors;

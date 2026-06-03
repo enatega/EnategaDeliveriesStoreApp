@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, Pressable, StyleSheet } from 'react-native';
+import { useAppTheme } from '../theme/ThemeProvider';
 
 type Props = {
   value: boolean;
@@ -13,6 +14,7 @@ const THUMB_SIZE = 20;
 const THUMB_TRAVEL = TRACK_WIDTH - THUMB_SIZE - 4; // 27
 
 export default function ToggleSwitch({ value, onValueChange, disabled = false }: Props) {
+  const { theme } = useAppTheme();
   const translateX = useRef(new Animated.Value(value ? THUMB_TRAVEL : 2)).current;
 
   useEffect(() => {
@@ -23,7 +25,7 @@ export default function ToggleSwitch({ value, onValueChange, disabled = false }:
     }).start();
   }, [value, translateX]);
 
-  const trackColor = value ? '#55C171' : '#D1D5DB';
+  const trackColor = value ? theme.colors.primary : theme.colors.gray300;
 
   return (
     <Pressable
@@ -37,7 +39,8 @@ export default function ToggleSwitch({ value, onValueChange, disabled = false }:
     >
       <Animated.View
         style={[
-          styles.thumb,
+        styles.thumb,
+          { backgroundColor: theme.colors.white },
           { transform: [{ translateX }] },
         ]}
       />

@@ -3,7 +3,6 @@ import {
   ActivityIndicator,
   Alert,
   Image,
-  ImageBackground,
   Linking,
   Pressable,
   ScrollView,
@@ -21,7 +20,14 @@ import { useProfileQuery, useAvailabilityQuery } from "../hooks/useProfileQuerie
 import { useUpdateAvailability } from "../hooks/useProfileMutations";
 import { useLogoutMutation } from "../hooks/useAuthMutations";
 import { MainStackParamList } from "../navigation/types";
-const profileBackground = require("../assets/images/profileBackground.png");
+
+function withAlpha(hexColor: string, alphaHex: string) {
+  if (!/^#([0-9A-F]{6})$/i.test(hexColor)) {
+    return hexColor;
+  }
+
+  return `${hexColor}${alphaHex}`;
+}
 
 export default function ProfileScreen() {
   const { theme } = useAppTheme();
@@ -122,9 +128,15 @@ export default function ProfileScreen() {
   ] as const;
 
   return (
-    <View style={[styles.flex, { backgroundColor: "#F3F4F6" }]}>
+    <View style={[styles.flex, { backgroundColor: theme.colors.gray50 }]}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.contentContainer}>
-        <ImageBackground source={profileBackground} style={styles.hero} imageStyle={styles.heroImage}>
+        <View style={[styles.hero, { backgroundColor: theme.colors.primary }]}>
+          <View
+            style={[
+              styles.heroShapeLarge,
+              { backgroundColor: withAlpha(theme.colors.secondary, "22") },
+            ]}
+          />
           <View style={styles.profileRow}>
             {profile.image?.trim() ? (
               <Image source={{ uri: profile.image }} style={styles.avatarImage} />
@@ -142,11 +154,16 @@ export default function ProfileScreen() {
               <Text style={styles.profileId}>ID-{(basicInformation.storeId ?? "7853").toString().slice(0, 4)}</Text>
             </View>
           </View>
-        </ImageBackground>
+        </View>
 
-        <View style={styles.availabilityCard}>
+        <View
+          style={[
+            styles.availabilityCard,
+            { borderColor: theme.colors.gray300, backgroundColor: theme.colors.surface },
+          ]}
+        >
           <View style={styles.availabilityLeft}>
-            <View style={styles.iconCircle}>
+            <View style={[styles.iconCircle, { backgroundColor: theme.colors.tertiary }]}>
               <Feather name="clock" size={18} color={theme.colors.primary} />
             </View>
             <View style={styles.menuTextWrap}>
@@ -175,8 +192,8 @@ export default function ProfileScreen() {
             style={[styles.menuRow, styles.menuRowDivider]}
             onPress={() => navigation.navigate("ProfileDetails")}
           >
-            <View style={styles.iconCircle}>
-              <Feather name="user" size={18} color="#55C171" />
+            <View style={[styles.iconCircle, { backgroundColor: theme.colors.tertiary }]}>
+              <Feather name="user" size={18} color={theme.colors.primary} />
             </View>
             <View style={styles.menuTextWrap}>
               <Text weight="semiBold" style={styles.menuTitle}>
@@ -242,10 +259,12 @@ type MenuRowProps = {
 };
 
 function MenuRow({ icon, title, subtitle, onPress, showDivider = false }: MenuRowProps) {
+  const { theme } = useAppTheme();
+
   return (
     <Pressable onPress={onPress} style={[styles.menuRow, showDivider ? styles.menuRowDivider : null]}>
-      <View style={styles.iconCircle}>
-        <Feather name={icon} size={18} color="#55C171" />
+      <View style={[styles.iconCircle, { backgroundColor: theme.colors.tertiary }]}>
+        <Feather name={icon} size={18} color={theme.colors.primary} />
       </View>
       <View style={styles.menuTextWrap}>
         <Text weight="semiBold" style={styles.menuTitle}>
@@ -274,14 +293,19 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     marginTop: 6,
   },
-  heroImage: {
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
+  heroShapeLarge: {
+    position: "absolute",
+    width: 280,
+    height: 280,
+    borderRadius: 140,
+    right: -60,
+    top: 36,
   },
   profileRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 16,
+    zIndex: 1,
   },
   avatarCircle: {
     width: 54,
@@ -319,9 +343,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginTop: -34,
     borderWidth: 1,
-    borderColor: "#D1D5DB",
     borderRadius: 8,
-    backgroundColor: "#FFFFFF",
     padding: 16,
     flexDirection: "row",
     alignItems: "center",
@@ -373,7 +395,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "rgba(144,227,109,0.1)",
     alignItems: "center",
     justifyContent: "center",
   },

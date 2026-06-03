@@ -3,6 +3,7 @@ import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Text from './Text';
 import { useTranslations } from '../localization/LocalizationProvider';
+import { useAppTheme } from '../theme/ThemeProvider';
 import HomeIcon from './icons/HomeIcon';
 import WalletIcon from './icons/WalletIcon';
 import EarningsIcon from './icons/EarningsIcon';
@@ -17,9 +18,18 @@ const ROUTE_META = {
 
 export default function BottomTabBar({ state, navigation, insets }: BottomTabBarProps) {
   const { t } = useTranslations('app');
+  const { theme } = useAppTheme();
 
   return (
-    <View style={[styles.container, { paddingBottom: Math.max(10, insets.bottom) }]}>
+    <View
+      style={[
+        styles.container,
+        {
+          paddingBottom: Math.max(10, insets.bottom),
+          backgroundColor: theme.colors.gray200,
+        },
+      ]}
+    >
       {state.routes.map((route, index) => {
         const isActive = state.index === index;
         const meta = ROUTE_META[route.name as keyof typeof ROUTE_META];
@@ -47,7 +57,10 @@ export default function BottomTabBar({ state, navigation, insets }: BottomTabBar
             </View>
             <Text
               variant="caption"
-              style={[styles.label, isActive ? styles.labelActive : styles.labelInactive]}
+              style={[
+                styles.label,
+                { color: isActive ? theme.colors.primary : theme.colors.gray400 },
+              ]}
             >
               {label}
             </Text>
@@ -62,7 +75,6 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    backgroundColor: '#1F2937',
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderTopLeftRadius: 12,
@@ -82,11 +94,5 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 12,
     lineHeight: 16,
-  },
-  labelActive: {
-    color: '#90E36D',
-  },
-  labelInactive: {
-    color: '#9CA3AF',
   },
 });

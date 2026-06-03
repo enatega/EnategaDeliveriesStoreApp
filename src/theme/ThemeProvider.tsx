@@ -1,6 +1,14 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { useColorScheme } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
+import { useAppSettingsQuery } from '../hooks/useAppSettings';
+import {
+  areBrandColorsEqual,
+  brandColorsStorage,
+  buildBrandColors,
+  BrandColors,
+  defaultBrandColors,
+} from './brandColors';
 import { buildTheme, Theme } from './theme';
 
 export type ThemeMode = 'system' | 'light' | 'dark';
@@ -18,19 +26,40 @@ const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const systemScheme = useColorScheme();
   const [themeMode, setThemeModeState] = useState<ThemeMode>('system');
+  const [brandColors, setBrandColors] = useState<BrandColors>(defaultBrandColors);
   const [isLoaded, setIsLoaded] = useState(false);
+  const { data: appSettings } = useAppSettingsQuery();
 
   useEffect(() => {
-    SecureStore.getItemAsync(THEME_STORAGE_KEY)
-      .then((savedMode) => {
+    Promise.all([SecureStore.getItemAsync(THEME_STORAGE_KEY), brandColorsStorage.get()])
+      .then(([savedMode, cachedBrandColors]) => {
         if (savedMode && ['system', 'light', 'dark'].includes(savedMode)) {
           setThemeModeState(savedMode as ThemeMode);
         }
+
+        setBrandColors(cachedBrandColors);
       })
       .finally(() => {
         setIsLoaded(true);
       });
   }, []);
+
+  useEffect(() => {
+    if (!appSettings) {
+      return;
+    }
+
+    const nextBrandColors = buildBrandColors(appSettings);
+
+    setBrandColors((currentBrandColors) => {
+      if (areBrandColorsEqual(currentBrandColors, nextBrandColors)) {
+        return currentBrandColors;
+      }
+
+      void brandColorsStorage.set(nextBrandColors);
+      return nextBrandColors;
+    });
+  }, [appSettings]);
 
   const setThemeMode = async (mode: ThemeMode) => {
     setThemeModeState(mode);
@@ -40,7 +69,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const activeScheme =
     themeMode === 'system' ? (systemScheme === 'dark' ? 'dark' : 'light') : themeMode;
 
-  const theme = useMemo(() => buildTheme(activeScheme), [activeScheme]);
+  const theme = useMemo(() => buildTheme(activeScheme, brandColors), [activeScheme, brandColors]);
 
   const value = useMemo(
     () => ({

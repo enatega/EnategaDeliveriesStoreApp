@@ -27,17 +27,17 @@ function ThemedApp() {
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <SafeAreaProvider>
-        <QueryProvider>
+    <QueryProvider>
+      <ThemeProvider>
+        <SafeAreaProvider>
           <LocalizationProvider>
             <AuthProvider>
               <ThemedApp />
             </AuthProvider>
           </LocalizationProvider>
-        </QueryProvider>
-      </SafeAreaProvider>
-    </ThemeProvider>
+        </SafeAreaProvider>
+      </ThemeProvider>
+    </QueryProvider>
   );
 }
 
