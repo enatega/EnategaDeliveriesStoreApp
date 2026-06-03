@@ -5,6 +5,7 @@ import Text from "../../Text";
 import { OrderStatus } from "../../../api/orderServicesTypes";
 import { styles } from "./styles";
 import { Feather } from "@expo/vector-icons";
+import { useAppTheme } from "../../../theme/ThemeProvider";
 
 type Props = {
     orderCode: string;
@@ -24,6 +25,7 @@ export default function OrderHeader({
     headerStatusTone = "blue",
 }: Props) {
     const { t } = useTranslations("app");
+    const { theme } = useAppTheme();
     const createdDate = new Date(createdAt);
     const formattedDate = createdDate.toLocaleDateString(undefined, {
         day: "2-digit",
@@ -75,8 +77,8 @@ export default function OrderHeader({
             ) : null}
             <View style={styles.headerTopGrid}>
                 <View style={styles.headerInfoItem}>
-                    <View style={styles.headerIconWrap}>
-                        <Feather name="list" size={16} color="#111827" />
+                    <View style={[styles.headerIconWrap, { backgroundColor: theme.colors.tertiary }]}>
+                        <Feather name="list" size={16} color={theme.colors.primary} />
                     </View>
                     <View style={styles.headerInfoTextWrap}>
                         <Text style={styles.headerLabel}>{t("order_card_id_label")}</Text>
@@ -86,8 +88,8 @@ export default function OrderHeader({
                     </View>
                 </View>
                 <View style={styles.headerInfoItem}>
-                    <View style={styles.headerIconWrap}>
-                        <Feather name="calendar" size={16} color="#111827" />
+                    <View style={[styles.headerIconWrap, { backgroundColor: theme.colors.tertiary }]}>
+                        <Feather name="calendar" size={16} color={theme.colors.primary} />
                     </View>
                     <View style={styles.headerInfoTextWrap}>
                         <Text style={styles.headerLabel}>{t("order_card_placed_on")}</Text>

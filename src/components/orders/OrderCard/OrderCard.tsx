@@ -7,6 +7,7 @@ import { useTranslations } from "../../../localization/LocalizationProvider";
 import { Order, OrderStatus } from "../../../api/orderServicesTypes";
 import { MainStackParamList } from "../../../navigation/types";
 import { styles } from "./styles";
+import Text from "../../Text";
 import OrderHeader from "./OrderHeader";
 import CustomerInfo from "./CustomerInfo";
 import OrderItems from "./OrderItems";
@@ -108,7 +109,12 @@ export default function OrderCard({
     order.status === OrderStatus.ARRIVED;
 
   const isCompleted = order.status === OrderStatus.DELIVERED;
-  const canRejectOrder = order.canReject && !isInProgress;
+  const isNewOrderActionable =
+    order.status === OrderStatus.PENDING || order.status === OrderStatus.SCHEDULED;
+  const canAcceptOrder =
+    Boolean(onAccept) && (order.canAccept || isNewOrderActionable);
+  const canRejectOrder =
+    Boolean(onReject) && !isInProgress && (order.canReject || isNewOrderActionable);
   const hasAssignedRider = Boolean(
     order.riderId
     || order.riderName
@@ -212,7 +218,7 @@ export default function OrderCard({
       )}
 
       <AcceptRejectButtons
-        canAccept={order.canAccept}
+        canAccept={canAcceptOrder}
         canReject={canRejectOrder}
         orderId={order.orderId}
         onAccept={onAccept || (() => { })}

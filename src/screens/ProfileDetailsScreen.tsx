@@ -11,6 +11,7 @@ import Text from "../components/Text";
 import ScreenHeader from "../components/ScreenHeader";
 import { MainStackParamList } from "../navigation/types";
 import { useAuth } from "../auth/AuthProvider";
+import { useAppTheme } from "../theme/ThemeProvider";
 const profileBackground = require("../assets/images/profileBackground.png");
 
 export default function ProfileDetailsScreen() {
@@ -20,6 +21,7 @@ export default function ProfileDetailsScreen() {
   const { data: walletBalanceData } = useWalletBalance();
   const { formatAmount } = useCurrencyFormatter();
   const { session } = useAuth();
+  const { theme } = useAppTheme();
 
   const city = profileData?.basicInformation.city?.trim() || t("profile_not_added");
   const phone = profileData?.contactInformation.phoneNumber?.trim() || t("profile_not_added");
@@ -41,7 +43,7 @@ export default function ProfileDetailsScreen() {
   const walletBalance = walletBalanceData?.current_balance ?? 0;
 
   return (
-    <View style={[styles.container, { backgroundColor: "#F3F4F6" }]}>
+    <View style={[styles.container, { backgroundColor: theme.colors.gray50 }]}>
       <ScreenHeader title={t("profile_title")} onBack={() => navigation.goBack()} />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         <ImageBackground source={coverSource} style={styles.cover} imageStyle={styles.coverImage}>
@@ -51,7 +53,7 @@ export default function ProfileDetailsScreen() {
               <Image source={{ uri: profileImage }} style={styles.profileImage} />
             ) : (
               <View style={styles.profileImageFallback}>
-                <Text weight="bold" style={styles.profileImageFallbackText}>
+                <Text weight="bold" style={[styles.profileImageFallbackText, { color: theme.colors.primary }]}>
                   {initials}
                 </Text>
               </View>
@@ -62,14 +64,19 @@ export default function ProfileDetailsScreen() {
             </View>
           </View>
           {isApproved ? (
-            <View style={styles.verifiedPill}>
+            <View style={[styles.verifiedPill, { backgroundColor: theme.colors.primary }]}>
               <Feather name="check-circle" size={14} color="#111827" />
               <Text style={styles.verifiedText}>Verified Account</Text>
             </View>
           ) : null}
         </ImageBackground>
 
-        <View style={styles.cardGroup}>
+        <View
+          style={[
+            styles.cardGroup,
+            { borderColor: theme.colors.gray300, backgroundColor: theme.colors.surface },
+          ]}
+        >
           <DetailRow icon="home" label={t("profile_bank_details")} value={t("profile_updated")} valuePill showDivider />
           {/* <DetailRow icon="truck" label={t("profile_vehicle_plate")} value={vehiclePlate} showDivider /> */}
           <DetailRow
@@ -117,20 +124,31 @@ function DetailRow({
   valueHighlight = false,
   showChevron = false,
 }: DetailRowProps) {
+  const { theme } = useAppTheme();
+
   return (
-    <View style={[styles.row, showDivider ? styles.rowDivider : null]}>
-      <View style={styles.iconCircle}>
-        <Feather name={icon} size={18} color="#55C171" />
+    <View style={[styles.row, showDivider ? { borderBottomWidth: 1, borderBottomColor: theme.colors.gray200 } : null]}>
+      <View style={[styles.iconCircle, { backgroundColor: theme.colors.tertiary }]}>
+        <Feather name={icon} size={18} color={theme.colors.primary} />
       </View>
       <Text weight="semiBold" style={styles.label}>{label}</Text>
       {valuePill ? (
-        <View style={styles.updatedPill}>
+        <View style={[styles.updatedPill, { backgroundColor: theme.colors.primary }]}>
           <Feather name="check-circle" size={12} color="#111827" />
           <Text style={styles.updatedPillText}>{value}</Text>
         </View>
       ) : (
         <View style={styles.valueWrap}>
-          <Text style={[styles.value, valueHighlight ? styles.valueHighlight : null]} numberOfLines={1}>{value}</Text>
+          <Text
+            style={[
+              styles.value,
+              { color: theme.colors.gray500 },
+              valueHighlight ? { color: theme.colors.primary, fontWeight: "600" } : null,
+            ]}
+            numberOfLines={1}
+          >
+            {value}
+          </Text>
           {showChevron ? <Feather name="chevron-right" size={20} color="#111827" /> : null}
         </View>
       )}
@@ -189,11 +207,9 @@ const styles = StyleSheet.create({
   },
   profileImageFallbackText: {
     fontSize: 22,
-    color: "#90E36D",
   },
   verifiedPill: {
     alignSelf: "flex-start",
-    backgroundColor: "#90E36D",
     borderRadius: 999,
     paddingHorizontal: 14,
     paddingVertical: 8,
@@ -211,8 +227,6 @@ const styles = StyleSheet.create({
   cardGroup: {
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: "#D1D5DB",
-    backgroundColor: "#F9FAFB",
     overflow: "hidden",
     paddingHorizontal: 18,
     paddingTop: 8,
@@ -226,12 +240,10 @@ const styles = StyleSheet.create({
     minHeight: 88,
     paddingVertical: 16,
   },
-  rowDivider: { borderBottomWidth: 1, borderBottomColor: "#E5E7EB" },
   iconCircle: {
     width: 38,
     height: 38,
     borderRadius: 24,
-    backgroundColor: "rgba(144,227,109,0.1)",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -244,10 +256,8 @@ const styles = StyleSheet.create({
     maxWidth: 176,
     marginLeft: 8,
   },
-  value: { maxWidth: 128, fontSize: 13, lineHeight: 18, color: "#6B7280", textAlign: "right" },
-  valueHighlight: { color: "#90E36D", fontWeight: "600" },
+  value: { maxWidth: 128, fontSize: 13, lineHeight: 18, textAlign: "right" },
   updatedPill: {
-    backgroundColor: "#90E36D",
     borderRadius: 999,
     paddingHorizontal: 12,
     paddingVertical: 6,

@@ -26,7 +26,6 @@ export const styles = StyleSheet.create({
     elevation: 24,
   },
   header: {
-    backgroundColor: "#90E36D",
     paddingBottom: 14,
     paddingHorizontal: 20,
     gap: 4,

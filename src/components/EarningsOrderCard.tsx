@@ -28,8 +28,8 @@ export default function EarningsOrderCard({ item }: Props) {
             {item.order_id}
           </Text> */}
         </Text> 
-        <View style={styles.badge}>
-          <Text variant="caption" color="#16A34A" style={styles.badgeText}>
+        <View style={[styles.badge, { backgroundColor: theme.colors.tertiary }]}>
+          <Text variant="caption" color={theme.colors.primary} style={styles.badgeText}>
             {item.status}
           </Text>
         </View>
@@ -100,7 +100,6 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
   badge: {
-    backgroundColor: '#DCFCE7',
     paddingHorizontal: 12,
     paddingVertical: 3,
     borderRadius: 20,

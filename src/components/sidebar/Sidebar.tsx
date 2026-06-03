@@ -170,7 +170,12 @@ export default function Sidebar({
         ]}
       >
         {/* Header */}
-        <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
+        <View
+          style={[
+            styles.header,
+            { paddingTop: insets.top + 8, backgroundColor: theme.colors.primary },
+          ]}
+        >
           <View style={styles.avatarCircle}>
             <Text variant="body" weight="semiBold" color={theme.colors.primary}>
               {initials}
@@ -224,7 +229,7 @@ export default function Sidebar({
                 <View style={styles.toggleWrapper}>
                   <ToggleSwitch
                     value={item.value}
-                    onValueChange={item.onToggle}
+                    onValueChange={item.onToggle ?? (() => undefined)}
                     disabled={!item.onToggle}
                   />
                   {item.subLabel ? (
