@@ -111,11 +111,6 @@ function normalizeOrder(order: Order): Order {
     || (typeof runtimeOrder.customer_profile_picture === "string" && runtimeOrder.customer_profile_picture)
     || null;
 
-  const summarySource =
-    (runtimeOrder.summary as Record<string, unknown> | undefined)
-    ?? (runtimeOrder.orderSummary as Record<string, unknown> | undefined)
-    ?? (runtimeOrder.order_summary as Record<string, unknown> | undefined);
-
   const toNullableNumber = (value: unknown): number | null => {
     if (typeof value === "number" && Number.isFinite(value)) return value;
     if (typeof value === "string" && value.trim()) {
@@ -125,6 +120,42 @@ function normalizeOrder(order: Order): Order {
     return null;
   };
 
+  const summarySource =
+    (runtimeOrder.summary as Record<string, unknown> | undefined)
+    ?? (runtimeOrder.orderSummary as Record<string, unknown> | undefined)
+    ?? (runtimeOrder.order_summary as Record<string, unknown> | undefined)
+    ?? {
+      orderNumber: runtimeOrder.orderNumber ?? runtimeOrder.order_number ?? null,
+      itemSubtotal:
+        runtimeOrder.itemSubtotal
+        ?? runtimeOrder.item_subtotal
+        ?? runtimeOrder.subtotalAmount
+        ?? runtimeOrder.subtotal_amount
+        ?? runtimeOrder.subtotal
+        ?? null,
+      discountAmount:
+        runtimeOrder.discountAmount ?? runtimeOrder.discount_amount ?? null,
+      taxAmount: runtimeOrder.taxAmount ?? runtimeOrder.tax_amount ?? null,
+      packingCharges:
+        runtimeOrder.packingCharges ?? runtimeOrder.packing_charges ?? null,
+      deliveryFee: runtimeOrder.deliveryFee ?? runtimeOrder.delivery_fee ?? null,
+      courierTip: runtimeOrder.courierTip ?? runtimeOrder.courier_tip ?? null,
+      totalAmount:
+        runtimeOrder.totalAmount ?? runtimeOrder.total_amount ?? runtimeOrder.orderAmount ?? null,
+      note: runtimeOrder.note ?? null,
+    };
+
+  const derivedSubtotalFromItems =
+    Array.isArray(order.items) && order.items.length > 0
+      ? order.items.reduce((sum, item) => {
+          const safeValue =
+            typeof item.totalPrice === "number" && Number.isFinite(item.totalPrice)
+              ? item.totalPrice
+              : 0;
+          return sum + safeValue;
+        }, 0)
+      : null;
+
   const orderSummary = summarySource
     ? {
       orderNumber:
@@ -133,7 +164,9 @@ function normalizeOrder(order: Order): Order {
           : typeof summarySource.order_number === "string"
             ? summarySource.order_number
             : null,
-      itemSubtotal: toNullableNumber(summarySource.itemSubtotal ?? summarySource.item_subtotal),
+      itemSubtotal:
+        toNullableNumber(summarySource.itemSubtotal ?? summarySource.item_subtotal)
+        ?? derivedSubtotalFromItems,
       discountAmount: toNullableNumber(summarySource.discountAmount ?? summarySource.discount_amount),
       taxAmount: toNullableNumber(summarySource.taxAmount ?? summarySource.tax_amount),
       packingCharges: toNullableNumber(summarySource.packingCharges ?? summarySource.packing_charges),

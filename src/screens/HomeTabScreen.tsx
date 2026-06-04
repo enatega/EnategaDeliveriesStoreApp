@@ -21,18 +21,19 @@ import {
   CompletedScreen,
 } from './orders';
 
-const ORDER_TAB_SCREENS: Record<OrderTab, React.ReactElement> = {
-  new: <NewOrdersScreen />,
-  inProgress: <InProgressScreen />,
-  ready: <ReadyScreen />,
-  pickup: <PickupScreen />,
-  completed: <CompletedScreen />,
+const ORDER_TAB_SCREENS: Record<OrderTab, React.ComponentType> = {
+  new: NewOrdersScreen,
+  inProgress: InProgressScreen,
+  ready: ReadyScreen,
+  pickup: PickupScreen,
+  completed: CompletedScreen,
 };
 
 export default function HomeTabScreen() {
   const [activeOrderTab, setActiveOrderTab] = useState<OrderTab>('new');
   const { t } = useTranslations("app");
   const countParams = { offset: 0, limit: 1, orderType: "delivery" } as const;
+  const ActiveOrderScreen = ORDER_TAB_SCREENS[activeOrderTab];
 
   const countQueries = useQueries({
     queries: [
@@ -70,7 +71,7 @@ export default function HomeTabScreen() {
   return (
     <TabShell titleKey="orders_title">
       <TabBar tabs={ORDER_TABS} activeTab={activeOrderTab} onTabPress={setActiveOrderTab} />
-      {ORDER_TAB_SCREENS[activeOrderTab]}
+      <ActiveOrderScreen key={activeOrderTab} />
     </TabShell>
   );
 }
