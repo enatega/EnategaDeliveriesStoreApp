@@ -41,6 +41,7 @@ export function useNewOrders({
     initialPageParam: 0,
     getNextPageParam: (lastPage) => lastPage.nextOffset ?? undefined,
     staleTime: 60 * 1000,
+    refetchOnMount: "always",
     ...options,
   });
 }
@@ -60,6 +61,7 @@ export function useInProgressOrders({
     initialPageParam: 0,
     getNextPageParam: (lastPage) => lastPage.nextOffset ?? undefined,
     staleTime: 60 * 1000,
+    refetchOnMount: "always",
     ...options,
   });
 }
@@ -79,6 +81,7 @@ export function useReadyOrders({
     initialPageParam: 0,
     getNextPageParam: (lastPage) => lastPage.nextOffset ?? undefined,
     staleTime: 60 * 1000,
+    refetchOnMount: "always",
     ...options,
   });
 }
@@ -98,6 +101,7 @@ export function usePickupOrders({
     initialPageParam: 0,
     getNextPageParam: (lastPage) => lastPage.nextOffset ?? undefined,
     staleTime: 60 * 1000,
+    refetchOnMount: "always",
     ...options,
   });
 }
@@ -117,6 +121,7 @@ export function useCompletedOrders({
     initialPageParam: 0,
     getNextPageParam: (lastPage) => lastPage.nextOffset ?? undefined,
     staleTime: 60 * 1000,
+    refetchOnMount: "always",
     ...options,
   });
 }
@@ -143,6 +148,7 @@ export function useScheduledOrders({
     initialPageParam: 0,
     getNextPageParam: (lastPage) => lastPage.nextOffset ?? undefined,
     staleTime: 60 * 1000,
+    refetchOnMount: "always",
     ...options,
   });
 }
