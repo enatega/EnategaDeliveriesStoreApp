@@ -2,7 +2,7 @@ module.exports = {
   expo: {
     name: "EatMile Store",
     slug: "eatmile-store",
-    owner: "ninjas_code",
+    owner: "eatmile",
     version: "1.0.0",
     orientation: "portrait",
     icon: "./assets/icon.png",
