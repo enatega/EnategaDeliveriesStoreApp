@@ -12,6 +12,7 @@ export const buildLightColors = (brandColors: BrandColors = defaultBrandColors) 
   white: '#FFFFFF',
   // Gray scale (Figma tokens)
   gray900: '#111827',
+  gray800: '#1F2937',
   gray600: '#4B5563',
   gray500: '#6B7280',
   gray400: '#9CA3AF',
@@ -32,6 +33,7 @@ export const buildDarkColors = (brandColors: BrandColors = defaultBrandColors): 
   border: '#374151',
   white: '#FFFFFF',
   gray900: '#F9FAFB',
+  gray800: '#1F2937',
   gray600: '#9CA3AF',
   gray500: '#9CA3AF',
   gray400: '#6B7280',

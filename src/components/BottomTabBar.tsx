@@ -30,7 +30,7 @@ export default function BottomTabBar({ state, navigation, insets }: BottomTabBar
           paddingTop: 12,
           paddingBottom: bottomInset,
           minHeight: containerHeight,
-          backgroundColor: theme.colors.gray200,
+          backgroundColor: theme.colors.gray800,
         },
       ]}
     >

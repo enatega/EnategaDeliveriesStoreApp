@@ -19,6 +19,7 @@ type Props = {
     onOpenChat?: () => void;
     onConfirmPickup?: (orderId: string) => void;
     showConfirmButton?: boolean;
+    canConfirmPickup?: boolean;
     isConfirmingPickup?: boolean;
     theme: any;
 };
@@ -36,6 +37,7 @@ export default function ReadyPickupSection({
     onOpenChat,
     onConfirmPickup,
     showConfirmButton = false,
+    canConfirmPickup = true,
     isConfirmingPickup,
     theme,
 }: Props) {
@@ -84,9 +86,16 @@ export default function ReadyPickupSection({
 
             {showConfirmButton && isReady && (
                 <Pressable
-                    style={[styles.btnConfirmPickup, { backgroundColor: theme.colors.primary }, isConfirmingPickup && { opacity: 0.6 }]}
-                    onPress={() => onConfirmPickup?.(orderId)}
-                    disabled={isConfirmingPickup}
+                    style={[
+                        styles.btnConfirmPickup,
+                        { backgroundColor: canConfirmPickup ? theme.colors.primary : theme.colors.gray300 },
+                        (isConfirmingPickup || !canConfirmPickup) && { opacity: 0.6 },
+                    ]}
+                    onPress={() => {
+                        if (!canConfirmPickup) return;
+                        onConfirmPickup?.(orderId);
+                    }}
+                    disabled={isConfirmingPickup || !canConfirmPickup}
                 >
                     {isConfirmingPickup ? (
                         <ActivityIndicator size="small" color={theme.colors.gray900} />

@@ -104,6 +104,12 @@ function stripCourierComment(comment: string | null): string | null {
 
 function normalizeOrder(order: Order): Order {
   const runtimeOrder = order as unknown as Record<string, unknown>;
+  const isInstantOrder =
+    typeof runtimeOrder.isInstantOrder === "boolean"
+      ? runtimeOrder.isInstantOrder
+      : typeof runtimeOrder.is_instant_order === "boolean"
+        ? runtimeOrder.is_instant_order
+        : false;
   const customerProfileImageRaw =
     (typeof runtimeOrder.customerProfileImage === "string" && runtimeOrder.customerProfileImage)
     || (typeof runtimeOrder.customerProfilePicture === "string" && runtimeOrder.customerProfilePicture)
@@ -164,6 +170,7 @@ function normalizeOrder(order: Order): Order {
 
   return {
     ...order,
+    isInstantOrder,
     customerProfileImage: normalizeImageUrl(customerProfileImageRaw),
     items: (Array.isArray(order.items) ? order.items : []).map(normalizeOrderItem),
     customerComment: stripCourierComment(order.customerComment),

@@ -122,12 +122,16 @@ export default function OrderCard({
     || order.riderVehicle
     || order.status === OrderStatus.RIDER_ASSIGNED,
   );
-  const canMarkReady = hasAssignedRider;
+  const canMarkReady = order.isInstantOrder
+    ? hasAssignedRider || order.canAccept
+    : true;
   const headerStatusLabel =
     (order.status === OrderStatus.DELIVERED
       ? t("order_card_delivered")
       : order.status === OrderStatus.READY
-      ? "Rider assigned"
+      ? hasAssignedRider
+        ? "Rider assigned"
+        : order.statusLabel
       : getReadableRiderStatus(order.status, order.riderStatus, order.riderStatusLabel)) ||
     (order.riderArrived ? t("order_card_rider_arrived") : null);
   const headerStatusTone =
@@ -200,6 +204,7 @@ export default function OrderCard({
           onOpenChat={handleOpenChat}
           onConfirmPickup={onConfirmPickup}
           showConfirmButton={order.status === OrderStatus.READY && !!onConfirmPickup}
+          canConfirmPickup={order.isInstantOrder ? true : hasAssignedRider}
           isConfirmingPickup={isConfirmingPickup}
           theme={theme}
         />

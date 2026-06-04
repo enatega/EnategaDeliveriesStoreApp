@@ -29,7 +29,7 @@ module.exports = {
       edgeToEdgeEnabled: false,
     },
     androidNavigationBar: {
-      backgroundColor: "#E5E7EB",
+      backgroundColor: "#1F2937",
       barStyle: "dark-content",
       visible: "visible",
     },
@@ -48,9 +48,9 @@ module.exports = {
       [
         "expo-navigation-bar",
         {
-          backgroundColor: "#E5E7EB",
+          backgroundColor: "#1F2937",
           barStyle: "dark",
-          borderColor: "#E5E7EB",
+          borderColor: "#1F2937",
           visibility: "visible",
           behavior: "inset-swipe",
           position: "relative",

@@ -67,6 +67,7 @@ export interface Order {
   status: OrderStatus;
   statusLabel: string; // e.g. "New Order", "In Progress", "Ready", "Pickup", "Completed"
   orderType: OrderType;
+  isInstantOrder: boolean;
   customerName: string;
   customerProfileImage: string | null;
   customerPhone: string | null;
