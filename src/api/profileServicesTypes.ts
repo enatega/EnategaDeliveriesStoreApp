@@ -10,6 +10,8 @@ export interface ProfileResponse {
         rating: number;
         totalReviews: number;
         activeStatus: boolean;
+        isInstantDelivery: boolean;
+        instantDeliveryTime: number | null;
         blockStatus: boolean;
         approvalStatus: string; // "approved" etc.
         language: string;
@@ -64,6 +66,17 @@ export type UpdateAvailabilityRequest = {
 };
 
 export interface UpdateAvailabilityResponse {
+    message: string;
+    store_id: string;
+}
+
+// PATCH /profile/me/instant-delivery
+export type UpdateInstantDeliveryRequest = {
+    isInstantDelivery: boolean;
+    instantDeliveryTime: number | null;
+};
+
+export interface UpdateInstantDeliveryResponse {
     message: string;
     store_id: string;
 }

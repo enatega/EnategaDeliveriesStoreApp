@@ -42,7 +42,6 @@ export default function ReadyPickupSection({
     theme,
 }: Props) {
     const { t } = useTranslations("app");
-    const isReady = status === OrderStatus.READY;
     const handleCallRider = () => {
         if (!riderPhone) return;
         Linking.openURL(`tel:${riderPhone}`);
@@ -84,7 +83,7 @@ export default function ReadyPickupSection({
                 </View>
             )}
 
-            {showConfirmButton && isReady && (
+            {showConfirmButton && (
                 <Pressable
                     style={[
                         styles.btnConfirmPickup,

@@ -148,6 +148,16 @@ export type UpdateOrderStatusResponse = {
   status: OrderStatus;
 };
 
+export type ConfirmPickupRequest = {
+  isConfirmPickup: boolean;
+};
+
+export type ConfirmPickupResponse = {
+  message: string;
+  orderId: string;
+  status: OrderStatus;
+};
+
 export type UpdatePreparingTimeRequest = {
   preparingTimeInMinutes: number;
 };

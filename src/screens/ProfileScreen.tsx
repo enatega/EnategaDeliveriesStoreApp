@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -15,9 +15,12 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useAppTheme } from "../theme/ThemeProvider";
 import { useTranslations } from "../localization/LocalizationProvider";
 import Text from "../components/Text";
+import Button from "../components/Button";
+import TextInput from "../components/TextInput";
 import ToggleSwitch from "../components/ToggleSwitch";
+import ProfileToggleCard from "../components/profile/ProfileToggleCard";
 import { useProfileQuery, useAvailabilityQuery } from "../hooks/useProfileQueries";
-import { useUpdateAvailability } from "../hooks/useProfileMutations";
+import { useUpdateAvailability, useUpdateInstantDelivery } from "../hooks/useProfileMutations";
 import { useLogoutMutation } from "../hooks/useAuthMutations";
 import { MainStackParamList } from "../navigation/types";
 
@@ -37,7 +40,36 @@ export default function ProfileScreen() {
   const { data: profileData, isLoading: profileLoading } = useProfileQuery();
   const { data: availabilityData, isLoading: availabilityLoading } = useAvailabilityQuery();
   const updateAvailability = useUpdateAvailability();
+  const [instantDeliveryEnabled, setInstantDeliveryEnabled] = useState(false);
+  const [instantDeliveryDays, setInstantDeliveryDays] = useState("");
+  const [instantDeliveryError, setInstantDeliveryError] = useState("");
+  const updateInstantDelivery = useUpdateInstantDelivery({
+    onError: () => {
+      setInstantDeliveryEnabled(profileData?.profile.isInstantDelivery ?? false);
+    },
+  });
   const logoutMutation = useLogoutMutation();
+
+  const serverInstantDeliveryEnabled = profileData?.profile.isInstantDelivery ?? false;
+  const serverInstantDeliveryDays =
+    profileData?.profile.instantDeliveryTime !== null &&
+    profileData?.profile.instantDeliveryTime !== undefined
+      ? String(profileData.profile.instantDeliveryTime)
+      : "";
+
+  useEffect(() => {
+    setInstantDeliveryEnabled(serverInstantDeliveryEnabled);
+  }, [serverInstantDeliveryEnabled]);
+
+  useEffect(() => {
+    setInstantDeliveryDays(serverInstantDeliveryDays);
+  }, [serverInstantDeliveryDays]);
+
+  useEffect(() => {
+    if (instantDeliveryEnabled) {
+      setInstantDeliveryError("");
+    }
+  }, [instantDeliveryEnabled]);
 
   if (profileLoading || !profileData) {
     return (
@@ -59,6 +91,61 @@ export default function ProfileScreen() {
 
   const currentAvailability = availabilityData?.store_available ?? true;
   const isAvailabilityBusy = availabilityLoading || updateAvailability.isPending;
+  const isInstantDeliveryBusy = updateInstantDelivery.isPending;
+
+  const handleInstantDeliveryToggle = (newValue: boolean) => {
+    console.log("[ProfileScreen] instant delivery toggle", {
+      nextValue: newValue,
+      currentServerValue: serverInstantDeliveryEnabled,
+      currentInputDays: instantDeliveryDays,
+    });
+    setInstantDeliveryError("");
+    setInstantDeliveryEnabled(newValue);
+
+    if (newValue) {
+      console.log("[ProfileScreen] instant delivery payload", {
+        is_instant_delivery: true,
+        instant_delivery_time: null,
+      });
+      updateInstantDelivery.mutate({
+        isInstantDelivery: true,
+        instantDeliveryTime: null,
+      });
+      return;
+    }
+
+    if (!instantDeliveryDays.trim()) {
+      setInstantDeliveryDays(serverInstantDeliveryDays || "1");
+    }
+  };
+
+  const handleInstantDeliverySave = () => {
+    const parsedDays = Number.parseInt(instantDeliveryDays.trim(), 10);
+    console.log("[ProfileScreen] instant delivery save attempt", {
+      rawDays: instantDeliveryDays,
+      parsedDays,
+    });
+
+    if (!Number.isFinite(parsedDays) || parsedDays <= 0) {
+      console.log("[ProfileScreen] instant delivery validation failed", {
+        rawDays: instantDeliveryDays,
+        parsedDays,
+      });
+      setInstantDeliveryError(t("profile_instant_delivery_days_error"));
+      return;
+    }
+
+    setInstantDeliveryError("");
+    console.log("[ProfileScreen] instant delivery payload", {
+      is_instant_delivery: false,
+      instant_delivery_time: parsedDays,
+    });
+    updateInstantDelivery.mutate({
+      isInstantDelivery: false,
+      instantDeliveryTime: parsedDays,
+    });
+  };
+
   const openExternalUrl = async (url: string) => {
     try {
       const supported = await Linking.canOpenURL(url);
@@ -156,32 +243,68 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        <View
-          style={[
-            styles.availabilityCard,
-            { borderColor: theme.colors.gray300, backgroundColor: theme.colors.surface },
-          ]}
-        >
-          <View style={styles.availabilityLeft}>
-            <View style={[styles.iconCircle, { backgroundColor: theme.colors.tertiary }]}>
-              <Feather name="clock" size={18} color={theme.colors.primary} />
-            </View>
-            <View style={styles.menuTextWrap}>
-              <Text weight="semiBold" style={styles.menuTitle}>
-                {t("profile_availability")}
+        <ProfileToggleCard
+          icon="clock"
+          title={t("profile_availability")}
+          subtitle={t("profile_availability_subtitle")}
+          rightContent={
+            <>
+              <ToggleSwitch
+                value={currentAvailability}
+                onValueChange={(newValue) => updateAvailability.mutate({ storeAvailable: newValue })}
+                disabled={isAvailabilityBusy}
+              />
+              <Text style={styles.availableText}>
+                {currentAvailability ? t("Available") : t("Unavailable")}
               </Text>
-              <Text style={styles.menuSubtitle}>{t("profile_availability_subtitle")}</Text>
+            </>
+          }
+        />
+
+        <ProfileToggleCard
+          icon="zap"
+          title={t("profile_instant_delivery")}
+          subtitle={t("profile_instant_delivery_subtitle")}
+          rightContent={
+            <>
+              <ToggleSwitch
+                value={instantDeliveryEnabled}
+                onValueChange={handleInstantDeliveryToggle}
+                disabled={isInstantDeliveryBusy}
+              />
+              <Text style={styles.availableText}>
+                {instantDeliveryEnabled
+                  ? t("profile_instant_delivery_on")
+                  : t("profile_instant_delivery_off")}
+              </Text>
+            </>
+          }
+        >
+          {!instantDeliveryEnabled ? (
+            <View style={styles.instantDeliveryExpanded}>
+              <TextInput
+                label={t("profile_instant_delivery_days_label")}
+                value={instantDeliveryDays}
+                onChangeText={(value) => {
+                  setInstantDeliveryDays(value.replace(/[^0-9]/g, ""));
+                  if (instantDeliveryError) {
+                    setInstantDeliveryError("");
+                  }
+                }}
+                keyboardType="number-pad"
+                placeholder={t("profile_instant_delivery_days_placeholder")}
+                error={instantDeliveryError}
+                editable={!isInstantDeliveryBusy}
+              />
+              <Button
+                label={t("profile_update")}
+                onPress={handleInstantDeliverySave}
+                loading={isInstantDeliveryBusy}
+                disabled={isInstantDeliveryBusy}
+              />
             </View>
-          </View>
-          <View style={styles.availabilityRight}>
-            <ToggleSwitch
-              value={currentAvailability}
-              onValueChange={(newValue) => updateAvailability.mutate({ storeAvailable: newValue })}
-              disabled={isAvailabilityBusy}
-            />
-            <Text style={styles.availableText}>{currentAvailability ? t("Available") : t("Unavailable")}</Text>
-          </View>
-        </View>
+          ) : null}
+        </ProfileToggleCard>
 
         <Text weight="medium" style={styles.sectionTitle}>
           {t("profile_account_settings")}
@@ -339,31 +462,13 @@ const styles = StyleSheet.create({
     color: "#4B5563",
     fontWeight: "500",
   },
-  availabilityCard: {
-    marginHorizontal: 16,
-    marginTop: -34,
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 12,
-  },
-  availabilityLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    flex: 1,
-  },
-  availabilityRight: {
-    alignItems: "center",
-    gap: 6,
-  },
   availableText: {
     fontSize: 12,
     lineHeight: 16,
     color: "#4B5563",
+  },
+  instantDeliveryExpanded: {
+    gap: 12,
   },
   sectionTitle: {
     marginHorizontal: 16,

@@ -10,6 +10,8 @@ import { orderServices } from "../api/orderServices";
 import { ApiError } from "../api/apiClient";
 import {
   AcceptOrderResponse,
+  ConfirmPickupRequest,
+  ConfirmPickupResponse,
   RejectOrderResponse,
   RejectOrderRequest,
   UpdateOrderStatusRequest,
@@ -32,6 +34,7 @@ export function useAcceptOrder(
   options?: UseMutationOptions<AcceptOrderResponse, ApiError, string>,
 ) {
   const queryClient = useQueryClient();
+  const { onSuccess, ...restOptions } = options ?? {};
   return useMutation({
     mutationFn: (orderId: string) => orderServices.acceptOrder(orderId),
     onSuccess: (data, orderId, onMutateResult, context) => {
@@ -41,9 +44,9 @@ export function useAcceptOrder(
       queryClient.invalidateQueries({ queryKey: readyOrdersKeys.lists() });
       queryClient.invalidateQueries({ queryKey: pickupOrdersKeys.lists() });
       queryClient.invalidateQueries({ queryKey: completedOrdersKeys.lists() });
-      options?.onSuccess?.(data, orderId, onMutateResult, context);
+      onSuccess?.(data, orderId, onMutateResult, context);
     },
-    ...options,
+    ...restOptions,
   });
 }
 
@@ -56,6 +59,7 @@ export function useRejectOrder(
   >,
 ) {
   const queryClient = useQueryClient();
+  const { onSuccess, ...restOptions } = options ?? {};
   return useMutation({
     mutationFn: ({ orderId, data }) => orderServices.rejectOrder(orderId, data),
     onSuccess: (data, variables, onMutateResult, context) => {
@@ -65,9 +69,9 @@ export function useRejectOrder(
       queryClient.invalidateQueries({ queryKey: readyOrdersKeys.lists() });
       queryClient.invalidateQueries({ queryKey: pickupOrdersKeys.lists() });
       queryClient.invalidateQueries({ queryKey: completedOrdersKeys.lists() });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
+      onSuccess?.(data, variables, onMutateResult, context);
     },
-    ...options,
+    ...restOptions,
   });
 }
 
@@ -80,6 +84,7 @@ export function useUpdateOrderStatus(
   >,
 ) {
   const queryClient = useQueryClient();
+  const { onSuccess, ...restOptions } = options ?? {};
   return useMutation({
     mutationFn: ({ orderId, data }) =>
       orderServices.updateOrderStatus(orderId, data),
@@ -89,9 +94,60 @@ export function useUpdateOrderStatus(
       queryClient.invalidateQueries({ queryKey: inProgressOrdersKeys.lists() });
       queryClient.invalidateQueries({ queryKey: readyOrdersKeys.lists() });
       queryClient.invalidateQueries({ queryKey: pickupOrdersKeys.lists() });
-      options?.onSuccess?.(response, variables, onMutateResult, context);
+      onSuccess?.(response, variables, onMutateResult, context);
     },
-    ...options,
+    ...restOptions,
+  });
+}
+
+// ─── Confirm Pickup (non-instant pickup flow) ────────────────────
+export function useConfirmNonInstantPickup(
+  options?: UseMutationOptions<
+    ConfirmPickupResponse,
+    ApiError,
+    { orderId: string; data: ConfirmPickupRequest }
+  >,
+) {
+  const queryClient = useQueryClient();
+  const { onError, onMutate: _ignoredOnMutate, onSuccess, ...restOptions } = options ?? {};
+  return useMutation({
+    mutationFn: ({ orderId, data }) =>
+      orderServices.confirmNonInstantPickup(orderId, data),
+    onMutate: async (variables) => {
+      console.log("[useConfirmNonInstantPickup] onMutate", {
+        orderId: variables.orderId,
+        payload: {
+          is_confirm_pickup: variables.data.isConfirmPickup,
+        },
+      });
+    },
+    onError: (error, variables, onMutateResult, context) => {
+      console.log("[useConfirmNonInstantPickup] onError", {
+        orderId: variables.orderId,
+        payload: {
+          is_confirm_pickup: variables.data.isConfirmPickup,
+        },
+        errorMessage: error.message,
+        errorStatus: error.status,
+        errorCode: error.code,
+        errorData: error.data,
+      });
+      onError?.(error, variables, onMutateResult, context);
+    },
+    onSuccess: (response, variables, onMutateResult, context) => {
+      console.log("[useConfirmNonInstantPickup] onSuccess", {
+        orderId: variables.orderId,
+        payload: {
+          is_confirm_pickup: variables.data.isConfirmPickup,
+        },
+        response,
+      });
+      queryClient.invalidateQueries({ queryKey: readyOrdersKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: pickupOrdersKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: completedOrdersKeys.lists() });
+      onSuccess?.(response, variables, onMutateResult, context);
+    },
+    ...restOptions,
   });
 }
 
@@ -104,10 +160,18 @@ export function useUpdatePreparingTime(
   >,
 ) {
   const queryClient = useQueryClient();
+  const { onError, onMutate: _ignoredOnMutate, onSuccess, ...restOptions } = options ?? {};
   return useMutation({
     mutationFn: ({ orderId, data }) =>
       orderServices.updatePreparingTime(orderId, data),
-    onMutate: async (variables) => {
+    onMutate: async (
+      variables,
+    ): Promise<{
+      previousInProgress: [
+        readonly unknown[],
+        InfiniteData<PaginatedOrdersResponse, unknown> | undefined,
+      ][];
+    }> => {
       console.log("[useUpdatePreparingTime] onMutate:start", {
         orderId: variables.orderId,
         preparingTimeInMinutes: variables.data.preparingTimeInMinutes,
@@ -166,17 +230,17 @@ export function useUpdatePreparingTime(
 
       return { previousInProgress };
     },
-    onError: (error, variables, context) => {
+    onError: (error, variables, onMutateResult, context) => {
       console.log("[useUpdatePreparingTime] onError", {
         orderId: variables.orderId,
         preparingTimeInMinutes: variables.data.preparingTimeInMinutes,
         errorName: error?.name,
         errorMessage: error?.message,
       });
-      context?.previousInProgress?.forEach(([queryKey, data]) => {
+      onMutateResult?.previousInProgress?.forEach(([queryKey, data]) => {
         queryClient.setQueryData(queryKey, data);
       });
-      options?.onError?.(error, variables, context);
+      onError?.(error, variables, onMutateResult, context);
     },
     onSuccess: (response, variables, onMutateResult, context) => {
       console.log("[useUpdatePreparingTime] onSuccess", {
@@ -229,8 +293,8 @@ export function useUpdatePreparingTime(
           };
         },
       );
-      options?.onSuccess?.(response, variables, onMutateResult, context);
+      onSuccess?.(response, variables, onMutateResult, context);
     },
-    ...options,
+    ...restOptions,
   });
 }

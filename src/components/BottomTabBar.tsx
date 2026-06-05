@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Keyboard, Pressable, StyleSheet, View } from 'react-native';
 import Text from './Text';
 import { useTranslations } from '../localization/LocalizationProvider';
 import { useAppTheme } from '../theme/ThemeProvider';
@@ -19,8 +19,27 @@ const ROUTE_META = {
 export default function BottomTabBar({ state, navigation, insets }: BottomTabBarProps) {
   const { t } = useTranslations('app');
   const { theme } = useAppTheme();
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const bottomInset = Math.max(insets.bottom + 6, 16);
   const containerHeight = 62 + bottomInset;
+
+  useEffect(() => {
+    const showSubscription = Keyboard.addListener('keyboardDidShow', () => {
+      setIsKeyboardVisible(true);
+    });
+    const hideSubscription = Keyboard.addListener('keyboardDidHide', () => {
+      setIsKeyboardVisible(false);
+    });
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
+
+  if (isKeyboardVisible) {
+    return null;
+  }
 
   return (
     <View

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useWorkScheduleQuery } from "../hooks/useProfileQueries";
 import { useUpdateWorkSchedule } from "../hooks/useProfileMutations";
+import { StoreTimings } from "../api/profileServicesTypes";
 
 type BackendDayKey =
   | "monday"
@@ -10,11 +11,6 @@ type BackendDayKey =
   | "friday"
   | "saturday"
   | "sunday";
-
-type StoreTimings = Record<
-  BackendDayKey,
-  { slots: { open: string; close: string }[]; is_active: boolean }
->;
 
 interface UseWorkScheduleOptions {
   onSuccess?: () => void;

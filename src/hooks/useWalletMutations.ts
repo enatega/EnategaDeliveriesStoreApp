@@ -24,12 +24,12 @@ export function useWithdraw(
 
   return useMutation<WithdrawSuccessResponse, ApiError, WithdrawRequest>({
     mutationFn: (data) => walletServices.withdraw(data),
-    onSuccess: (data, variables, context) => {
+    onSuccess: (data, variables, onMutateResult, context) => {
       // Invalidate balance after successful withdrawal
       queryClient.invalidateQueries({ queryKey: walletKeys.balance() });
       // Also invalidate history to show the new withdrawal transaction
       queryClient.invalidateQueries({ queryKey: walletKeys.history() });
-      options?.onSuccess?.(data, variables, context);
+      options?.onSuccess?.(data, variables, onMutateResult, context);
     },
     ...options,
   });

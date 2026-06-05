@@ -54,12 +54,7 @@ export default function WalletScreen() {
           setWithdrawOpen(false);
         },
         onError: (error: ApiError) => {
-          // Extract error message from API response
-          const msg =
-            typeof error.message === "string"
-              ? error.message
-              : error.message?.join(", ") ||
-                "Withdrawal failed. Please try again.";
+          const msg = error.message || "Withdrawal failed. Please try again.";
           setErrorMessage(msg);
           setWithdrawOpen(false);
         },

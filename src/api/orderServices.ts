@@ -9,6 +9,8 @@ import {
   RejectOrderRequest,
   UpdateOrderStatusRequest,
   UpdateOrderStatusResponse,
+  ConfirmPickupRequest,
+  ConfirmPickupResponse,
   UpdatePreparingTimeRequest,
   UpdatePreparingTimeResponse,
 } from "./orderServicesTypes";
@@ -282,6 +284,15 @@ export const orderServices = {
     apiClient.patch<UpdateOrderStatusResponse>(
       `${BASE_PATH}/${orderId}/status`,
       data,
+    ),
+
+  confirmNonInstantPickup: (orderId: string, data: ConfirmPickupRequest) =>
+    apiClient.patch<ConfirmPickupResponse>(
+      `/apps/deliveries/orders/${orderId}/confirm-pickup`,
+      {
+        isConfirmPickup: data.isConfirmPickup,
+        is_confirm_pickup: data.isConfirmPickup,
+      },
     ),
 
   updatePreparingTime: (orderId: string, data: UpdatePreparingTimeRequest) =>

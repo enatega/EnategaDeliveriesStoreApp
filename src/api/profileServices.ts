@@ -4,6 +4,8 @@ import {
     AvailabilityResponse,
     UpdateAvailabilityRequest,
     UpdateAvailabilityResponse,
+    UpdateInstantDeliveryRequest,
+    UpdateInstantDeliveryResponse,
     WorkScheduleResponse,
     UpdateWorkScheduleRequest,
     UpdateWorkScheduleResponse,
@@ -29,6 +31,12 @@ export const profileService = {
         apiClient.patch<UpdateAvailabilityResponse>(`${BASE_PATH}/availability`, {
             storeAvailable: data.storeAvailable,
             store_available: data.storeAvailable,
+        }),
+
+    updateInstantDelivery: (data: UpdateInstantDeliveryRequest) =>
+        apiClient.patch<UpdateInstantDeliveryResponse>(`${BASE_PATH}/instant-delivery`, {
+            is_instant_delivery: data.isInstantDelivery,
+            instant_delivery_time: data.instantDeliveryTime,
         }),
 
     // Work schedule

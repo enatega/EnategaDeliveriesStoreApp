@@ -21,9 +21,42 @@ export default function NewOrdersScreen() {
   const rejectMutation = useRejectOrder();
   const updateTimeMutation = useUpdatePreparingTime();
 
-  const handleAccept = (orderId: string) => {
-    setPendingOrderId(orderId);
+  const handleAccept = async (order: Order) => {
+    console.log("[NewOrdersScreen] Accept tapped", {
+      orderId: order.orderId,
+      orderCode: order.orderCode,
+      isInstantOrder: order.isInstantOrder,
+      status: order.status,
+    });
+
+    if (!order.isInstantOrder) {
+      try {
+        console.log("[NewOrdersScreen] Accepting non-instant order directly", {
+          orderId: order.orderId,
+          isInstantOrder: order.isInstantOrder,
+        });
+        await acceptMutation.mutateAsync(order.orderId);
+        console.log("[NewOrdersScreen] Non-instant order accepted without preparing time", {
+          orderId: order.orderId,
+        });
+      } catch (error) {
+        const runtimeError = error as { message?: string; stack?: string; name?: string };
+        console.log("[NewOrdersScreen] failed to accept non-instant order", {
+          orderId: order.orderId,
+          error,
+          errorName: runtimeError?.name,
+          errorMessage: runtimeError?.message,
+          errorStack: runtimeError?.stack,
+        });
+      }
+      return;
+    }
+
+    setPendingOrderId(order.orderId);
     setModalVisible(true);
+    console.log("[NewOrdersScreen] Showing preparing time modal for instant order", {
+      orderId: order.orderId,
+    });
   };
 
   const handleReject = (orderId: string, orderCode?: string) => {
@@ -60,7 +93,6 @@ export default function NewOrdersScreen() {
     });
     setModalVisible(false);
     setPendingOrderId(null);
-
     try {
       console.log("[NewOrdersScreen] Accepting order", { orderId });
       await acceptMutation.mutateAsync(orderId);
@@ -96,7 +128,7 @@ export default function NewOrdersScreen() {
   };
 
   const renderActions = (order: Order) => ({
-    onAccept: handleAccept,
+    onAccept: () => handleAccept(order),
     onReject: () => handleReject(order.orderId, order.orderCode),
     isAccepting: acceptMutation.isPending || updateTimeMutation.isPending,
     isRejecting: rejectMutation.isPending,

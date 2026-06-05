@@ -10,6 +10,7 @@ import { getReadableRiderStatus } from "./riderStatusLabel";
 
 type Props = {
     orderId: string;
+    isInstantOrder: boolean;
     riderArrived: boolean;
     riderStatus: string | null;
     riderStatusLabel: string | null;
@@ -31,6 +32,7 @@ type Props = {
 
 export default function InProgressSection({
     orderId,
+    isInstantOrder,
     riderArrived,
     riderStatus,
     riderStatusLabel,
@@ -121,41 +123,45 @@ export default function InProgressSection({
                         </View>
                     </View>
                 )}
-                <View style={[styles.preparingStatusBox, { backgroundColor: theme.colors.green50 }]}>
-                    <View style={styles.preparingLeft}>
-                        <Svg name="timer" width={40} height={40} />
-                        <Text style={styles.preparingText}>{t("order_card_preparing")}</Text>
+                {isInstantOrder ? (
+                    <View style={[styles.preparingStatusBox, { backgroundColor: theme.colors.green50 }]}>
+                        <View style={styles.preparingLeft}>
+                            <Svg name="timer" width={40} height={40} />
+                            <Text style={styles.preparingText}>{t("order_card_preparing")}</Text>
+                        </View>
+                        <CountdownTimer
+                            startTimeMs={startTime}
+                            totalMinutes={preparingTimeInMinutes}
+                            remainingSecondsOverride={liveRemainingSeconds}
+                            style={styles.timerText}
+                        />
                     </View>
-                    <CountdownTimer
-                        startTimeMs={startTime}
-                        totalMinutes={preparingTimeInMinutes}
-                        remainingSecondsOverride={liveRemainingSeconds}
-                        style={styles.timerText}
-                    />
-                </View>
+                ) : null}
             </View>
 
             <View style={styles.inProgressActions}>
-                <Pressable
-                    style={[styles.btnPlusTime, isUpdatingTime && { opacity: 0.6 }]}
-                    onPress={() => {
-                        const nextMinutes = (preparingTimeInMinutes || 0) + 5;
-                        setLiveRemainingSeconds((prev) => Math.max(0, prev) + 5 * 60);
-                        console.log("[InProgressSection] +5m tapped", {
-                            orderId,
-                            currentPreparingTimeInMinutes: preparingTimeInMinutes,
-                            nextPreparingTimeInMinutes: nextMinutes,
-                        });
-                        onUpdatePreparingTime(orderId, nextMinutes);
-                    }}
-                    disabled={isUpdatingTime}
-                >
-                    {isUpdatingTime ? (
-                        <ActivityIndicator size="small" color="#374151" />
-                    ) : (
-                        <Text style={styles.btnPlusTimeText}>+5m</Text>
-                    )}
-                </Pressable>
+                {isInstantOrder ? (
+                    <Pressable
+                        style={[styles.btnPlusTime, isUpdatingTime && { opacity: 0.6 }]}
+                        onPress={() => {
+                            const nextMinutes = (preparingTimeInMinutes || 0) + 5;
+                            setLiveRemainingSeconds((prev) => Math.max(0, prev) + 5 * 60);
+                            console.log("[InProgressSection] +5m tapped", {
+                                orderId,
+                                currentPreparingTimeInMinutes: preparingTimeInMinutes,
+                                nextPreparingTimeInMinutes: nextMinutes,
+                            });
+                            onUpdatePreparingTime(orderId, nextMinutes);
+                        }}
+                        disabled={isUpdatingTime}
+                    >
+                        {isUpdatingTime ? (
+                            <ActivityIndicator size="small" color="#374151" />
+                        ) : (
+                            <Text style={styles.btnPlusTimeText}>+5m</Text>
+                        )}
+                    </Pressable>
+                ) : null}
                 <Pressable
                     style={[
                       styles.btnMarkReady,

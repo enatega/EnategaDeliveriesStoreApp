@@ -8,11 +8,17 @@ export default function ReadyScreen() {
   const updateStatus = useUpdateOrderStatus();
 
   const handleConfirmPickup = (orderId: string) => {
-    updateStatus.mutate({ orderId, data: { status: OrderStatus.PICKED_UP } });
+    console.log("[ReadyScreen] confirm pickup for instant order", {
+      orderId,
+      payload: {
+        status: OrderStatus.OUT_FOR_DELIVERY,
+      },
+    });
+    updateStatus.mutate({ orderId, data: { status: OrderStatus.OUT_FOR_DELIVERY } });
   };
 
-  const renderActions = () => ({
-    onConfirmPickup: handleConfirmPickup,
+  const renderActions = (order: { isInstantOrder: boolean }) => ({
+    onConfirmPickup: order.isInstantOrder ? handleConfirmPickup : undefined,
     isConfirmingPickup: updateStatus.isPending,
   });
 

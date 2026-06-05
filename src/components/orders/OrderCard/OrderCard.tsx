@@ -170,6 +170,7 @@ export default function OrderCard({
       {isInProgress && onMarkReady && onUpdatePreparingTime && (
         <InProgressSection
           orderId={order.orderId}
+          isInstantOrder={order.isInstantOrder}
           riderArrived={order.riderArrived}
           riderStatus={order.riderStatus}
           riderStatusLabel={order.riderStatusLabel}
@@ -203,7 +204,7 @@ export default function OrderCard({
           unreadMessagesCount={unreadMessagesCount}
           onOpenChat={handleOpenChat}
           onConfirmPickup={onConfirmPickup}
-          showConfirmButton={order.status === OrderStatus.READY && !!onConfirmPickup}
+          showConfirmButton={!!onConfirmPickup}
           canConfirmPickup={order.isInstantOrder ? true : hasAssignedRider}
           isConfirmingPickup={isConfirmingPickup}
           theme={theme}
