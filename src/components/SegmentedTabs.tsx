@@ -88,7 +88,12 @@ export default function SegmentedTabs({
             accessibilityState={{ selected: isActive }}
           >
             <View style={styles.tabContent}>
-              <Text style={[styles.label, { color: theme.colors.gray600 }]}>
+              <Text
+                style={[
+                  styles.label,
+                  { color: isActive ? theme.colors.buttonText : theme.colors.gray600 },
+                ]}
+              >
                 {tab.label}
               </Text>
             </View>

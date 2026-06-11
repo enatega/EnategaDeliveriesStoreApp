@@ -125,9 +125,14 @@ export default function OrderCard({
   const canMarkReady = order.isInstantOrder
     ? hasAssignedRider || order.canAccept
     : true;
+  const showMarkReadyButton = !(
+    order.status === OrderStatus.RIDER_ASSIGNED && !order.isInstantOrder
+  );
   const headerStatusLabel =
     (order.status === OrderStatus.DELIVERED
       ? t("order_card_delivered")
+      : order.status === OrderStatus.RIDER_ASSIGNED && !order.isInstantOrder
+      ? "Rider assigned"
       : order.status === OrderStatus.READY
       ? hasAssignedRider
         ? "Rider assigned"
@@ -171,6 +176,7 @@ export default function OrderCard({
         <InProgressSection
           orderId={order.orderId}
           isInstantOrder={order.isInstantOrder}
+          showMarkReadyButton={showMarkReadyButton}
           riderArrived={order.riderArrived}
           riderStatus={order.riderStatus}
           riderStatusLabel={order.riderStatusLabel}

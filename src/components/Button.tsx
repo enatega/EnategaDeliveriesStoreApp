@@ -36,7 +36,7 @@ export default function Button({
     alignSelf: fullWidth ? 'stretch' : 'center',
   };
 
-  const textColor = variant === 'primary' ? theme.colors.gray900 : theme.colors.text;
+  const textColor = variant === 'primary' ? theme.colors.buttonText : theme.colors.text;
 
   return (
     <Pressable

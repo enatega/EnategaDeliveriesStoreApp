@@ -8,6 +8,7 @@ export interface AppSettings {
   is_maintenance_mode: boolean;
   maintenance_message: string;
   primary_color: string | null;
+  btn_text_color: string | null;
   secondary_color: string | null;
   tertiary_color: string | null;
   created_at: string;

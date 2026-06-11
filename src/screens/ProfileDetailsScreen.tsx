@@ -59,14 +59,18 @@ export default function ProfileDetailsScreen() {
               </View>
             )}
             <View style={styles.heroTextWrap}>
-              <Text weight="semiBold" style={styles.heroName}>{profileName}</Text>
-              <Text style={styles.heroId}>ID-{storeId.toString().slice(0, 4)}</Text>
+              <Text weight="semiBold" color={theme.colors.buttonText} style={styles.heroName}>
+                {profileName}
+              </Text>
+              <Text color={theme.colors.buttonText} style={styles.heroId}>
+                ID-{storeId.toString().slice(0, 4)}
+              </Text>
             </View>
           </View>
           {isApproved ? (
             <View style={[styles.verifiedPill, { backgroundColor: theme.colors.primary }]}>
-              <Feather name="check-circle" size={14} color="#111827" />
-              <Text style={styles.verifiedText}>Verified Account</Text>
+              <Feather name="check-circle" size={14} color={theme.colors.buttonText} />
+              <Text color={theme.colors.buttonText} style={styles.verifiedText}>Verified Account</Text>
             </View>
           ) : null}
         </ImageBackground>
@@ -134,8 +138,8 @@ function DetailRow({
       <Text weight="semiBold" style={styles.label}>{label}</Text>
       {valuePill ? (
         <View style={[styles.updatedPill, { backgroundColor: theme.colors.primary }]}>
-          <Feather name="check-circle" size={12} color="#111827" />
-          <Text style={styles.updatedPillText}>{value}</Text>
+          <Feather name="check-circle" size={12} color={theme.colors.buttonText} />
+          <Text color={theme.colors.buttonText} style={styles.updatedPillText}>{value}</Text>
         </View>
       ) : (
         <View style={styles.valueWrap}>

@@ -11,6 +11,7 @@ import { getReadableRiderStatus } from "./riderStatusLabel";
 type Props = {
     orderId: string;
     isInstantOrder: boolean;
+    showMarkReadyButton?: boolean;
     riderArrived: boolean;
     riderStatus: string | null;
     riderStatusLabel: string | null;
@@ -33,6 +34,7 @@ type Props = {
 export default function InProgressSection({
     orderId,
     isInstantOrder,
+    showMarkReadyButton = true,
     riderArrived,
     riderStatus,
     riderStatusLabel,
@@ -162,26 +164,28 @@ export default function InProgressSection({
                         )}
                     </Pressable>
                 ) : null}
-                <Pressable
-                    style={[
-                      styles.btnMarkReady,
-                      { backgroundColor: canMarkReady ? theme.colors.primary : theme.colors.gray300 },
-                      (isMarkingReady || !canMarkReady) && { opacity: 0.6 },
-                    ]}
-                    onPress={() => {
-                      if (!canMarkReady) return;
-                      onMarkReady(orderId);
-                    }}
-                    disabled={isMarkingReady || !canMarkReady}
-                >
-                    {isMarkingReady ? (
-                        <ActivityIndicator size="small" color={theme.colors.gray900} />
-                    ) : (
-                        <Text style={[styles.btnMarkReadyText, { color: theme.colors.gray900 }]}>
-                            {t("order_card_mark_ready")}
-                        </Text>
-                    )}
-                </Pressable>
+                {showMarkReadyButton ? (
+                    <Pressable
+                        style={[
+                          styles.btnMarkReady,
+                          { backgroundColor: canMarkReady ? theme.colors.primary : theme.colors.gray300 },
+                          (isMarkingReady || !canMarkReady) && { opacity: 0.6 },
+                        ]}
+                        onPress={() => {
+                          if (!canMarkReady) return;
+                          onMarkReady(orderId);
+                        }}
+                        disabled={isMarkingReady || !canMarkReady}
+                    >
+                        {isMarkingReady ? (
+                            <ActivityIndicator size="small" color={theme.colors.buttonText} />
+                        ) : (
+                            <Text style={[styles.btnMarkReadyText, { color: theme.colors.buttonText }]}>
+                                {t("order_card_mark_ready")}
+                            </Text>
+                        )}
+                    </Pressable>
+                ) : null}
             </View>
         </>
     );

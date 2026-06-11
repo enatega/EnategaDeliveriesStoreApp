@@ -235,10 +235,12 @@ export default function ProfileScreen() {
               </View>
             )}
             <View style={styles.profileTextWrap}>
-              <Text weight="semiBold" style={styles.profileName}>
+              <Text weight="semiBold" color={theme.colors.buttonText} style={styles.profileName}>
                 {profile.name}
               </Text>
-              <Text style={styles.profileId}>ID-{(basicInformation.storeId ?? "7853").toString().slice(0, 4)}</Text>
+              <Text color={theme.colors.buttonText} style={styles.profileId}>
+                ID-{(basicInformation.storeId ?? "7853").toString().slice(0, 4)}
+              </Text>
             </View>
           </View>
         </View>

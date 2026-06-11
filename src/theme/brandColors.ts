@@ -3,6 +3,7 @@ import { AppSettings } from '../api/appSettingsTypes';
 
 export type BrandColors = {
   primary: string;
+  buttonText: string;
   secondary: string;
   tertiary: string;
   updatedAt: string | null;
@@ -10,6 +11,7 @@ export type BrandColors = {
 
 export const defaultBrandColors: BrandColors = {
   primary: '#90E36D',
+  buttonText: '#111827',
   secondary: '#6B5BFF',
   tertiary: '#ECFDF5',
   updatedAt: null,
@@ -27,6 +29,7 @@ function normalizeHexColor(value: string | null | undefined, fallback: string) {
 export function buildBrandColors(settings?: AppSettings | null): BrandColors {
   return {
     primary: normalizeHexColor(settings?.primary_color, defaultBrandColors.primary),
+    buttonText: normalizeHexColor(settings?.btn_text_color, defaultBrandColors.buttonText),
     secondary: normalizeHexColor(settings?.secondary_color, defaultBrandColors.secondary),
     tertiary: normalizeHexColor(settings?.tertiary_color, defaultBrandColors.tertiary),
     updatedAt: settings?.updated_at ?? null,
@@ -36,6 +39,7 @@ export function buildBrandColors(settings?: AppSettings | null): BrandColors {
 export function areBrandColorsEqual(left: BrandColors, right: BrandColors) {
   return (
     left.primary === right.primary &&
+    left.buttonText === right.buttonText &&
     left.secondary === right.secondary &&
     left.tertiary === right.tertiary &&
     left.updatedAt === right.updatedAt
@@ -55,6 +59,7 @@ export const brandColorsStorage = {
 
       return {
         primary: normalizeHexColor(parsedValue.primary, defaultBrandColors.primary),
+        buttonText: normalizeHexColor(parsedValue.buttonText, defaultBrandColors.buttonText),
         secondary: normalizeHexColor(parsedValue.secondary, defaultBrandColors.secondary),
         tertiary: normalizeHexColor(parsedValue.tertiary, defaultBrandColors.tertiary),
         updatedAt: parsedValue.updatedAt ?? null,
