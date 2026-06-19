@@ -27,7 +27,25 @@ import {
   pickupOrdersKeys,
   completedOrdersKeys,
 } from "../api/queryKeys";
-import { PaginatedOrdersResponse } from "../api/orderServicesTypes";
+import { Order, PaginatedOrdersResponse } from "../api/orderServicesTypes";
+
+function updateOrderInInfiniteData(
+  previous: InfiniteData<PaginatedOrdersResponse> | undefined,
+  orderId: string,
+  updater: (order: Order) => Order,
+): InfiniteData<PaginatedOrdersResponse> | undefined {
+  if (!previous?.pages?.length) return previous;
+
+  return {
+    ...previous,
+    pages: previous.pages.map((page) => ({
+      ...page,
+      items: (Array.isArray(page.items) ? page.items : []).map((item) =>
+        item.orderId === orderId ? updater(item) : item,
+      ),
+    })),
+  };
+}
 
 // ─── Accept Order ─────────────────────────────────────────────────
 export function useAcceptOrder(
@@ -114,14 +132,33 @@ export function useConfirmNonInstantPickup(
     mutationFn: ({ orderId, data }) =>
       orderServices.confirmNonInstantPickup(orderId, data),
     onMutate: async (variables) => {
+      await queryClient.cancelQueries({ queryKey: pickupOrdersKeys.lists() });
+      const previousPickup = queryClient.getQueriesData<
+        InfiniteData<PaginatedOrdersResponse>
+      >({ queryKey: pickupOrdersKeys.lists() });
+
+      queryClient.setQueriesData<InfiniteData<PaginatedOrdersResponse>>(
+        { queryKey: pickupOrdersKeys.lists() },
+        (previous) =>
+          updateOrderInInfiniteData(previous, variables.orderId, (order) => ({
+            ...order,
+            isConfirmPickup: variables.data.isConfirmPickup,
+          })),
+      );
+
       console.log("[useConfirmNonInstantPickup] onMutate", {
         orderId: variables.orderId,
         payload: {
           is_confirm_pickup: variables.data.isConfirmPickup,
         },
       });
+
+      return { previousPickup };
     },
     onError: (error, variables, onMutateResult, context) => {
+      onMutateResult?.previousPickup?.forEach(([queryKey, data]) => {
+        queryClient.setQueryData(queryKey, data);
+      });
       console.log("[useConfirmNonInstantPickup] onError", {
         orderId: variables.orderId,
         payload: {
@@ -135,6 +172,14 @@ export function useConfirmNonInstantPickup(
       onError?.(error, variables, onMutateResult, context);
     },
     onSuccess: (response, variables, onMutateResult, context) => {
+      queryClient.setQueriesData<InfiniteData<PaginatedOrdersResponse>>(
+        { queryKey: pickupOrdersKeys.lists() },
+        (previous) =>
+          updateOrderInInfiniteData(previous, variables.orderId, (order) => ({
+            ...order,
+            isConfirmPickup: true,
+          })),
+      );
       console.log("[useConfirmNonInstantPickup] onSuccess", {
         orderId: variables.orderId,
         payload: {

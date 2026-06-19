@@ -26,6 +26,7 @@ export default function ReadyScreen() {
     <GenericOrderList
       useOrdersHook={useReadyOrders}
       renderActions={renderActions}
+      listContext="ready"
     />
   );
 }

@@ -153,6 +153,7 @@ export default function NewOrdersScreen() {
       <GenericOrderList
         useOrdersHook={useNewOrders}
         renderActions={renderActions}
+        listContext="new"
         onOrdersDataChange={handleOrdersDataChange}
         autoScrollToTopOnNewItem
       />

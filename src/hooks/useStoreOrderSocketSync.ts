@@ -251,7 +251,11 @@ function invalidateStoreTabsForOrderStatus(
     [StoreOrderStatus.PENDING]: [newOrdersKeys.lists()],
     [StoreOrderStatus.ACCEPTED]: [inProgressOrdersKeys.lists()],
     [StoreOrderStatus.PREPARING]: [inProgressOrdersKeys.lists()],
-    [StoreOrderStatus.RIDER_ASSIGNED]: [inProgressOrdersKeys.lists()],
+    [StoreOrderStatus.RIDER_ASSIGNED]: [
+      inProgressOrdersKeys.lists(),
+      readyOrdersKeys.lists(),
+      pickupOrdersKeys.lists(),
+    ],
     [StoreOrderStatus.READY]: [readyOrdersKeys.lists()],
     [StoreOrderStatus.PICKED_UP]: [pickupOrdersKeys.lists()],
     [StoreOrderStatus.OUT_FOR_DELIVERY]: [pickupOrdersKeys.lists()],

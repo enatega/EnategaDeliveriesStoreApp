@@ -22,6 +22,8 @@ export type MainStackParamList = {
     chatBoxId?: string | null;
     receiverId?: string | null;
     riderName?: string | null;
+    riderPhone?: string | null;
     orderId?: string;
+    orderAmount?: number | null;
   };
 };

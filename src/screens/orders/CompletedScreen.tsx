@@ -9,6 +9,7 @@ export default function CompletedScreen() {
     <GenericOrderList
       useOrdersHook={useCompletedOrders}
       renderActions={renderActions}
+      listContext="completed"
     />
   );
 }

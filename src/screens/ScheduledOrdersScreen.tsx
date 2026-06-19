@@ -69,7 +69,7 @@ export default function ScheduledOrdersScreen() {
         <VerticalList
           data={orders}
           keyExtractor={(item) => item.orderId}
-          renderItem={({ item }) => <OrderCard order={item} />}
+          renderItem={({ item }) => <OrderCard order={item} listContext="new" />}
           contentContainerStyle={styles.listContent}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
           refreshing={isRefetching}

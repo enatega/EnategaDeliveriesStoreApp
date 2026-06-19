@@ -1,0 +1,1181 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+2 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+3 0 obj
+<< /Length 1901 >>
+stream
+0.180 0.490 0.360 rg
+54.00 770.00 487.00 12.00 re f
+BT
+/F2 11 Tf
+1 0 0 1 54.00 726.00 Tm
+(CLIENT GUIDE) Tj
+ET
+BT
+/F2 26 Tf
+1 0 0 1 54.00 676.00 Tm
+(Store App Operational Flow Guide) Tj
+ET
+BT
+/F1 13 Tf
+1 0 0 1 54.00 772.00 Tm
+(A client-facing overview of how the Enatega Deliveries Store App works,) Tj
+ET
+BT
+/F1 13 Tf
+1 0 0 1 54.00 754.00 Tm
+(including store login, order flow, rider coordination, scheduled orders,) Tj
+ET
+BT
+/F1 13 Tf
+1 0 0 1 54.00 736.00 Tm
+(wallet, earnings, profile controls, and the local setup points that matter) Tj
+ET
+BT
+/F1 13 Tf
+1 0 0 1 54.00 718.00 Tm
+(for a successful deployment.) Tj
+ET
+0.820 0.880 0.860 RG
+54.00 410.00 300.00 150.00 re S
+BT
+/F2 12 Tf
+1 0 0 1 66.00 538.00 Tm
+(Application Scope) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 66.00 520.00 Tm
+(Store-side workspace for merchants to manage) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 66.00 506.00 Tm
+(delivery and pickup order operations.) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 66.00 492.00 Tm
+(Includes rider coordination, wallet tracking,) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 66.00 478.00 Tm
+(earnings visibility, and profile controls.) Tj
+ET
+0.820 0.880 0.860 RG
+370.00 410.00 171.00 150.00 re S
+BT
+/F2 12 Tf
+1 0 0 1 382.00 538.00 Tm
+(Document Details) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 382.00 520.00 Tm
+(Application: Enatega Deliveries Store App) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 382.00 506.00 Tm
+(Current build branding: Cylia Merchant) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 382.00 492.00 Tm
+(Prepared: June 19, 2026) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 382.00 478.00 Tm
+(Purpose: Module Flow and Local Guide) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 54.00 696.00 Tm
+(This document reflects the currently implemented mobile application flow in the local project) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 54.00 682.00 Tm
+(repository as of June 19, 2026.) Tj
+ET
+0.80 w 54.00 36.00 m 541.00 36.00 l S
+BT
+/F1 9 Tf
+1 0 0 1 54.00 24.00 Tm
+(Prepared on June 19, 2026) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 505.00 24.00 Tm
+(Page 1) Tj
+ET
+endstream
+endobj
+4 0 obj
+<< /Type /Page /Parent 13 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 3 0 R >>
+endobj
+5 0 obj
+<< /Length 5588 >>
+stream
+1.20 w 54.00 800.00 m 541.00 800.00 l S
+BT
+/F2 10 Tf
+1 0 0 1 54.00 810.00 Tm
+(Store App Operational Flow Guide) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 415.00 810.00 Tm
+(Enatega Deliveries Store App) Tj
+ET
+BT
+/F2 16 Tf
+1 0 0 1 54.00 776.00 Tm
+(1. Executive Summary) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 754.00 Tm
+(The Store App is the merchant control surface for the delivery ecosystem. A store logs) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 738.00 Tm
+(in with its store account, receives new orders in real time, accepts or rejects them,) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 722.00 Tm
+(manages preparation timing, marks orders as ready, confirms rider pickup where needed,) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 706.00 Tm
+(and tracks completion through live status updates.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 686.00 Tm
+(The app is built around five operational pillars: authentication and session control,) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 670.00 Tm
+(order management, rider communication, financial tracking, and store profile settings.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 654.00 Tm
+(These pillars work together so that day-to-day store operations happen in one place.) Tj
+ET
+BT
+/F2 16 Tf
+1 0 0 1 54.00 634.00 Tm
+(2. Primary User Flow) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 612.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 612.00 Tm
+(Login and session start: the merchant logs in using store credentials, the app stores) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 597.00 Tm
+(the access token securely, and the user is moved from the login flow to the main) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 582.00 Tm
+(workspace.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 565.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 565.00 Tm
+(Main workspace opens: the store lands in a four-tab interface covering Orders,) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 550.00 Tm
+(Wallet, Earnings, and Profile.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 533.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 533.00 Tm
+(Orders arrive in real time: a live socket connection listens for new orders and order) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 518.00 Tm
+(status changes, so new items appear without manual refresh.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 501.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 501.00 Tm
+(Store processes the order: the merchant can accept or reject orders, set preparation) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 486.00 Tm
+(timing, move orders to ready, and continue through pickup and completion flow.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 469.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 469.00 Tm
+(Rider coordination continues fulfillment: delivery orders can surface rider) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 454.00 Tm
+(assignment, rider progress, rider chat, and call actions when rider details exist.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 437.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 437.00 Tm
+(Financial tracking and settings remain available: the store can review wallet data,) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 422.00 Tm
+(earnings, availability, instant delivery settings, schedule, language, and bank) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 407.00 Tm
+(details at any time.) Tj
+ET
+BT
+/F2 16 Tf
+1 0 0 1 54.00 390.00 Tm
+(3. Module-by-Module Working Flow) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 368.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 368.00 Tm
+(Authentication: Controls secure login and session startup through the store email) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 353.00 Tm
+(login endpoint, secure token storage, session restoration on app restart, and) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 338.00 Tm
+(automatic logout on session expiry.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 321.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 321.00 Tm
+(Orders: Central workspace for new, active, ready, pickup, completed, and scheduled) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 306.00 Tm
+(orders. Status-based tabs keep order work organized.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 289.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 289.00 Tm
+(Real-Time Sync: A socket connection opens after login and listens for new orders,) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 274.00 Tm
+(order status changes, rider status changes, and chat messages.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 257.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 257.00 Tm
+(Rider Coordination: Supports delivery-side collaboration through rider assignment,) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 242.00 Tm
+(rider progress updates, rider chat, and direct phone call launch.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 225.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 225.00 Tm
+(Wallet: Shows current balance, available withdrawal amount, pending withdrawal) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 210.00 Tm
+(requests, and recent transaction history.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 193.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 193.00 Tm
+(Earnings: Shows chart summaries, daily earnings activity, and order-based earning) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 178.00 Tm
+(history for selected dates.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 161.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 161.00 Tm
+(Profile and Operations: Lets the store manage availability, instant delivery, work) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 146.00 Tm
+(schedule, language, bank information, and logout.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 129.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 129.00 Tm
+(Localization: Currently includes English and French language support.) Tj
+ET
+BT
+/F2 16 Tf
+1 0 0 1 54.00 112.00 Tm
+(4. Order Lifecycle in Detail) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 54.00 90.00 Tm
+(New Order Stage) Tj
+ET
+0.80 w 54.00 36.00 m 541.00 36.00 l S
+BT
+/F1 9 Tf
+1 0 0 1 54.00 24.00 Tm
+(Prepared on June 19, 2026) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 505.00 24.00 Tm
+(Page 2) Tj
+ET
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 13 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 5 0 R >>
+endobj
+7 0 obj
+<< /Length 4756 >>
+stream
+1.20 w 54.00 800.00 m 541.00 800.00 l S
+BT
+/F2 10 Tf
+1 0 0 1 54.00 810.00 Tm
+(Store App Operational Flow Guide) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 415.00 810.00 Tm
+(Enatega Deliveries Store App) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 776.00 Tm
+(Orders first appear in the New Orders tab. The store reviews line items, order type,) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 760.00 Tm
+(notes, address details, and total amount, then accepts or rejects the order. Delivery) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 744.00 Tm
+(and pickup filters are available.) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 54.00 724.00 Tm
+(In Progress Stage) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 706.00 Tm
+(Once accepted, the order moves into the preparation state. The store manages preparation) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 690.00 Tm
+(timing here and countdown-related data can remain visible.) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 54.00 670.00 Tm
+(Ready Stage) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 652.00 Tm
+(When preparation is complete, the order can move into the Ready state to show that the) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 636.00 Tm
+(store has finished preparing it for pickup or dispatch.) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 54.00 616.00 Tm
+(Pickup Stage) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 598.00 Tm
+(Pickup-related actions are handled in a dedicated tab. This is where rider arrival,) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 582.00 Tm
+(rider status, and pickup confirmation become important, especially for non-instant) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 566.00 Tm
+(pickup flow.) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 54.00 546.00 Tm
+(Completed Stage) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 528.00 Tm
+(Delivered, cancelled, rejected, and failed outcomes are presented in the completed area) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 512.00 Tm
+(so the store has a historical view of finalized activity.) Tj
+ET
+BT
+/F2 12 Tf
+1 0 0 1 54.00 492.00 Tm
+(Scheduled Orders) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 474.00 Tm
+(Scheduled orders are intentionally separated from immediate order tabs so upcoming) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 458.00 Tm
+(workload can be reviewed without mixing it into live active operations.) Tj
+ET
+BT
+/F2 16 Tf
+1 0 0 1 54.00 438.00 Tm
+(5. Real-Time and Delivery Coordination Flow) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 416.00 Tm
+(After login, the mobile app opens a socket connection using the authenticated store) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 400.00 Tm
+(session. This lets the store receive event-based updates rather than relying only on) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 384.00 Tm
+(manual or timed refreshes.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 364.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 364.00 Tm
+(New order created: the order is inserted into matching New Order lists and the alert) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 349.00 Tm
+(loop can be triggered.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 332.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 332.00 Tm
+(Order status updated: the app refreshes the relevant order tabs so the order appears) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 317.00 Tm
+(in the correct stage.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 300.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 300.00 Tm
+(Rider status updated: the app refreshes active delivery-related tabs so the store) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 285.00 Tm
+(sees the rider?s latest state.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 268.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 268.00 Tm
+(Chat message received: the message appears inside the rider chat thread and is merged) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 253.00 Tm
+(with previously loaded messages.) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 54.00 236.00 Tm
+(Important client note: delivery-side coordination depends on the backend socket service, rider) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 54.00 222.00 Tm
+(assignment logic, and chat services being available and correctly mapped to the store account and) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 54.00 208.00 Tm
+(order records.) Tj
+ET
+BT
+/F2 16 Tf
+1 0 0 1 54.00 190.00 Tm
+(6. Wallet and Earnings Flow) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 168.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 168.00 Tm
+(Wallet shows current balance, available withdrawal amount, pending withdrawal) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 153.00 Tm
+(requests, and recent transactions.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 136.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 136.00 Tm
+(The store can submit a withdrawal request directly from the app.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 119.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 119.00 Tm
+(Earnings shows chart data, daily earnings activity, summary drilldowns, and order-) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 104.00 Tm
+(based earning history by selected date.) Tj
+ET
+0.80 w 54.00 36.00 m 541.00 36.00 l S
+BT
+/F1 9 Tf
+1 0 0 1 54.00 24.00 Tm
+(Prepared on June 19, 2026) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 505.00 24.00 Tm
+(Page 3) Tj
+ET
+endstream
+endobj
+8 0 obj
+<< /Type /Page /Parent 13 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 7 0 R >>
+endobj
+9 0 obj
+<< /Length 5644 >>
+stream
+1.20 w 54.00 800.00 m 541.00 800.00 l S
+BT
+/F2 10 Tf
+1 0 0 1 54.00 810.00 Tm
+(Store App Operational Flow Guide) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 415.00 810.00 Tm
+(Enatega Deliveries Store App) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 776.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 776.00 Tm
+(Financial values are formatted using the central currency configuration returned by) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 761.00 Tm
+(the backend.) Tj
+ET
+BT
+/F2 16 Tf
+1 0 0 1 54.00 744.00 Tm
+(7. Profile and Store Controls) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 722.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 722.00 Tm
+(Availability toggle marks the store as available or unavailable.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 705.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 705.00 Tm
+(Instant delivery toggle enables immediate delivery or a day-based delivery time) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 690.00 Tm
+(setting.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 673.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 673.00 Tm
+(Work schedule defines active days and time slots.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 656.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 656.00 Tm
+(Bank management stores payout-related account information.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 639.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 639.00 Tm
+(Language selection lets the user switch between supported languages.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 622.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 622.00 Tm
+(Scheduled orders are accessible separately from the profile area.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 605.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 605.00 Tm
+(Logout clears the session and returns the app to the login flow.) Tj
+ET
+BT
+/F2 16 Tf
+1 0 0 1 54.00 588.00 Tm
+(8. Local Setup and Deployment Notes) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 566.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 566.00 Tm
+(EXPO_PUBLIC_API_BASE_URL is required. The app will not boot without this backend API) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 551.00 Tm
+(base URL.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 534.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 534.00 Tm
+(EXPO_PUBLIC_SOCKET_URL is optional. If not provided, the socket origin falls back to) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 519.00 Tm
+(the API origin.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 502.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 502.00 Tm
+(EXPO_PUBLIC_SOCKET_PATH is optional and defaults to /socket.io. It must match the) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 487.00 Tm
+(backend socket setup.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 470.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 470.00 Tm
+(EXPO_PUBLIC_EAS_PROJECT_ID is used as a fallback for push token registration if not) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 455.00 Tm
+(already available in Expo config.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 438.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 438.00 Tm
+(google-services.json is required for the Android Firebase and notification) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 423.00 Tm
+(configuration already referenced by the app.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 406.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 406.00 Tm
+(Push token registration is intended for a physical device. Simulator-only testing is) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 391.00 Tm
+(limited.) Tj
+ET
+BT
+/F2 16 Tf
+1 0 0 1 54.00 374.00 Tm
+(9. Important Client Considerations) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 352.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 352.00 Tm
+(The app depends on backend auth, order, wallet, earnings, profile, chat, and socket) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 337.00 Tm
+(services.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 320.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 320.00 Tm
+(Real-time order and rider coordination work only when the socket server is available) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 305.00 Tm
+(and authenticated correctly.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 288.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 288.00 Tm
+(Push notification registration is built into login preparation, but device) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 273.00 Tm
+(permissions must be granted by the user.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 256.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 256.00 Tm
+(Store users must have a valid store-linked profile in the auth response for store-) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 241.00 Tm
+(specific real-time filtering to work correctly.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 224.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 224.00 Tm
+(The app currently includes English and French localization support.) Tj
+ET
+BT
+/F2 16 Tf
+1 0 0 1 54.00 207.00 Tm
+(10. Recommended Handover Checklist) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 185.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 185.00 Tm
+(Confirm production API base URL and socket URL/path.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 168.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 168.00 Tm
+(Confirm store login credentials and store-profile mapping.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 151.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 151.00 Tm
+(Validate real-time new order arrival and rider status events.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 134.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 134.00 Tm
+(Validate order action permissions including accept, reject, ready, and confirm) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 119.00 Tm
+(pickup.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 102.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 102.00 Tm
+(Validate wallet balance, transaction history, and withdrawal flow.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 85.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 85.00 Tm
+(Validate earnings chart and date-based detail flow.) Tj
+ET
+0.80 w 54.00 36.00 m 541.00 36.00 l S
+BT
+/F1 9 Tf
+1 0 0 1 54.00 24.00 Tm
+(Prepared on June 19, 2026) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 505.00 24.00 Tm
+(Page 4) Tj
+ET
+endstream
+endobj
+10 0 obj
+<< /Type /Page /Parent 13 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 9 0 R >>
+endobj
+11 0 obj
+<< /Length 1578 >>
+stream
+1.20 w 54.00 800.00 m 541.00 800.00 l S
+BT
+/F2 10 Tf
+1 0 0 1 54.00 810.00 Tm
+(Store App Operational Flow Guide) Tj
+ET
+BT
+/F1 10 Tf
+1 0 0 1 415.00 810.00 Tm
+(Enatega Deliveries Store App) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 776.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 776.00 Tm
+(Validate bank management, work schedule, language, and availability controls.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 759.00 Tm
+(?) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 68.00 759.00 Tm
+(Validate push-notification permissions on a physical Android or iOS device.) Tj
+ET
+BT
+/F2 16 Tf
+1 0 0 1 54.00 742.00 Tm
+(11. Closing Summary) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 720.00 Tm
+(In practical terms, this Store App is designed to be the merchant?s live operations) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 704.00 Tm
+(console. It combines order intake, preparation flow, rider-side coordination, finance) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 688.00 Tm
+(visibility, and store configuration into one mobile experience.) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 668.00 Tm
+(For the client, the most important success factors are a stable backend connection,) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 652.00 Tm
+(correct store account mapping, and fully working real-time services. With those) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 636.00 Tm
+(dependencies in place, the app provides a complete store-side workflow for both delivery) Tj
+ET
+BT
+/F1 11 Tf
+1 0 0 1 54.00 620.00 Tm
+(and pickup operations.) Tj
+ET
+0.80 w 54.00 36.00 m 541.00 36.00 l S
+BT
+/F1 9 Tf
+1 0 0 1 54.00 24.00 Tm
+(Prepared on June 19, 2026) Tj
+ET
+BT
+/F1 9 Tf
+1 0 0 1 505.00 24.00 Tm
+(Page 5) Tj
+ET
+endstream
+endobj
+12 0 obj
+<< /Type /Page /Parent 13 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R /F2 2 0 R >> >> /Contents 11 0 R >>
+endobj
+13 0 obj
+<< /Type /Pages /Count 5 /Kids [4 0 R 6 0 R 8 0 R 10 0 R 12 0 R] >>
+endobj
+14 0 obj
+<< /Type /Catalog /Pages 13 0 R >>
+endobj
+xref
+0 15
+0000000000 65535 f 
+0000000015 00000 n 
+0000000085 00000 n 
+0000000160 00000 n 
+0000002113 00000 n 
+0000002250 00000 n 
+0000007890 00000 n 
+0000008027 00000 n 
+0000012835 00000 n 
+0000012972 00000 n 
+0000018668 00000 n 
+0000018806 00000 n 
+0000020437 00000 n 
+0000020576 00000 n 
+0000020660 00000 n 
+trailer
+<< /Size 15 /Root 14 0 R >>
+startxref
+20711
+%%EOF

@@ -15,6 +15,7 @@ import { Order } from "../../api/orderServicesTypes";
 import VerticalList from "../VerticalList";
 
 type OrderTypeFilter = "delivery" | "pickup";
+type OrderListContext = "new" | "inProgress" | "ready" | "pickup" | "completed";
 
 type UseOrdersHook = (options?: {
   params?: { limit?: number; orderType?: OrderTypeFilter };
@@ -44,6 +45,7 @@ type RenderActionsReturn = {
 type Props = {
   useOrdersHook: UseOrdersHook;
   renderActions: (order: Order) => RenderActionsReturn;
+  listContext: OrderListContext;
   onOrdersDataChange?: (orders: Order[]) => void;
   autoScrollToTopOnNewItem?: boolean;
 };
@@ -51,6 +53,7 @@ type Props = {
 export default function GenericOrderList({
   useOrdersHook,
   renderActions,
+  listContext,
   onOrdersDataChange,
   autoScrollToTopOnNewItem = false,
 }: Props) {
@@ -162,6 +165,7 @@ export default function GenericOrderList({
             return (
               <OrderCard
                 order={item}
+                listContext={listContext}
                 onAccept={actions.onAccept}
                 onReject={actions.onReject}
                 onMarkReady={actions.onMarkReady}

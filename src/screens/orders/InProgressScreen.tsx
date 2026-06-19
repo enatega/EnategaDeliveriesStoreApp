@@ -86,6 +86,7 @@ export default function InProgressScreen() {
       <GenericOrderList
         useOrdersHook={useInProgressOrders}
         renderActions={renderActions}
+        listContext="inProgress"
       />
       <RejectOrderModal
         visible={Boolean(rejectingOrderId)}

@@ -112,6 +112,12 @@ function normalizeOrder(order: Order): Order {
       : typeof runtimeOrder.is_instant_order === "boolean"
         ? runtimeOrder.is_instant_order
         : false;
+  const isConfirmPickup =
+    typeof runtimeOrder.isConfirmPickup === "boolean"
+      ? runtimeOrder.isConfirmPickup
+      : typeof runtimeOrder.is_confirm_pickup === "boolean"
+        ? runtimeOrder.is_confirm_pickup
+        : false;
   const customerProfileImageRaw =
     (typeof runtimeOrder.customerProfileImage === "string" && runtimeOrder.customerProfileImage)
     || (typeof runtimeOrder.customerProfilePicture === "string" && runtimeOrder.customerProfilePicture)
@@ -173,6 +179,7 @@ function normalizeOrder(order: Order): Order {
   return {
     ...order,
     isInstantOrder,
+    isConfirmPickup,
     customerProfileImage: normalizeImageUrl(customerProfileImageRaw),
     items: (Array.isArray(order.items) ? order.items : []).map(normalizeOrderItem),
     customerComment: stripCourierComment(order.customerComment),

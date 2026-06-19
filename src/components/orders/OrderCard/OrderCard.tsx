@@ -21,6 +21,7 @@ import { resolveSupportChatBoxId } from "../../../api/supportChatSession";
 
 type Props = {
   order: Order;
+  listContext: "new" | "inProgress" | "ready" | "pickup" | "completed";
   onAccept?: (orderId: string) => void;
   onReject?: (orderId: string) => void;
   onMarkReady?: (orderId: string) => void;
@@ -35,6 +36,7 @@ type Props = {
 
 export default function OrderCard({
   order,
+  listContext,
   onAccept,
   onReject,
   onMarkReady,
@@ -84,7 +86,9 @@ export default function OrderCard({
       chatBoxId: resolvedChatBoxId ?? null,
       receiverId: receiverId ?? null,
       riderName: order.riderName ?? null,
+      riderPhone: order.riderPhone ?? null,
       orderId: order.orderId,
+      orderAmount: order.orderAmount,
     };
     console.log("[OrderCard] openChat", params);
     navigation.navigate("StoreChat", params);
@@ -98,15 +102,23 @@ export default function OrderCard({
     : null;
 
   const isInProgress =
-    order.status === OrderStatus.PREPARING ||
-    order.status === OrderStatus.ACCEPTED ||
-    order.status === OrderStatus.RIDER_ASSIGNED;
+    listContext === "inProgress"
+      ? order.status === OrderStatus.PREPARING
+        || order.status === OrderStatus.ACCEPTED
+        || order.status === OrderStatus.RIDER_ASSIGNED
+      : order.status === OrderStatus.PREPARING || order.status === OrderStatus.ACCEPTED;
 
   const isReadyOrPickup =
-    order.status === OrderStatus.READY ||
-    order.status === OrderStatus.PICKED_UP ||
-    order.status === OrderStatus.OUT_FOR_DELIVERY ||
-    order.status === OrderStatus.ARRIVED;
+    listContext === "ready" || listContext === "pickup"
+      ? order.status === OrderStatus.RIDER_ASSIGNED
+        || order.status === OrderStatus.READY
+        || order.status === OrderStatus.PICKED_UP
+        || order.status === OrderStatus.OUT_FOR_DELIVERY
+        || order.status === OrderStatus.ARRIVED
+      : order.status === OrderStatus.READY
+        || order.status === OrderStatus.PICKED_UP
+        || order.status === OrderStatus.OUT_FOR_DELIVERY
+        || order.status === OrderStatus.ARRIVED;
 
   const isCompleted = order.status === OrderStatus.DELIVERED;
   const isNewOrderActionable =
@@ -128,14 +140,18 @@ export default function OrderCard({
   const showMarkReadyButton = !(
     order.status === OrderStatus.RIDER_ASSIGNED && !order.isInstantOrder
   );
+  const riderAssignedLabel =
+    listContext === "ready" || listContext === "pickup"
+      ? order.statusLabel || "Rider assigned"
+      : "Rider assigned";
   const headerStatusLabel =
     (order.status === OrderStatus.DELIVERED
       ? t("order_card_delivered")
       : order.status === OrderStatus.RIDER_ASSIGNED && !order.isInstantOrder
-      ? "Rider assigned"
+      ? riderAssignedLabel
       : order.status === OrderStatus.READY
       ? hasAssignedRider
-        ? "Rider assigned"
+        ? riderAssignedLabel
         : order.statusLabel
       : getReadableRiderStatus(order.status, order.riderStatus, order.riderStatusLabel)) ||
     (order.riderArrived ? t("order_card_rider_arrived") : null);
@@ -210,7 +226,7 @@ export default function OrderCard({
           unreadMessagesCount={unreadMessagesCount}
           onOpenChat={handleOpenChat}
           onConfirmPickup={onConfirmPickup}
-          showConfirmButton={!!onConfirmPickup}
+          showConfirmButton={!!onConfirmPickup && !order.isConfirmPickup}
           canConfirmPickup={order.isInstantOrder ? true : hasAssignedRider}
           isConfirmingPickup={isConfirmingPickup}
           theme={theme}
