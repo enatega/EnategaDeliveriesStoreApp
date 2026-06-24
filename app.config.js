@@ -25,7 +25,7 @@ module.exports = {
         backgroundColor: "#ffffff",
       },
       googleServicesFile: "./google-services.json",
-      package: "com.cyliaplatform.merchant",
+      package: "com.enatega.deliveries.store",
       edgeToEdgeEnabled: false,
     },
     androidNavigationBar: {
