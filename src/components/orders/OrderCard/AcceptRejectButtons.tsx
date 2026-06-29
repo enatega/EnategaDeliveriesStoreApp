@@ -53,9 +53,9 @@ export default function AcceptRejectButtons({
                     disabled={isAccepting}
                 >
                     {isAccepting ? (
-                        <ActivityIndicator size="small" color={theme.colors.gray900} />
+                        <ActivityIndicator size="small" color={theme.colors.buttonText} />
                     ) : (
-                        <Text style={styles.btnAcceptText} color={theme.colors.gray900} weight="medium">
+                        <Text style={styles.btnAcceptText} color={theme.colors.buttonText} weight="medium">
                             {t("order_card_accept")}
                         </Text>
                     )}

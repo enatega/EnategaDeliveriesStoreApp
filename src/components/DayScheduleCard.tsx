@@ -122,7 +122,7 @@ export default function DayScheduleCard({
                     { backgroundColor: theme.colors.primary },
                   ]}
                 >
-                  <Text style={styles.addBtnText} color={theme.colors.gray900}>
+                  <Text style={styles.addBtnText} color={theme.colors.buttonText}>
                     +
                   </Text>
                 </Pressable>

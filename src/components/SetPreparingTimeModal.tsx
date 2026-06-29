@@ -99,7 +99,7 @@ export default function SetPreparingTimeModal({
                   <Text
                     style={[
                       modalStyles.timeText,
-                      { color: isSelected ? theme.colors.white : theme.colors.gray600 },
+                      { color: isSelected ? theme.colors.buttonText : theme.colors.gray600 },
                     ]}
                   >
                     {min} min
@@ -124,7 +124,7 @@ export default function SetPreparingTimeModal({
             <Text
               style={[
                 modalStyles.doneText,
-                { color: selectedTime !== null ? "#111827" : "#6B7280" },
+                { color: selectedTime !== null ? theme.colors.buttonText : theme.colors.gray500 },
               ]}
             >
               {t("done")}

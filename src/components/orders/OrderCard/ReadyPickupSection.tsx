@@ -89,13 +89,13 @@ export default function ReadyPickupSection({
                     disabled={isConfirmingPickup}
                 >
                     {isConfirmingPickup ? (
-                        <ActivityIndicator size="small" color={theme.colors.gray900} />
+                        <ActivityIndicator size="small" color={theme.colors.buttonText} />
                     ) : (
                         <View style={styles.confirmPickupContent}>
-                            <View style={[styles.confirmPickupIconCircle, { borderColor: theme.colors.gray900 }]}>
-                                <Feather name="check" size={12} color={theme.colors.gray900} />
+                            <View style={[styles.confirmPickupIconCircle, { borderColor: theme.colors.buttonText }]}>
+                                <Feather name="check" size={12} color={theme.colors.buttonText} />
                             </View>
-                            <Text style={[styles.btnConfirmPickupText, { color: theme.colors.gray900 }]}>
+                            <Text style={[styles.btnConfirmPickupText, { color: theme.colors.buttonText }]}>
                                 {t("order_card_confirm_pickup")}
                             </Text>
                         </View>

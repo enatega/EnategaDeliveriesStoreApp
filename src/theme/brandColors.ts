@@ -5,6 +5,7 @@ export type BrandColors = {
   primary: string;
   secondary: string;
   tertiary: string;
+  buttonText: string;
   updatedAt: string | null;
 };
 
@@ -12,6 +13,7 @@ export const defaultBrandColors: BrandColors = {
   primary: '#90E36D',
   secondary: '#6B5BFF',
   tertiary: '#ECFDF5',
+  buttonText: '#111827',
   updatedAt: null,
 };
 
@@ -29,6 +31,7 @@ export function buildBrandColors(settings?: AppSettings | null): BrandColors {
     primary: normalizeHexColor(settings?.primary_color, defaultBrandColors.primary),
     secondary: normalizeHexColor(settings?.secondary_color, defaultBrandColors.secondary),
     tertiary: normalizeHexColor(settings?.tertiary_color, defaultBrandColors.tertiary),
+    buttonText: normalizeHexColor(settings?.button_text_color, defaultBrandColors.buttonText),
     updatedAt: settings?.updated_at ?? null,
   };
 }
@@ -38,6 +41,7 @@ export function areBrandColorsEqual(left: BrandColors, right: BrandColors) {
     left.primary === right.primary &&
     left.secondary === right.secondary &&
     left.tertiary === right.tertiary &&
+    left.buttonText === right.buttonText &&
     left.updatedAt === right.updatedAt
   );
 }
@@ -57,6 +61,7 @@ export const brandColorsStorage = {
         primary: normalizeHexColor(parsedValue.primary, defaultBrandColors.primary),
         secondary: normalizeHexColor(parsedValue.secondary, defaultBrandColors.secondary),
         tertiary: normalizeHexColor(parsedValue.tertiary, defaultBrandColors.tertiary),
+        buttonText: normalizeHexColor(parsedValue.buttonText, defaultBrandColors.buttonText),
         updatedAt: parsedValue.updatedAt ?? null,
       };
     } catch {

@@ -227,7 +227,7 @@ export default function CalendarRangePicker({ visible, onClose, onApply, initial
                       >
                         <Text
                           variant="body"
-                          color={inRange ? '#111827' : isCurrent ? theme.colors.text : theme.colors.gray400}
+                          color={inRange ? theme.colors.buttonText : isCurrent ? theme.colors.text : theme.colors.gray400}
                           weight={inRange ? 'semiBold' : 'regular'}
                           style={styles.dayText}
                         >
@@ -259,7 +259,7 @@ export default function CalendarRangePicker({ visible, onClose, onApply, initial
                       <Text
                         variant="body"
                         weight={selected ? 'bold' : 'regular'}
-                        color={selected ? '#111827' : theme.colors.text}
+                        color={selected ? theme.colors.buttonText : theme.colors.text}
                       >
                         {year}
                       </Text>

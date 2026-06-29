@@ -1,6 +1,7 @@
 export interface AppSettings {
   id: string;
   app_type: string;
+  button_text_color: string | null;
   global_logo: string | null;
   splash_screen: string | null;
   maintenance_message_image: string | null;

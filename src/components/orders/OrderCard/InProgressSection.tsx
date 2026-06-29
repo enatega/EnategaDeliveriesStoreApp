@@ -169,9 +169,9 @@ export default function InProgressSection({
                     disabled={isMarkingReady || !canMarkReady}
                 >
                     {isMarkingReady ? (
-                        <ActivityIndicator size="small" color={theme.colors.gray900} />
+                        <ActivityIndicator size="small" color={theme.colors.buttonText} />
                     ) : (
-                        <Text style={[styles.btnMarkReadyText, { color: theme.colors.gray900 }]}>
+                        <Text style={[styles.btnMarkReadyText, { color: theme.colors.buttonText }]}>
                             {t("order_card_mark_ready")}
                         </Text>
                     )}

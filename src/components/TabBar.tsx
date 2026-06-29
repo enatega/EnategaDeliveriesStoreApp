@@ -58,7 +58,7 @@ export default function TabBar<T extends string>({ tabs, activeTab, onTabPress }
               >
                 <Text
                   variant="caption"
-                  color={isActive ? theme.colors.gray900 : theme.colors.gray600}
+                  color={isActive ? theme.colors.buttonText : theme.colors.gray600}
                   style={styles.badgeText}
                 >
                   {tab.badgeCount}
