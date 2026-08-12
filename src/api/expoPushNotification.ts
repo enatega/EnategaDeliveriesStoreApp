@@ -1,6 +1,7 @@
 import Constants from "expo-constants";
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
+import apiClient from "./apiClient";
 
 let cachedToken: string | null = null;
 let inFlightTokenPromise: Promise<string | null> | null = null;
@@ -55,22 +56,7 @@ async function getPushTokenInternal(): Promise<string | null> {
     console.log("[PushToken] token fetch response", {
       hasToken: Boolean(response.data),
     });
-    if (response.data) {
-      return response.data;
-    }
-
-    console.log("[PushToken] Expo token empty, trying native device token fallback");
-    const deviceTokenResponse = await Notifications.getDevicePushTokenAsync();
-    const nativeToken =
-      typeof deviceTokenResponse.data === "string"
-        ? deviceTokenResponse.data
-        : JSON.stringify(deviceTokenResponse.data);
-
-    console.log("[PushToken] native token fallback result", {
-      hasToken: Boolean(nativeToken),
-      type: deviceTokenResponse.type,
-    });
-    return nativeToken || null;
+    return response.data || null;
   } catch (error) {
     console.log("[PushToken] failed to fetch token", error);
     return null;
@@ -96,4 +82,13 @@ export async function getExpoPushTokenForAuth(): Promise<string | null> {
   } finally {
     inFlightTokenPromise = null;
   }
+}
+
+export async function syncExpoPushToken(): Promise<void> {
+  const pushToken = await getExpoPushTokenForAuth();
+  if (pushToken) await apiClient.patch("/users/push-token", { pushToken });
+}
+
+export async function unregisterExpoPushToken(): Promise<void> {
+  await apiClient.patch("/users/push-token", { pushToken: null });
 }

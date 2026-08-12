@@ -7,6 +7,10 @@ import { useStoreOrderSocketSync } from '../hooks/useStoreOrderSocketSync';
 import AuthNavigator from './AuthNavigator';
 import MainNavigator from './MainNavigator';
 import { buildNavigationTheme } from './navigationTheme';
+import {
+  navigationRef,
+  openPendingNotification,
+} from './rootNavigation';
 
 export default function RootNavigator() {
   const { theme } = useAppTheme();
@@ -29,7 +33,12 @@ export default function RootNavigator() {
   }
 
   return (
-    <NavigationContainer theme={buildNavigationTheme(theme)}>
+    <NavigationContainer
+      ref={navigationRef}
+      theme={buildNavigationTheme(theme)}
+      onReady={openPendingNotification}
+      onStateChange={openPendingNotification}
+    >
       {isAuthenticated ? <MainNavigator /> : <AuthNavigator />}
     </NavigationContainer>
   );

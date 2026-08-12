@@ -4,6 +4,7 @@ import { authKeys } from '../api/queryKeys';
 import type { ApiError } from '../api/apiClient';
 import type { AuthSessionResponse, LoginPayload } from '../api/authTypes';
 import { useAuth } from '../auth/AuthProvider';
+import { unregisterExpoPushToken } from '../api/expoPushNotification';
 
 type AppTag = 'store' | 'rider';
 
@@ -57,7 +58,10 @@ export function useLogoutMutation(options?: UseMutationOptions<void, ApiError, v
   const { clearSession } = useAuth();
 
   return useMutation<void, ApiError, void>({
-    mutationFn: clearSession,
+    mutationFn: async () => {
+      await unregisterExpoPushToken().catch(() => undefined);
+      await clearSession();
+    },
     ...options,
     onSuccess: async (data, variables, onMutateResult, context) => {
       queryClient.setQueryData(authKeys.session(), {
