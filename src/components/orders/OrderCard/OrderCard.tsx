@@ -18,6 +18,7 @@ import CompletedSection from "./CompletedSection";
 import AcceptRejectButtons from "./AcceptRejectButtons";
 import { getReadableRiderStatus } from "./riderStatusLabel";
 import { resolveSupportChatBoxId } from "../../../api/supportChatSession";
+import InvoicePrintButton from "../InvoicePrintButton";
 
 type Props = {
   order: Order;
@@ -255,6 +256,7 @@ export default function OrderCard({
         isRejecting={isRejecting}
         theme={theme}
       />
+      <InvoicePrintButton order={order} />
     </View>
   );
 }

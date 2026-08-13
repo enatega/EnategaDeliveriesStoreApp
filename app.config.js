@@ -16,6 +16,8 @@ module.exports = {
       supportsTablet: true,
       bundleIdentifier: "com.cyliaplatform.merchant",
       infoPlist: {
+        NSBluetoothAlwaysUsageDescription:
+          "Cylia Merchant uses Bluetooth to connect to receipt printers.",
         UIBackgroundModes: ["audio"],
       },
     },
@@ -26,6 +28,13 @@ module.exports = {
       },
       googleServicesFile: "./google-services.json",
       package: "com.cyliaplatform.merchant",
+      permissions: [
+        "ACCESS_FINE_LOCATION",
+        "android.permission.BLUETOOTH",
+        "android.permission.BLUETOOTH_ADMIN",
+        "android.permission.BLUETOOTH_SCAN",
+        "android.permission.BLUETOOTH_CONNECT",
+      ],
       edgeToEdgeEnabled: false,
     },
     androidNavigationBar: {

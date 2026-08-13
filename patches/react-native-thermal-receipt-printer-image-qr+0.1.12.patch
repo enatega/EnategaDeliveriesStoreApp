@@ -1,0 +1,68 @@
+diff --git a/node_modules/react-native-thermal-receipt-printer-image-qr/android/src/main/java/com/pinmi/react/printer/adapter/BLEPrinterAdapter.java b/node_modules/react-native-thermal-receipt-printer-image-qr/android/src/main/java/com/pinmi/react/printer/adapter/BLEPrinterAdapter.java
+index 9d77969..01893b8 100644
+--- a/node_modules/react-native-thermal-receipt-printer-image-qr/android/src/main/java/com/pinmi/react/printer/adapter/BLEPrinterAdapter.java
++++ b/node_modules/react-native-thermal-receipt-printer-image-qr/android/src/main/java/com/pinmi/react/printer/adapter/BLEPrinterAdapter.java
+@@ -115,9 +115,12 @@ public class BLEPrinterAdapter implements PrinterAdapter{
+         BLEPrinterDeviceId blePrinterDeviceId = (BLEPrinterDeviceId)printerDeviceId;
+         if(this.mBluetoothDevice != null){
+             if(this.mBluetoothDevice.getAddress().equals(blePrinterDeviceId.getInnerMacAddress()) && this.mBluetoothSocket != null){
+-                Log.v(LOG_TAG, "do not need to reconnect");
+-                successCallback.invoke(new BLEPrinterDevice(this.mBluetoothDevice).toRNWritableMap());
+-                return;
++                if (this.mBluetoothSocket.isConnected()) {
++                    Log.v(LOG_TAG, "do not need to reconnect");
++                    successCallback.invoke(new BLEPrinterDevice(this.mBluetoothDevice).toRNWritableMap());
++                    return;
++                }
++                closeConnectionIfExists();
+             }else{
+                 closeConnectionIfExists();
+             }
+@@ -162,9 +165,14 @@ public class BLEPrinterAdapter implements PrinterAdapter{
+             }
+         } else {
+             this.mBluetoothSocket = device.createInsecureRfcommSocketToServiceRecord(uuid);
+-            this.mBluetoothSocket.connect();
+         }
+ 
++        if (this.mBluetoothSocket == null) {
++            throw new IOException("bluetooth socket create failed");
++        }
++
++        this.mBluetoothSocket.connect();
++
+         this.mBluetoothDevice = device;// 最后一步执行
+ 
+     }
+@@ -292,11 +300,19 @@ public class BLEPrinterAdapter implements PrinterAdapter{
+         }
+ 
+         final BluetoothSocket socket = this.mBluetoothSocket;
++        if (!socket.isConnected()) {
++            errorCallback.invoke("bluetooth socket is disconnected");
++            return;
++        }
+ 
+         try {
+             int[][] pixels = getPixelsSlow(bitmapImage, imageWidth, imageHeight);
+ 
+             OutputStream printerOutputStream = socket.getOutputStream();
++            if (printerOutputStream == null) {
++                errorCallback.invoke("bluetooth output stream is null");
++                return;
++            }
+ 
+             printerOutputStream.write(SET_LINE_SPACE_24);
+             printerOutputStream.write(CENTER_ALIGN);
+@@ -320,9 +336,10 @@ public class BLEPrinterAdapter implements PrinterAdapter{
+             printerOutputStream.write(LINE_FEED);
+ 
+             printerOutputStream.flush();
+-        } catch (IOException e) {
++        } catch (Exception e) {
+             Log.e(LOG_TAG, "failed to print data");
+             e.printStackTrace();
++            errorCallback.invoke("failed to print image: " + e.getMessage());
+         }
+     }
+ }
